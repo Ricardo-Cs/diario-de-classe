@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">DiarioDeClasse</string>
+    <string name="turmas_vazio">Nenhuma turma cadastrada ainda.</string>
 </resources>
