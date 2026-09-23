@@ -16,6 +16,7 @@ import javax.inject.Inject
 interface TurmaRepository {
     fun observarTurmas(): Flow<List<Turma>>
     fun observarTurma(id: String): Flow<Turma?>
+    suspend fun buscarTurma(id: String): Turma?
     suspend fun criar(nome: String, anoSerie: String, periodo: Periodo, anoLetivo: Int): Turma
     suspend fun atualizar(turma: Turma)
     suspend fun excluir(id: String)
@@ -30,6 +31,8 @@ class TurmaRepositoryImpl @Inject constructor(
     override fun observarTurmas(): Flow<List<Turma>> = dao.observarTodas()
 
     override fun observarTurma(id: String): Flow<Turma?> = dao.observarPorId(id)
+
+    override suspend fun buscarTurma(id: String): Turma? = dao.buscarPorId(id)
 
     override suspend fun criar(
         nome: String,
@@ -52,7 +55,8 @@ class TurmaRepositoryImpl @Inject constructor(
     }
 
     override suspend fun atualizar(turma: Turma) {
-        dao.atualizar(turma.copy(updatedAt = Instant.now(clock)))
+        val turmaAtualizada = turma.copy(updatedAt = Instant.now(clock))
+        dao.atualizar(turmaAtualizada)
     }
 
     override suspend fun excluir(id: String) {

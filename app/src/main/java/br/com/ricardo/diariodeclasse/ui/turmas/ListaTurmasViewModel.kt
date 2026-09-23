@@ -11,9 +11,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
-sealed interface TurmasUiState {
-    data object Carregando : TurmasUiState
-    data class Sucesso(val turmas: List<Turma>) : TurmasUiState
+sealed interface ListaTurmasUiState {
+    data object Carregando : ListaTurmasUiState
+    data class Carregado(val turmas: List<Turma>) : ListaTurmasUiState
 }
 
 /**
@@ -22,15 +22,15 @@ sealed interface TurmasUiState {
  * observadores, para não reconsultar o banco a cada rotação de tela.
  */
 @HiltViewModel
-class TurmasViewModel @Inject constructor(
+class ListaTurmasViewModel @Inject constructor(
     turmaRepository: TurmaRepository,
 ) : ViewModel() {
 
-    val uiState: StateFlow<TurmasUiState> = turmaRepository.observarTurmas()
-        .map<List<Turma>, TurmasUiState> { TurmasUiState.Sucesso(it) }
+    val uiState: StateFlow<ListaTurmasUiState> = turmaRepository.observarTurmas()
+        .map { turmas -> ListaTurmasUiState.Carregado(turmas) }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = TurmasUiState.Carregando,
+            initialValue = ListaTurmasUiState.Carregando,
         )
 }

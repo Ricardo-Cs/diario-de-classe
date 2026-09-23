@@ -9,8 +9,18 @@ import java.time.Instant
  */
 class Converters {
     @TypeConverter
-    fun instantParaLong(instant: Instant?): Long? = instant?.toEpochMilli()
+    fun instantParaLong(instant: Instant?): Long? {
+        if (instant == null) {
+            return null
+        }
+        return instant.toEpochMilli()
+    }
 
     @TypeConverter
-    fun longParaInstant(millis: Long?): Instant? = millis?.let(Instant::ofEpochMilli)
+    fun longParaInstant(millis: Long?): Instant? {
+        if (millis == null) {
+            return null
+        }
+        return Instant.ofEpochMilli(millis)
+    }
 }

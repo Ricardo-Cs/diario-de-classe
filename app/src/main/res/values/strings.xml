@@ -1,4 +1,47 @@
 <resources>
     <string name="app_name">DiarioDeClasse</string>
+
+    <!-- Ações comuns -->
+    <string name="voltar">Voltar</string>
+    <string name="salvar">Salvar</string>
+    <string name="cancelar">Cancelar</string>
+    <string name="editar">Editar</string>
+    <string name="excluir">Excluir</string>
+    <string name="concluir">Concluir</string>
+
+    <!-- Lista de turmas -->
+    <string name="turmas_titulo">Turmas</string>
     <string name="turmas_vazio">Nenhuma turma cadastrada ainda.</string>
+    <string name="turmas_nova">Nova turma</string>
+
+    <!-- Formulário de turma -->
+    <string name="turma_formulario_titulo_nova">Nova turma</string>
+    <string name="turma_formulario_titulo_edicao">Editar turma</string>
+    <string name="turma_campo_nome">Nome da turma</string>
+    <string name="turma_campo_nome_exemplo">Ex.: 1º ano A</string>
+    <string name="turma_campo_ano_serie">Ano/série</string>
+    <string name="turma_campo_ano_serie_exemplo">Ex.: 1º ano, Pré II</string>
+    <string name="turma_campo_periodo">Período</string>
+    <string name="turma_campo_ano_letivo">Ano letivo</string>
+
+    <!-- Períodos -->
+    <string name="periodo_manha">Manhã</string>
+    <string name="periodo_tarde">Tarde</string>
+    <string name="periodo_noite">Noite</string>
+    <string name="periodo_integral">Integral</string>
+
+    <!-- Detalhe da turma -->
+    <string name="turma_alunos_vazio">Nenhum aluno nesta turma ainda.</string>
+    <string name="turma_adicionar_alunos">Adicionar alunos</string>
+    <string name="turma_excluir_titulo">Excluir turma?</string>
+    <string name="turma_excluir_mensagem">A turma %1$s e seus alunos deixarão de aparecer no app.</string>
+
+    <!-- Alunos -->
+    <string name="aluno_campo_nome">Nome do aluno</string>
+    <string name="aluno_adicionar_titulo">Adicionar alunos</string>
+    <string name="aluno_adicionar">Adicionar</string>
+    <string name="aluno_adicionado">%1$s adicionado(a)</string>
+    <string name="aluno_editar_titulo">Editar aluno</string>
+    <string name="aluno_excluir_titulo">Excluir aluno?</string>
+    <string name="aluno_excluir_mensagem">%1$s deixará de aparecer na turma.</string>
 </resources>

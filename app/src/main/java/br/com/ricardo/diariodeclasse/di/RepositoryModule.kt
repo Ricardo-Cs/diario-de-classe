@@ -1,5 +1,7 @@
 package br.com.ricardo.diariodeclasse.di
 
+import br.com.ricardo.diariodeclasse.data.repository.AlunoRepository
+import br.com.ricardo.diariodeclasse.data.repository.AlunoRepositoryImpl
 import br.com.ricardo.diariodeclasse.data.repository.TurmaRepository
 import br.com.ricardo.diariodeclasse.data.repository.TurmaRepositoryImpl
 import dagger.Binds
@@ -16,4 +18,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindTurmaRepository(impl: TurmaRepositoryImpl): TurmaRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindAlunoRepository(impl: AlunoRepositoryImpl): AlunoRepository
 }

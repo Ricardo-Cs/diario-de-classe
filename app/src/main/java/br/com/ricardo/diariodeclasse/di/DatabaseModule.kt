@@ -3,6 +3,7 @@ package br.com.ricardo.diariodeclasse.di
 import android.content.Context
 import androidx.room.Room
 import br.com.ricardo.diariodeclasse.data.local.AppDatabase
+import br.com.ricardo.diariodeclasse.data.local.dao.AlunoDao
 import br.com.ricardo.diariodeclasse.data.local.dao.TurmaDao
 import dagger.Module
 import dagger.Provides
@@ -27,6 +28,9 @@ object DatabaseModule {
 
     @Provides
     fun provideTurmaDao(database: AppDatabase): TurmaDao = database.turmaDao()
+
+    @Provides
+    fun provideAlunoDao(database: AppDatabase): AlunoDao = database.alunoDao()
 
     @Provides
     @Singleton

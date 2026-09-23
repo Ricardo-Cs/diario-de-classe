@@ -24,6 +24,15 @@ Consequência para o design: tudo o que ela anota no caderno precisa ser **mais 
 - Está aprendendo Kotlin e o ecossistema Android com este projeto.
 - Ao sugerir código, explique as decisões e os conceitos específicos de Android/Kotlin (ciclo de vida, Compose, coroutines/Flow, Room, WorkManager), fazendo paralelos com TS/Java quando ajudar.
 
+### Regra: legibilidade do código
+O desenvolvedor **nunca trabalhou com Kotlin** e precisa **entender e apresentar todo o código**. A prioridade é código legível por si só, não por comentários.
+- Quando conciso e explícito entrarem em conflito, escolher o **explícito**, mesmo que seja menos idiomático.
+- Evitar: encadeamento de scope functions (`let`, `also`, `apply`, `run`), referências de função (`::funcao`), `it` implícito em lambdas não triviais, operadores sobrecarregados pouco óbvios (`map += a to b`) e truques de inferência de tipo.
+- Preferir: `if`/`when` e variáveis intermediárias com nomes claros; parâmetros de lambda nomeados; tipos declarados quando não forem óbvios pelo lado direito.
+- Nomes descritivos em português; funções curtas, com uma responsabilidade.
+- Recursos inevitáveis de Kotlin/Android (`suspend`, `Flow`, `@Composable`, anotações do Hilt/Room, `data class`, `sealed interface`) são usados normalmente, mas explicados na conversa quando aparecerem pela primeira vez.
+- Comentários só para o "porquê" não óbvio, nunca para compensar código confuso.
+
 ---
 
 ## 2. Funcionalidades

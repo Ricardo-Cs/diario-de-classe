@@ -15,11 +15,14 @@ import java.time.Instant
  */
 @Dao
 interface TurmaDao {
-    @Query("SELECT * FROM turmas WHERE deletedAt IS NULL ORDER BY anoLetivo DESC, nome")
+    @Query("SELECT * FROM turmas WHERE deletedAt IS NULL ORDER BY anoLetivo DESC, nome COLLATE LOCALIZED")
     fun observarTodas(): Flow<List<Turma>>
 
     @Query("SELECT * FROM turmas WHERE id = :id AND deletedAt IS NULL")
     fun observarPorId(id: String): Flow<Turma?>
+
+    @Query("SELECT * FROM turmas WHERE id = :id AND deletedAt IS NULL")
+    suspend fun buscarPorId(id: String): Turma?
 
     @Insert
     suspend fun inserir(turma: Turma)
