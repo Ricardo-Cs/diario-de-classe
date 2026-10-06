@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import br.com.ricardo.diariodeclasse.data.local.entity.Turma
 import br.com.ricardo.diariodeclasse.data.repository.AlunoRepository
 import br.com.ricardo.diariodeclasse.data.repository.ChamadaRepository
+import br.com.ricardo.diariodeclasse.data.repository.PendenciaRepository
 import br.com.ricardo.diariodeclasse.data.repository.TurmaAtivaRepository
 import br.com.ricardo.diariodeclasse.data.repository.TurmaRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -39,13 +40,15 @@ sealed interface TurmasDoInicio {
         val turmaAtiva: Turma,
         val todas: List<Turma>,
         val chamadaDeHoje: SituacaoDaChamada,
+        val pendencias: ResumoDePendencias,
     ) : TurmasDoInicio
 }
 
-/** Turma ativa e a situação da chamada dela no dia, sempre calculadas juntas. */
+/** Turma ativa e a situação dela no dia (chamada e pendências), sempre calculadas juntas. */
 private data class DadosDoDia(
     val turmaAtiva: Turma,
     val chamadaDeHoje: SituacaoDaChamada,
+    val pendencias: ResumoDePendencias,
 )
 
 private data class TurmaNoDia(
@@ -59,6 +62,7 @@ class InicioViewModel @Inject constructor(
     private val turmaAtivaRepository: TurmaAtivaRepository,
     private val alunoRepository: AlunoRepository,
     private val chamadaRepository: ChamadaRepository,
+    private val pendenciaRepository: PendenciaRepository,
     private val clock: Clock,
 ) : ViewModel() {
 
@@ -109,10 +113,12 @@ class InicioViewModel @Inject constructor(
         return combine(
             alunoRepository.observarAlunosDaTurma(turma.id),
             chamadaRepository.observarChamada(turma.id, turmaNoDia.data),
-        ) { alunos, chamada ->
+            pendenciaRepository.observarPendentesDaTurma(turma.id),
+        ) { alunos, chamada, pendencias ->
             DadosDoDia(
                 turmaAtiva = turma,
                 chamadaDeHoje = calcularSituacaoDaChamada(alunos, chamada, clock.zone),
+                pendencias = calcularResumoDePendencias(alunos, pendencias, turmaNoDia.data),
             )
         }
     }
@@ -130,6 +136,7 @@ class InicioViewModel @Inject constructor(
                 turmaAtiva = dados.turmaAtiva,
                 todas = todasAsTurmas,
                 chamadaDeHoje = dados.chamadaDeHoje,
+                pendencias = dados.pendencias,
             )
         }
 

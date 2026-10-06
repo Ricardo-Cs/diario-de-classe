@@ -2,6 +2,7 @@ package br.com.ricardo.diariodeclasse.data.repository
 
 import br.com.ricardo.diariodeclasse.data.local.dao.PendenciaDao
 import br.com.ricardo.diariodeclasse.data.local.entity.Pendencia
+import br.com.ricardo.diariodeclasse.data.local.entity.PendenciaComOrigem
 import br.com.ricardo.diariodeclasse.data.local.entity.StatusPendencia
 import kotlinx.coroutines.flow.Flow
 import java.time.Clock
@@ -12,7 +13,7 @@ import javax.inject.Inject
 
 interface PendenciaRepository {
     /** Só as que ainda não foram entregues, das mais antigas para as mais novas. */
-    fun observarPendentesDaTurma(turmaId: String): Flow<List<Pendencia>>
+    fun observarPendentesDaTurma(turmaId: String): Flow<List<PendenciaComOrigem>>
 
     suspend fun criar(
         alunoId: String,
@@ -35,7 +36,7 @@ class PendenciaRepositoryImpl @Inject constructor(
     private val clock: Clock,
 ) : PendenciaRepository {
 
-    override fun observarPendentesDaTurma(turmaId: String): Flow<List<Pendencia>> {
+    override fun observarPendentesDaTurma(turmaId: String): Flow<List<PendenciaComOrigem>> {
         return dao.observarDaTurmaPorStatus(turmaId, StatusPendencia.PENDENTE)
     }
 

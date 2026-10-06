@@ -35,6 +35,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import br.com.ricardo.diariodeclasse.R
 import br.com.ricardo.diariodeclasse.data.local.entity.Aluno
 import br.com.ricardo.diariodeclasse.data.local.entity.Pendencia
+import br.com.ricardo.diariodeclasse.data.local.entity.PendenciaComOrigem
 import br.com.ricardo.diariodeclasse.ui.componentes.BarraSuperior
 import br.com.ricardo.diariodeclasse.ui.componentes.MensagemCentralizada
 import br.com.ricardo.diariodeclasse.ui.componentes.TelaCarregando
@@ -129,11 +130,11 @@ private fun ConteudoPendencias(
                             aoAdicionar = { painel.value = PainelNovaPendencia.Aberto(alunoInicial = grupo.aluno) },
                         )
                     }
-                    items(grupo.pendencias, key = { pendencia -> pendencia.id }) { pendencia ->
+                    items(grupo.pendencias, key = { item -> item.pendencia.id }) { item ->
                         LinhaDaPendencia(
-                            pendencia = pendencia,
+                            item = item,
                             hoje = estado.hoje,
-                            aoMarcarComoEntregue = { marcarComoEntregue(pendencia) },
+                            aoMarcarComoEntregue = { marcarComoEntregue(item.pendencia) },
                         )
                     }
                     item {
@@ -201,7 +202,7 @@ private fun CabecalhoDoAluno(grupo: GrupoDePendencias, aoAdicionar: () -> Unit) 
 
 @Composable
 private fun LinhaDaPendencia(
-    pendencia: Pendencia,
+    item: PendenciaComOrigem,
     hoje: LocalDate,
     aoMarcarComoEntregue: () -> Unit,
 ) {
@@ -210,8 +211,15 @@ private fun LinhaDaPendencia(
         modifier = Modifier.padding(start = 16.dp, end = 4.dp, bottom = 4.dp),
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            Text(text = pendencia.descricao, style = MaterialTheme.typography.bodyLarge)
-            TextoDoLembrete(dataLembrete = pendencia.dataLembrete, hoje = hoje)
+            Text(text = item.pendencia.descricao, style = MaterialTheme.typography.bodyLarge)
+            Row {
+                TextoDoLembrete(dataLembrete = item.pendencia.dataLembrete, hoje = hoje)
+                Text(
+                    text = " · " + textoDaOrigem(item.dataDaFalta),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
         IconButton(onClick = aoMarcarComoEntregue) {
             Icon(

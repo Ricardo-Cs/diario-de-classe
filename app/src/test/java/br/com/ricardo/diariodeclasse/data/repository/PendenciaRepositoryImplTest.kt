@@ -2,6 +2,7 @@ package br.com.ricardo.diariodeclasse.data.repository
 
 import br.com.ricardo.diariodeclasse.data.local.dao.PendenciaDao
 import br.com.ricardo.diariodeclasse.data.local.entity.Pendencia
+import br.com.ricardo.diariodeclasse.data.local.entity.PendenciaComOrigem
 import br.com.ricardo.diariodeclasse.data.local.entity.StatusPendencia
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,9 +23,10 @@ import java.time.ZoneOffset
 private class FakePendenciaDao : PendenciaDao {
     val linhas = MutableStateFlow<List<Pendencia>>(emptyList())
 
-    override fun observarDaTurmaPorStatus(turmaId: String, status: StatusPendencia): Flow<List<Pendencia>> {
+    override fun observarDaTurmaPorStatus(turmaId: String, status: StatusPendencia): Flow<List<PendenciaComOrigem>> {
         return linhas.map { pendencias ->
-            pendencias.filter { pendencia -> pendencia.status == status && pendencia.deletedAt == null }
+            val filtradas = pendencias.filter { pendencia -> pendencia.status == status && pendencia.deletedAt == null }
+            filtradas.map { pendencia -> PendenciaComOrigem(pendencia, dataDaFalta = null) }
         }
     }
 

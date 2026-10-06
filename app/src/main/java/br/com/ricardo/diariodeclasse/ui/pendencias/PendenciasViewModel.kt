@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import br.com.ricardo.diariodeclasse.data.local.entity.Aluno
-import br.com.ricardo.diariodeclasse.data.local.entity.Pendencia
+import br.com.ricardo.diariodeclasse.data.local.entity.PendenciaComOrigem
 import br.com.ricardo.diariodeclasse.data.local.entity.Turma
 import br.com.ricardo.diariodeclasse.data.repository.AlunoRepository
 import br.com.ricardo.diariodeclasse.data.repository.PendenciaRepository
@@ -24,7 +24,7 @@ import javax.inject.Inject
 /** As pendências de um aluno, para a lista agrupada. */
 data class GrupoDePendencias(
     val aluno: Aluno,
-    val pendencias: List<Pendencia>,
+    val pendencias: List<PendenciaComOrigem>,
 )
 
 sealed interface PendenciasUiState {
@@ -50,8 +50,8 @@ sealed interface PendenciasUiState {
         fun quantidadeParaHoje(): Int {
             var quantidade = 0
             for (grupo in grupos) {
-                for (pendencia in grupo.pendencias) {
-                    if (pendencia.estaPendenteEm(hoje)) {
+                for (item in grupo.pendencias) {
+                    if (item.pendencia.estaPendenteEm(hoje)) {
                         quantidade = quantidade + 1
                     }
                 }
@@ -85,7 +85,7 @@ class PendenciasViewModel @Inject constructor(
         initialValue = PendenciasUiState.Carregando,
     )
 
-    private fun criarEstado(turma: Turma?, alunos: List<Aluno>, pendencias: List<Pendencia>): PendenciasUiState {
+    private fun criarEstado(turma: Turma?, alunos: List<Aluno>, pendencias: List<PendenciaComOrigem>): PendenciasUiState {
         if (turma == null) {
             return PendenciasUiState.TurmaNaoEncontrada
         }
@@ -101,13 +101,13 @@ class PendenciasViewModel @Inject constructor(
      * Segue a ordem alfabética dos alunos e deixa de fora quem não tem pendências.
      * Dentro de cada grupo, mantém a ordem do banco (lembrete mais antigo primeiro).
      */
-    private fun agruparPorAluno(alunos: List<Aluno>, pendencias: List<Pendencia>): List<GrupoDePendencias> {
+    private fun agruparPorAluno(alunos: List<Aluno>, pendencias: List<PendenciaComOrigem>): List<GrupoDePendencias> {
         val grupos = mutableListOf<GrupoDePendencias>()
         for (aluno in alunos) {
-            val pendenciasDoAluno = mutableListOf<Pendencia>()
-            for (pendencia in pendencias) {
-                if (pendencia.alunoId == aluno.id) {
-                    pendenciasDoAluno.add(pendencia)
+            val pendenciasDoAluno = mutableListOf<PendenciaComOrigem>()
+            for (item in pendencias) {
+                if (item.pendencia.alunoId == aluno.id) {
+                    pendenciasDoAluno.add(item)
                 }
             }
             if (pendenciasDoAluno.isNotEmpty()) {

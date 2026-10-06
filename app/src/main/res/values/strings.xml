@@ -25,6 +25,14 @@
     <string name="inicio_cadastrar_turma">Cadastrar turma</string>
     <string name="inicio_fazer_chamada">Fazer chamada</string>
     <string name="inicio_ver_pendencias">Ver pendências</string>
+    <string name="inicio_pendencias_titulo">Pendências de hoje</string>
+    <plurals name="inicio_pendencias_para_hoje">
+        <item quantity="one">%d atividade para hoje</item>
+        <item quantity="other">%d atividades para hoje</item>
+    </plurals>
+    <string name="inicio_pendencias_e_mais">e mais %1$d</string>
+    <string name="inicio_ver_todas">Ver todas</string>
+    <string name="inicio_nenhuma_pendencia_hoje">Nenhuma pendência para hoje</string>
     <string name="inicio_chamada_de_hoje">Chamada de hoje</string>
     <string name="inicio_chamada_nao_feita">Ainda não foi feita</string>
     <string name="inicio_chamada_concluida">Concluída às %1$s</string>
@@ -86,6 +94,8 @@
     <string name="pendencia_lembrete_hoje">Para hoje</string>
     <string name="pendencia_lembrete_amanha">Para amanhã</string>
     <string name="pendencia_lembrete_data">Para %1$s</string>
+    <string name="pendencia_origem_falta">falta em %1$s</string>
+    <string name="pendencia_origem_avulsa">avulsa</string>
     <string name="pendencia_marcar_entregue">Marcar como entregue</string>
     <string name="pendencia_entregue_aviso">Pendência marcada como entregue</string>
     <string name="pendencia_desfazer">Desfazer</string>
