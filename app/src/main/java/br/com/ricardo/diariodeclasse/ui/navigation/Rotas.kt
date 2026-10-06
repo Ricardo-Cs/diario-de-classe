@@ -54,3 +54,12 @@ data class PendenciasRoute(val turmaId: String)
 
 @Serializable
 data class AlunoRoute(val alunoId: String)
+
+/**
+ * A mesma tela do aluno, aberta a partir da aba Início (pela tela de pendências).
+ * Cada aba tem a própria pilha de telas: com uma rota própria do Início, o aluno
+ * abre nessa pilha, "voltar" retorna às pendências e a barra inferior continua
+ * destacando o Início.
+ */
+@Serializable
+data class AlunoNoInicioRoute(val alunoId: String)

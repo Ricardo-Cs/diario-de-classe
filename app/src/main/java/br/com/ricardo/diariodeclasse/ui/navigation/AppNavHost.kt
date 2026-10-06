@@ -84,6 +84,13 @@ fun AppNavHost() {
 
                 composable<PendenciasRoute> {
                     PendenciasScreen(
+                        aoAbrirAluno = { alunoId -> navController.navigate(AlunoNoInicioRoute(alunoId)) },
+                        aoVoltar = { navController.popBackStack() },
+                    )
+                }
+
+                composable<AlunoNoInicioRoute> {
+                    AlunoScreen(
                         aoVoltar = { navController.popBackStack() },
                     )
                 }

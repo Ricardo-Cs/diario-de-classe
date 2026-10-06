@@ -1,9 +1,12 @@
 package br.com.ricardo.diariodeclasse.ui.pendencias
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.HorizontalDivider
@@ -49,6 +52,7 @@ private sealed interface PainelDePendencia {
 
 @Composable
 fun PendenciasScreen(
+    aoAbrirAluno: (alunoId: String) -> Unit,
     aoVoltar: () -> Unit,
     viewModel: PendenciasViewModel = hiltViewModel(),
 ) {
@@ -63,7 +67,7 @@ fun PendenciasScreen(
             }
         }
 
-        is PendenciasUiState.Carregado -> ConteudoPendencias(estado, viewModel, aoVoltar)
+        is PendenciasUiState.Carregado -> ConteudoPendencias(estado, viewModel, aoAbrirAluno, aoVoltar)
     }
 }
 
@@ -71,6 +75,7 @@ fun PendenciasScreen(
 private fun ConteudoPendencias(
     estado: PendenciasUiState.Carregado,
     viewModel: PendenciasViewModel,
+    aoAbrirAluno: (alunoId: String) -> Unit,
     aoVoltar: () -> Unit,
 ) {
     val painel: MutableState<PainelDePendencia> = remember { mutableStateOf(PainelDePendencia.Fechado) }
@@ -125,6 +130,7 @@ private fun ConteudoPendencias(
                     item(key = grupo.aluno.id) {
                         CabecalhoDoAluno(
                             grupo = grupo,
+                            aoAbrirAluno = { aoAbrirAluno(grupo.aluno.id) },
                             aoAdicionar = { painel.value = PainelDePendencia.Criando(alunoInicial = grupo.aluno) },
                         )
                     }
@@ -200,17 +206,16 @@ private fun CabecalhoDasPendencias(estado: PendenciasUiState.Carregado) {
 }
 
 @Composable
-private fun CabecalhoDoAluno(grupo: GrupoDePendencias, aoAdicionar: () -> Unit) {
+private fun CabecalhoDoAluno(
+    grupo: GrupoDePendencias,
+    aoAbrirAluno: () -> Unit,
+    aoAdicionar: () -> Unit,
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(start = 16.dp, end = 4.dp, top = 8.dp),
+        modifier = Modifier.padding(end = 4.dp, top = 8.dp),
     ) {
-        Text(
-            text = grupo.aluno.nome,
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier.weight(1f),
-        )
+        NomeQueAbreOAluno(nome = grupo.aluno.nome, aoTocar = aoAbrirAluno, modifier = Modifier.weight(1f))
         IconButton(onClick = aoAdicionar) {
             Icon(
                 painter = painterResource(R.drawable.ic_adicionar),
@@ -218,5 +223,32 @@ private fun CabecalhoDoAluno(grupo: GrupoDePendencias, aoAdicionar: () -> Unit) 
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
+    }
+}
+
+/**
+ * O nome do aluno abre a página dele. A seta ao lado indica que o nome leva a
+ * outra tela; a área de toque tem pelo menos 48dp de altura.
+ */
+@Composable
+private fun NomeQueAbreOAluno(nome: String, aoTocar: () -> Unit, modifier: Modifier) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .heightIn(min = 48.dp)
+            .clickable(onClick = aoTocar)
+            .padding(start = 16.dp),
+    ) {
+        Text(
+            text = nome,
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.secondary,
+        )
+        Icon(
+            painter = painterResource(R.drawable.ic_abrir),
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.secondary,
+            modifier = Modifier.size(18.dp),
+        )
     }
 }

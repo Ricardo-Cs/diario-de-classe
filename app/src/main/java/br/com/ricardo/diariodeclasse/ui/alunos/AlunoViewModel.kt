@@ -3,7 +3,6 @@ package br.com.ricardo.diariodeclasse.ui.alunos
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.toRoute
 import br.com.ricardo.diariodeclasse.data.local.entity.Aluno
 import br.com.ricardo.diariodeclasse.data.local.entity.Anotacao
 import br.com.ricardo.diariodeclasse.data.local.entity.FaltaDoAluno
@@ -12,6 +11,7 @@ import br.com.ricardo.diariodeclasse.data.repository.AlunoRepository
 import br.com.ricardo.diariodeclasse.data.repository.AnotacaoRepository
 import br.com.ricardo.diariodeclasse.data.repository.ChamadaRepository
 import br.com.ricardo.diariodeclasse.data.repository.PendenciaRepository
+import br.com.ricardo.diariodeclasse.ui.navigation.AlunoNoInicioRoute
 import br.com.ricardo.diariodeclasse.ui.navigation.AlunoRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -52,7 +52,12 @@ class AlunoViewModel @Inject constructor(
     private val clock: Clock,
 ) : ViewModel() {
 
-    private val alunoId: String = savedStateHandle.toRoute<AlunoRoute>().alunoId
+    /**
+     * A tela tem duas rotas ([AlunoRoute] na aba Turmas e [AlunoNoInicioRoute] no
+     * Início), e as duas guardam o id com o mesmo nome, "alunoId". Lemos direto
+     * pela chave para servir a qualquer uma delas.
+     */
+    private val alunoId: String = lerAlunoIdDaRota(savedStateHandle)
 
     val uiState: StateFlow<AlunoUiState> = combine(
         alunoRepository.observarAluno(alunoId),
@@ -84,6 +89,14 @@ class AlunoViewModel @Inject constructor(
             faltas = calcularResumoDasFaltas(faltas, hoje),
             anotacoes = anotacoes,
         )
+    }
+
+    private fun lerAlunoIdDaRota(savedStateHandle: SavedStateHandle): String {
+        val id: String? = savedStateHandle.get<String>("alunoId")
+        if (id == null) {
+            throw IllegalStateException("A tela do aluno foi aberta sem o id do aluno")
+        }
+        return id
     }
 
     /** A anotação nova recebe a data de hoje. */
