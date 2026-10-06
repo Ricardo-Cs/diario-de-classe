@@ -23,19 +23,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import br.com.ricardo.diariodeclasse.R
 import br.com.ricardo.diariodeclasse.data.local.entity.Aluno
 import br.com.ricardo.diariodeclasse.data.local.entity.Turma
-import br.com.ricardo.diariodeclasse.ui.alunos.DialogoAdicionarAlunos
+import br.com.ricardo.diariodeclasse.ui.alunos.FolhaAdicionarAlunos
 import br.com.ricardo.diariodeclasse.ui.componentes.BarraSuperior
 import br.com.ricardo.diariodeclasse.ui.componentes.BotaoFlutuante
-import br.com.ricardo.diariodeclasse.ui.componentes.DialogoConfirmacao
 import br.com.ricardo.diariodeclasse.ui.componentes.MensagemCentralizada
 import br.com.ricardo.diariodeclasse.ui.componentes.TelaCarregando
-
-/** Qual diálogo está aberto na tela (no máximo um por vez). */
-private sealed interface Dialogo {
-    data object Nenhum : Dialogo
-    data object AdicionarAlunos : Dialogo
-    data object ConfirmarExclusaoTurma : Dialogo
-}
 
 @Composable
 fun DetalheTurmaScreen(
@@ -75,7 +67,7 @@ private fun ConteudoDetalheTurma(
     aoAbrirAluno: (alunoId: String) -> Unit,
     aoVoltar: () -> Unit,
 ) {
-    val dialogoAberto: MutableState<Dialogo> = remember { mutableStateOf(Dialogo.Nenhum) }
+    val adicionandoAlunos: MutableState<Boolean> = remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -83,16 +75,11 @@ private fun ConteudoDetalheTurma(
                 titulo = turma.nome,
                 aoVoltar = aoVoltar,
                 acoes = {
+                    // Excluir a turma fica dentro da edição, longe do toque acidental.
                     IconButton(onClick = { aoEditarTurma(turma.id) }) {
                         Icon(
                             painter = painterResource(R.drawable.ic_editar),
                             contentDescription = stringResource(R.string.editar),
-                        )
-                    }
-                    IconButton(onClick = { dialogoAberto.value = Dialogo.ConfirmarExclusaoTurma }) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_excluir),
-                            contentDescription = stringResource(R.string.excluir),
                         )
                     }
                 },
@@ -101,7 +88,7 @@ private fun ConteudoDetalheTurma(
         floatingActionButton = {
             BotaoFlutuante(
                 texto = stringResource(R.string.turma_adicionar_alunos),
-                aoClicar = { dialogoAberto.value = Dialogo.AdicionarAlunos },
+                aoClicar = { adicionandoAlunos.value = true },
             )
         },
     ) { espacamentoDasBarras ->
@@ -118,26 +105,10 @@ private fun ConteudoDetalheTurma(
         }
     }
 
-    val fecharDialogo = { dialogoAberto.value = Dialogo.Nenhum }
-    val dialogo: Dialogo = dialogoAberto.value
-
-    when (dialogo) {
-        is Dialogo.Nenhum -> {}
-
-        is Dialogo.AdicionarAlunos -> DialogoAdicionarAlunos(
+    if (adicionandoAlunos.value) {
+        FolhaAdicionarAlunos(
             aoAdicionar = { nome -> viewModel.adicionarAluno(nome) },
-            aoConcluir = fecharDialogo,
-        )
-
-        is Dialogo.ConfirmarExclusaoTurma -> DialogoConfirmacao(
-            titulo = stringResource(R.string.turma_excluir_titulo),
-            mensagem = stringResource(R.string.turma_excluir_mensagem, turma.nome),
-            textoConfirmar = stringResource(R.string.excluir),
-            aoConfirmar = {
-                viewModel.excluirTurma()
-                fecharDialogo()
-            },
-            aoCancelar = fecharDialogo,
+            aoConcluir = { adicionandoAlunos.value = false },
         )
     }
 }

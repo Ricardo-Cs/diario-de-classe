@@ -63,11 +63,4 @@ class DetalheTurmaViewModel @Inject constructor(
             alunoRepository.criar(turmaId, nomeSemEspacosNasPontas)
         }
     }
-
-    /** Depois de excluir, o Flow da turma emite `null` e a tela volta sozinha. */
-    fun excluirTurma() {
-        viewModelScope.launch {
-            turmaRepository.excluir(turmaId)
-        }
-    }
 }

@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -49,11 +49,12 @@ fun LinhaDaPendencia(
                 )
             }
         }
-        IconButton(onClick = aoMarcarComoEntregue) {
+        // Botão com fundo (tonal): é a ação mais frequente da lista e precisa
+        // parecer um botão, não um ícone decorativo.
+        FilledTonalIconButton(onClick = aoMarcarComoEntregue) {
             Icon(
                 painter = painterResource(R.drawable.ic_presente),
                 contentDescription = stringResource(R.string.pendencia_marcar_entregue),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }

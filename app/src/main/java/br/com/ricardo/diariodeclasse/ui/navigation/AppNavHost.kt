@@ -113,6 +113,11 @@ fun AppNavHost() {
                 composable<FormularioTurmaRoute> {
                     FormularioTurmaScreen(
                         aoVoltar = { navController.popBackStack() },
+                        // Fecha o formulário e o detalhe da turma excluída de uma vez,
+                        // voltando direto para a lista.
+                        aoExcluirTurma = {
+                            navController.popBackStack(route = ListaTurmasRoute, inclusive = false)
+                        },
                     )
                 }
 

@@ -24,6 +24,8 @@ data class FormularioTurmaUiState(
     val editando: Boolean,
     val salvando: Boolean = false,
     val salvo: Boolean = false,
+    /** A turma foi excluída: a tela volta direto para a lista de turmas. */
+    val excluida: Boolean = false,
 ) {
     fun podeSalvar(): Boolean {
         return nome.isNotBlank() && anoLetivoEhValido() && !salvando
@@ -124,6 +126,15 @@ class FormularioTurmaViewModel @Inject constructor(
             }
 
             estadoMutavel.value = estadoMutavel.value.copy(salvando = false, salvo = true)
+        }
+    }
+
+    /** Soft delete: a turma e os alunos dela deixam de aparecer, mas nada é apagado do banco. */
+    fun excluir() {
+        val turma: Turma = turmaEmEdicao ?: return
+        viewModelScope.launch {
+            turmaRepository.excluir(turma.id)
+            estadoMutavel.value = estadoMutavel.value.copy(excluida = true)
         }
     }
 }

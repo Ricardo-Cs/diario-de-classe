@@ -211,14 +211,14 @@ private fun ConteudoAluno(
             aoFechar = fechar,
         )
 
-        is Sobreposicao.EditandoAluno -> DialogoEditarAluno(
+        is Sobreposicao.EditandoAluno -> FolhaEditarAluno(
             aluno = estado.aluno,
             aoSalvar = { novoNome ->
                 viewModel.renomearAluno(estado.aluno, novoNome)
                 fechar()
             },
             aoExcluir = { sobreposicao.value = Sobreposicao.ConfirmandoExclusaoDoAluno },
-            aoCancelar = fechar,
+            aoFechar = fechar,
         )
 
         is Sobreposicao.ConfirmandoExclusaoDoAluno -> DialogoConfirmacao(

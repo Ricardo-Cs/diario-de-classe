@@ -171,6 +171,7 @@
     <!-- Detalhe da turma -->
     <string name="turma_alunos_vazio">Nenhum aluno nesta turma ainda.</string>
     <string name="turma_adicionar_alunos">Adicionar alunos</string>
+    <string name="turma_excluir">Excluir turma</string>
     <string name="turma_excluir_titulo">Excluir turma?</string>
     <string name="turma_excluir_mensagem">A turma %1$s e seus alunos deixarão de aparecer no app.</string>
 

@@ -10,13 +10,18 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -27,18 +32,27 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import br.com.ricardo.diariodeclasse.R
 import br.com.ricardo.diariodeclasse.data.local.entity.Periodo
 import br.com.ricardo.diariodeclasse.ui.componentes.BarraSuperior
+import br.com.ricardo.diariodeclasse.ui.componentes.DialogoConfirmacao
 import br.com.ricardo.diariodeclasse.ui.componentes.nomeDoPeriodo
 
 @Composable
 fun FormularioTurmaScreen(
     aoVoltar: () -> Unit,
+    aoExcluirTurma: () -> Unit,
     viewModel: FormularioTurmaViewModel = hiltViewModel(),
 ) {
     val estado: FormularioTurmaUiState = viewModel.uiState.collectAsStateWithLifecycle().value
 
+    val confirmandoExclusao: MutableState<Boolean> = remember { mutableStateOf(false) }
+
     LaunchedEffect(estado.salvo) {
         if (estado.salvo) {
             aoVoltar()
+        }
+    }
+    LaunchedEffect(estado.excluida) {
+        if (estado.excluida) {
+            aoExcluirTurma()
         }
     }
 
@@ -100,7 +114,30 @@ fun FormularioTurmaScreen(
             ) {
                 Text(stringResource(R.string.salvar))
             }
+
+            if (estado.editando) {
+                TextButton(
+                    onClick = { confirmandoExclusao.value = true },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(stringResource(R.string.turma_excluir))
+                }
+            }
         }
+    }
+
+    if (confirmandoExclusao.value) {
+        DialogoConfirmacao(
+            titulo = stringResource(R.string.turma_excluir_titulo),
+            mensagem = stringResource(R.string.turma_excluir_mensagem, estado.nome),
+            textoConfirmar = stringResource(R.string.excluir),
+            aoConfirmar = {
+                confirmandoExclusao.value = false
+                viewModel.excluir()
+            },
+            aoCancelar = { confirmandoExclusao.value = false },
+        )
     }
 }
 
@@ -113,6 +150,7 @@ private fun SeletorDePeriodo(
         Text(
             text = stringResource(R.string.turma_campo_periodo),
             style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
