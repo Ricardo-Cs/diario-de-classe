@@ -182,4 +182,57 @@
     <string name="aluno_editar_titulo">Editar aluno</string>
     <string name="aluno_excluir_titulo">Excluir aluno?</string>
     <string name="aluno_excluir_mensagem">%1$s deixará de aparecer na turma.</string>
+
+    <!-- Mais: backup e exportação -->
+    <string name="mais_seus_dados">Seus dados</string>
+    <string name="mais_exportar">Exportar dados</string>
+    <string name="mais_exportar_descricao">Salva o diário inteiro num arquivo que você guarda onde quiser.</string>
+    <string name="mais_importar">Importar dados</string>
+    <string name="mais_importar_descricao">Troca tudo o que está no app pelo conteúdo de um arquivo exportado.</string>
+    <string name="mais_ultima_exportacao_nunca">Ainda não exportado neste celular</string>
+    <string name="mais_ultima_exportacao_hoje">Última exportação: hoje</string>
+    <string name="mais_ultima_exportacao_ontem">Última exportação: ontem</string>
+    <plurals name="mais_ultima_exportacao_dias">
+        <item quantity="one">Última exportação: há %d dia</item>
+        <item quantity="other">Última exportação: há %d dias</item>
+    </plurals>
+    <string name="mais_aviso_privacidade">O arquivo contém os dados dos seus alunos. Guarde em local seguro e não compartilhe.</string>
+    <string name="mais_aviso_backup_automatico">Além do arquivo, o Android guarda uma cópia automática na sua conta Google, se o backup estiver ativado nas configurações do celular.</string>
+    <string name="mais_nome_do_arquivo">diario-%1$s.json</string>
+
+    <string name="importar_confirmar_titulo">Substituir todos os dados?</string>
+    <string name="importar_confirmar_mensagem">O arquivo foi exportado em %1$s e contém %2$s.
+
+Tudo o que está no app agora será apagado e trocado pelo conteúdo do arquivo. Se quiser guardar os dados atuais, exporte-os antes.</string>
+    <string name="importar_confirmar">Substituir</string>
+    <plurals name="importar_turmas">
+        <item quantity="one">%d turma</item>
+        <item quantity="other">%d turmas</item>
+    </plurals>
+    <plurals name="importar_alunos">
+        <item quantity="one">%d aluno</item>
+        <item quantity="other">%d alunos</item>
+    </plurals>
+    <plurals name="importar_chamadas">
+        <item quantity="one">%d chamada</item>
+        <item quantity="other">%d chamadas</item>
+    </plurals>
+    <plurals name="importar_pendencias">
+        <item quantity="one">%d pendência em aberto</item>
+        <item quantity="other">%d pendências em aberto</item>
+    </plurals>
+    <plurals name="importar_anotacoes">
+        <item quantity="one">%d anotação</item>
+        <item quantity="other">%d anotações</item>
+    </plurals>
+    <string name="importar_lista_e">%1$s e %2$s</string>
+
+    <string name="mensagem_exportado">Dados exportados</string>
+    <string name="mensagem_importado">Dados importados</string>
+    <string name="mensagem_erro_ao_gravar">Não foi possível salvar o arquivo. Tente outro local.</string>
+    <string name="mensagem_erro_ao_ler">Não foi possível abrir o arquivo.</string>
+    <string name="mensagem_nao_e_backup">Este arquivo não é uma exportação do diário.</string>
+    <string name="mensagem_versao_mais_nova">Este arquivo foi exportado por uma versão mais nova do app. Atualize o app para importá-lo.</string>
+    <string name="mensagem_arquivo_danificado">O arquivo está incompleto ou danificado.</string>
+    <string name="mensagem_erro_ao_importar">Não foi possível importar. Nada foi alterado.</string>
 </resources>
