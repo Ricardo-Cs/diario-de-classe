@@ -72,6 +72,11 @@ private class FakePendenciaDao : PendenciaDao {
             if (existente.id == pendencia.id) pendencia else existente
         }
     }
+
+    override suspend fun marcarComoExcluida(id: String, agora: Instant) {
+        val excluida = buscarPorId(id)!!.copy(deletedAt = agora, updatedAt = agora)
+        atualizar(excluida)
+    }
 }
 
 class PendenciaRepositoryImplTest {
@@ -174,5 +179,23 @@ class PendenciaRepositoryImplTest {
         assertEquals("falta-ana", salva.registroPresencaId)
         assertEquals(inicio, salva.createdAt)
         assertEquals(umaHoraDepois, salva.updatedAt)
+    }
+
+    @Test
+    fun excluir_someDasPendentesERestaurarTrazDeVolta() = runBlocking {
+        val pendencia = repositorioNoInstante(inicio).criar("ana", "Ficha", hoje)
+        val umaHoraDepois = inicio.plusSeconds(3600)
+        val repositorio = repositorioNoInstante(umaHoraDepois)
+
+        repositorio.excluir(pendencia.id)
+
+        assertEquals(umaHoraDepois, dao.buscarPorId(pendencia.id)!!.deletedAt)
+        assertTrue(repositorio.observarPendentesDoAluno("ana").first().isEmpty())
+        assertTrue(repositorio.buscarParaLembrete(hoje).isEmpty())
+
+        repositorio.restaurar(pendencia.id)
+
+        assertNull(dao.buscarPorId(pendencia.id)!!.deletedAt)
+        assertEquals(1, repositorio.observarPendentesDoAluno("ana").first().size)
     }
 }

@@ -148,4 +148,16 @@ class PendenciasViewModel @Inject constructor(
             pendenciaRepository.desfazerEntrega(pendenciaId)
         }
     }
+
+    fun excluirPendencia(pendenciaId: String) {
+        viewModelScope.launch {
+            pendenciaRepository.excluir(pendenciaId)
+        }
+    }
+
+    fun restaurarPendencia(pendenciaId: String) {
+        viewModelScope.launch {
+            pendenciaRepository.restaurar(pendenciaId)
+        }
+    }
 }

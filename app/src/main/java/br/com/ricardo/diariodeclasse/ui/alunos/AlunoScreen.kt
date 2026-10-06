@@ -76,6 +76,7 @@ private fun ConteudoAluno(
     val escopo: CoroutineScope = rememberCoroutineScope()
     val textoAnotacaoExcluida: String = stringResource(R.string.anotacao_excluida_aviso)
     val textoPendenciaEntregue: String = stringResource(R.string.pendencia_entregue_aviso)
+    val textoPendenciaExcluida: String = stringResource(R.string.pendencia_excluida_aviso)
     val textoDesfazer: String = stringResource(R.string.pendencia_desfazer)
 
     /** Aviso no rodapé com "Desfazer", para o caso de um toque por engano. */
@@ -101,6 +102,11 @@ private fun ConteudoAluno(
     fun marcarComoEntregue(pendencia: Pendencia) {
         viewModel.marcarPendenciaComoEntregue(pendencia.id)
         avisarComDesfazer(textoPendenciaEntregue, aoDesfazer = { viewModel.desfazerEntregaDaPendencia(pendencia.id) })
+    }
+
+    fun excluirPendencia(pendencia: Pendencia) {
+        viewModel.excluirPendencia(pendencia.id)
+        avisarComDesfazer(textoPendenciaExcluida, aoDesfazer = { viewModel.restaurarPendencia(pendencia.id) })
     }
 
     Scaffold(
@@ -193,6 +199,7 @@ private fun ConteudoAluno(
                 viewModel.criarPendencia(descricao, dataLembrete)
                 fechar()
             },
+            aoExcluir = null,
             aoFechar = fechar,
         )
 
@@ -206,6 +213,10 @@ private fun ConteudoAluno(
             hoje = estado.hoje,
             aoSalvar = { _, descricao, dataLembrete ->
                 viewModel.editarPendencia(aberta.pendencia.id, descricao, dataLembrete)
+                fechar()
+            },
+            aoExcluir = {
+                excluirPendencia(aberta.pendencia)
                 fechar()
             },
             aoFechar = fechar,

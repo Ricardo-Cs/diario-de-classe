@@ -82,24 +82,34 @@ private fun ConteudoPendencias(
     val avisos: SnackbarHostState = remember { SnackbarHostState() }
     // Escopo de coroutine preso à tela: `showSnackbar` é `suspend` (espera o aviso sumir).
     val escopo: CoroutineScope = rememberCoroutineScope()
-    val textoDoAviso: String = stringResource(R.string.pendencia_entregue_aviso)
+    val textoPendenciaEntregue: String = stringResource(R.string.pendencia_entregue_aviso)
+    val textoPendenciaExcluida: String = stringResource(R.string.pendencia_excluida_aviso)
     val textoDesfazer: String = stringResource(R.string.pendencia_desfazer)
     val temAlunos: Boolean = estado.alunos.isNotEmpty()
 
-    /** Marca e mostra o aviso com "Desfazer" para o caso de um toque por engano. */
-    fun marcarComoEntregue(pendencia: Pendencia) {
-        viewModel.marcarComoEntregue(pendencia.id)
+    /** Aviso no rodapé com "Desfazer", para o caso de um toque por engano. */
+    fun avisarComDesfazer(mensagem: String, aoDesfazer: () -> Unit) {
         escopo.launch {
             avisos.currentSnackbarData?.dismiss()
             val resultado: SnackbarResult = avisos.showSnackbar(
-                message = textoDoAviso,
+                message = mensagem,
                 actionLabel = textoDesfazer,
                 duration = SnackbarDuration.Short,
             )
             if (resultado == SnackbarResult.ActionPerformed) {
-                viewModel.desfazerEntrega(pendencia.id)
+                aoDesfazer()
             }
         }
+    }
+
+    fun marcarComoEntregue(pendencia: Pendencia) {
+        viewModel.marcarComoEntregue(pendencia.id)
+        avisarComDesfazer(textoPendenciaEntregue, aoDesfazer = { viewModel.desfazerEntrega(pendencia.id) })
+    }
+
+    fun excluirPendencia(pendencia: Pendencia) {
+        viewModel.excluirPendencia(pendencia.id)
+        avisarComDesfazer(textoPendenciaExcluida, aoDesfazer = { viewModel.restaurarPendencia(pendencia.id) })
     }
 
     Scaffold(
@@ -167,6 +177,7 @@ private fun ConteudoPendencias(
                 viewModel.criarPendencia(alunoId, descricao, dataLembrete)
                 fecharPainel()
             },
+            aoExcluir = null,
             aoFechar = fecharPainel,
         )
 
@@ -180,6 +191,10 @@ private fun ConteudoPendencias(
             hoje = estado.hoje,
             aoSalvar = { _, descricao, dataLembrete ->
                 viewModel.editarPendencia(painelAtual.pendencia.id, descricao, dataLembrete)
+                fecharPainel()
+            },
+            aoExcluir = {
+                excluirPendencia(painelAtual.pendencia)
                 fecharPainel()
             },
             aoFechar = fecharPainel,

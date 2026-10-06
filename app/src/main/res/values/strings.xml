@@ -118,6 +118,7 @@
     <string name="pendencia_origem_avulsa">avulsa</string>
     <string name="pendencia_marcar_entregue">Marcar como entregue</string>
     <string name="pendencia_entregue_aviso">Pendência marcada como entregue</string>
+    <string name="pendencia_excluida_aviso">Pendência excluída</string>
     <string name="pendencia_desfazer">Desfazer</string>
     <string name="pendencia_adicionar_para">Adicionar pendência para %1$s</string>
     <string name="pendencia_escolher_aluno">Escolher aluno</string>

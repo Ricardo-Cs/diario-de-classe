@@ -39,6 +39,12 @@ interface PendenciaRepository {
 
     /** Volta a pendência para "pendente" (botão "Desfazer" depois de marcar por engano). */
     suspend fun desfazerEntrega(id: String)
+
+    /** Para pendência criada por engano. Diferente de "entregue", não fica no histórico. */
+    suspend fun excluir(id: String)
+
+    /** Desfaz a exclusão (botão "Desfazer" do aviso). */
+    suspend fun restaurar(id: String)
 }
 
 class PendenciaRepositoryImpl @Inject constructor(
@@ -115,5 +121,15 @@ class PendenciaRepositoryImpl @Inject constructor(
             updatedAt = Instant.now(clock),
         )
         dao.atualizar(pendenteDeNovo)
+    }
+
+    override suspend fun excluir(id: String) {
+        dao.marcarComoExcluida(id, Instant.now(clock))
+    }
+
+    override suspend fun restaurar(id: String) {
+        val pendencia: Pendencia = dao.buscarPorId(id) ?: return
+        val restaurada = pendencia.copy(deletedAt = null, updatedAt = Instant.now(clock))
+        dao.atualizar(restaurada)
     }
 }

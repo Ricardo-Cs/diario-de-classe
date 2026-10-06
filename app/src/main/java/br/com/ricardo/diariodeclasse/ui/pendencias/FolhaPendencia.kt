@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -19,6 +20,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -39,6 +41,7 @@ import java.time.LocalDate
  *   professora só digita a atividade.
  * - Editando, o aluno fica fixo ([podeTrocarAluno] = `false`): a pendência pode
  *   estar ligada a uma falta daquele aluno.
+ * - [aoExcluir] `null` = pendência nova (sem botão "Excluir").
  *
  * `ModalBottomSheet` ainda é experimental no Material 3; o `@OptIn` fica só aqui.
  */
@@ -53,6 +56,7 @@ fun FolhaPendencia(
     dataInicial: LocalDate,
     hoje: LocalDate,
     aoSalvar: (alunoId: String, descricao: String, dataLembrete: LocalDate) -> Unit,
+    aoExcluir: (() -> Unit)?,
     aoFechar: () -> Unit,
 ) {
     val alunoEscolhido: MutableState<Aluno?> = remember { mutableStateOf(alunoInicial) }
@@ -108,6 +112,14 @@ fun FolhaPendencia(
             )
 
             Row(modifier = Modifier.fillMaxWidth()) {
+                if (aoExcluir != null) {
+                    TextButton(
+                        onClick = aoExcluir,
+                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                    ) {
+                        Text(stringResource(R.string.excluir))
+                    }
+                }
                 Spacer(Modifier.weight(1f))
                 Button(
                     enabled = podeSalvar,

@@ -165,6 +165,18 @@ class AlunoViewModel @Inject constructor(
         }
     }
 
+    fun excluirPendencia(pendenciaId: String) {
+        viewModelScope.launch {
+            pendenciaRepository.excluir(pendenciaId)
+        }
+    }
+
+    fun restaurarPendencia(pendenciaId: String) {
+        viewModelScope.launch {
+            pendenciaRepository.restaurar(pendenciaId)
+        }
+    }
+
     fun renomearAluno(aluno: Aluno, novoNome: String) {
         val nomeSemEspacosNasPontas: String = novoNome.trim()
         if (nomeSemEspacosNasPontas.isEmpty()) {

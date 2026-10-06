@@ -9,6 +9,7 @@ import br.com.ricardo.diariodeclasse.data.local.entity.PendenciaComOrigem
 import br.com.ricardo.diariodeclasse.data.local.entity.PendenciaParaLembrete
 import br.com.ricardo.diariodeclasse.data.local.entity.StatusPendencia
 import kotlinx.coroutines.flow.Flow
+import java.time.Instant
 import java.time.LocalDate
 
 /**
@@ -58,7 +59,8 @@ interface PendenciaDao {
     )
     suspend fun buscarParaLembrete(data: LocalDate, status: StatusPendencia): List<PendenciaParaLembrete>
 
-    @Query("SELECT * FROM pendencias WHERE id = :id AND deletedAt IS NULL")
+    /** Inclui as excluídas: é usada também para desfazer uma exclusão. */
+    @Query("SELECT * FROM pendencias WHERE id = :id")
     suspend fun buscarPorId(id: String): Pendencia?
 
     /** Dentre os registros de falta informados, quais já têm alguma pendência ligada. */
@@ -73,4 +75,7 @@ interface PendenciaDao {
 
     @Update
     suspend fun atualizar(pendencia: Pendencia)
+
+    @Query("UPDATE pendencias SET deletedAt = :agora, updatedAt = :agora WHERE id = :id")
+    suspend fun marcarComoExcluida(id: String, agora: Instant)
 }
