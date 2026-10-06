@@ -24,6 +24,17 @@
     <string name="inicio_sem_turmas">Cadastre sua primeira turma para começar a usar o diário.</string>
     <string name="inicio_cadastrar_turma">Cadastrar turma</string>
     <string name="inicio_fazer_chamada">Fazer chamada</string>
+    <string name="inicio_chamada_de_hoje">Chamada de hoje</string>
+    <string name="inicio_chamada_nao_feita">Ainda não foi feita</string>
+    <string name="inicio_chamada_concluida">Concluída às %1$s</string>
+    <plurals name="inicio_alunos_na_turma">
+        <item quantity="one">%d aluno na turma</item>
+        <item quantity="other">%d alunos na turma</item>
+    </plurals>
+    <plurals name="inicio_presentes">
+        <item quantity="one">%d presente</item>
+        <item quantity="other">%d presentes</item>
+    </plurals>
 
     <!-- Chamada -->
     <string name="chamada_titulo">Chamada</string>

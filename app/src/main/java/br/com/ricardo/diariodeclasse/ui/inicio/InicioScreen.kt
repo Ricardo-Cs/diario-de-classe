@@ -38,6 +38,7 @@ import java.time.LocalDate
 fun InicioScreen(
     aoCadastrarTurma: () -> Unit,
     aoAbrirChamada: (turmaId: String, data: LocalDate) -> Unit,
+    aoAbrirTurma: (turmaId: String) -> Unit,
     viewModel: InicioViewModel = hiltViewModel(),
 ) {
     val estado: InicioUiState = viewModel.uiState.collectAsStateWithLifecycle().value
@@ -74,10 +75,11 @@ fun InicioScreen(
                         todasAsTurmas = turmas.todas,
                         aoSelecionarTurma = { turmaId -> viewModel.selecionarTurma(turmaId) },
                     )
-                    // Provisório: vira o card da chamada na próxima etapa.
-                    Button(onClick = { aoAbrirChamada(turmas.turmaAtiva.id, estado.hoje) }) {
-                        Text(stringResource(R.string.inicio_fazer_chamada))
-                    }
+                    CardChamada(
+                        situacao = turmas.chamadaDeHoje,
+                        aoAbrirChamada = { aoAbrirChamada(turmas.turmaAtiva.id, estado.hoje) },
+                        aoAdicionarAlunos = { aoAbrirTurma(turmas.turmaAtiva.id) },
+                    )
                 }
             }
         }

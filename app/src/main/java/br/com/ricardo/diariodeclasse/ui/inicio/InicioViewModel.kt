@@ -3,13 +3,21 @@ package br.com.ricardo.diariodeclasse.ui.inicio
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.ricardo.diariodeclasse.data.local.entity.Turma
+import br.com.ricardo.diariodeclasse.data.repository.AlunoRepository
+import br.com.ricardo.diariodeclasse.data.repository.ChamadaRepository
 import br.com.ricardo.diariodeclasse.data.repository.TurmaAtivaRepository
 import br.com.ricardo.diariodeclasse.data.repository.TurmaRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.Clock
@@ -27,13 +35,30 @@ data class InicioUiState(
 sealed interface TurmasDoInicio {
     data object Carregando : TurmasDoInicio
     data object NenhumaCadastrada : TurmasDoInicio
-    data class Carregadas(val turmaAtiva: Turma, val todas: List<Turma>) : TurmasDoInicio
+    data class Carregadas(
+        val turmaAtiva: Turma,
+        val todas: List<Turma>,
+        val chamadaDeHoje: SituacaoDaChamada,
+    ) : TurmasDoInicio
 }
+
+/** Turma ativa e a situação da chamada dela no dia, sempre calculadas juntas. */
+private data class DadosDoDia(
+    val turmaAtiva: Turma,
+    val chamadaDeHoje: SituacaoDaChamada,
+)
+
+private data class TurmaNoDia(
+    val turma: Turma?,
+    val data: LocalDate,
+)
 
 @HiltViewModel
 class InicioViewModel @Inject constructor(
     turmaRepository: TurmaRepository,
     private val turmaAtivaRepository: TurmaAtivaRepository,
+    private val alunoRepository: AlunoRepository,
+    private val chamadaRepository: ChamadaRepository,
     private val clock: Clock,
 ) : ViewModel() {
 
@@ -43,28 +68,69 @@ class InicioViewModel @Inject constructor(
      */
     private val agora = MutableStateFlow(LocalDateTime.now(clock))
 
+    /** `distinctUntilChanged` só deixa passar quando o dia de fato muda, não a cada minuto. */
+    private val hoje: Flow<LocalDate> = agora
+        .map { dataEHora -> dataEHora.toLocalDate() }
+        .distinctUntilChanged()
+
+    private val dadosDoDia: Flow<DadosDoDia?> = observarDadosDoDia()
+
     val uiState: StateFlow<InicioUiState> = combine(
         agora,
-        turmaAtivaRepository.observarTurmaAtiva(),
+        dadosDoDia,
         turmaRepository.observarTurmas(),
-    ) { dataEHora, turmaAtiva, todasAsTurmas ->
-        criarEstado(dataEHora, turmaAtiva, todasAsTurmas)
+    ) { dataEHora, dados, todasAsTurmas ->
+        criarEstado(dataEHora, dados, todasAsTurmas)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = criarEstadoCarregando(),
     )
 
+    /**
+     * Sempre que a turma ativa ou o dia mudam, troca as consultas de alunos e de
+     * chamada pelas da nova turma/dia. `flatMapLatest` faz essa troca e cancela as
+     * consultas antigas, como o `switchMap` do RxJS.
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun observarDadosDoDia(): Flow<DadosDoDia?> {
+        return combine(turmaAtivaRepository.observarTurmaAtiva(), hoje) { turma, data ->
+            TurmaNoDia(turma, data)
+        }.flatMapLatest { turmaNoDia ->
+            observarDadosDaTurma(turmaNoDia)
+        }
+    }
+
+    private fun observarDadosDaTurma(turmaNoDia: TurmaNoDia): Flow<DadosDoDia?> {
+        val turma: Turma? = turmaNoDia.turma
+        if (turma == null) {
+            return flowOf(null)
+        }
+        return combine(
+            alunoRepository.observarAlunosDaTurma(turma.id),
+            chamadaRepository.observarChamada(turma.id, turmaNoDia.data),
+        ) { alunos, chamada ->
+            DadosDoDia(
+                turmaAtiva = turma,
+                chamadaDeHoje = calcularSituacaoDaChamada(alunos, chamada, clock.zone),
+            )
+        }
+    }
+
     private fun criarEstado(
         dataEHora: LocalDateTime,
-        turmaAtiva: Turma?,
+        dados: DadosDoDia?,
         todasAsTurmas: List<Turma>,
     ): InicioUiState {
         val turmas: TurmasDoInicio
-        if (turmaAtiva == null) {
+        if (dados == null) {
             turmas = TurmasDoInicio.NenhumaCadastrada
         } else {
-            turmas = TurmasDoInicio.Carregadas(turmaAtiva, todasAsTurmas)
+            turmas = TurmasDoInicio.Carregadas(
+                turmaAtiva = dados.turmaAtiva,
+                todas = todasAsTurmas,
+                chamadaDeHoje = dados.chamadaDeHoje,
+            )
         }
 
         return InicioUiState(
@@ -85,7 +151,8 @@ class InicioViewModel @Inject constructor(
 
     /**
      * O app pode ficar aberto em segundo plano de manhã até a tarde (ou de um dia
-     * para o outro); sem isto, a tela continuaria com a saudação e a data antigas.
+     * para o outro); sem isto, a tela continuaria com a saudação, a data e a
+     * chamada do dia anterior.
      */
     fun atualizarDataEHora() {
         agora.value = LocalDateTime.now(clock)

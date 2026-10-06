@@ -70,6 +70,12 @@ fun AppNavHost() {
                         aoAbrirChamada = { turmaId, data ->
                             navController.navigate(ChamadaRoute(turmaId, data.toString()))
                         },
+                        aoAbrirTurma = { turmaId ->
+                            // Vai para a aba Turma e abre a turma lá, para a barra
+                            // inferior destacar a aba certa.
+                            navegarParaAba(navController, AbaPrincipal.TURMA)
+                            navController.navigate(DetalheTurmaRoute(turmaId))
+                        },
                     )
                 }
 
