@@ -2,6 +2,7 @@ package br.com.ricardo.diariodeclasse.data.repository
 
 import br.com.ricardo.diariodeclasse.data.local.dao.ChamadaDao
 import br.com.ricardo.diariodeclasse.data.local.entity.Chamada
+import br.com.ricardo.diariodeclasse.data.local.entity.FaltaDoAluno
 import br.com.ricardo.diariodeclasse.data.local.entity.RegistroPresenca
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -30,6 +31,9 @@ interface ChamadaRepository {
     fun observarChamada(turmaId: String, data: LocalDate): Flow<ChamadaDoDia?>
     suspend fun buscarChamada(turmaId: String, data: LocalDate): ChamadaDoDia?
 
+    /** Todas as faltas do aluno, da mais recente para a mais antiga. */
+    fun observarFaltasDoAluno(alunoId: String): Flow<List<FaltaDoAluno>>
+
     /**
      * Cria a chamada do dia ou atualiza a existente. Devolve a chamada como ficou
      * gravada, para quem chamou saber os ids dos registros (ex.: ligar pendências às faltas).
@@ -57,6 +61,10 @@ class ChamadaRepositoryImpl @Inject constructor(
 
     override suspend fun buscarChamada(turmaId: String, data: LocalDate): ChamadaDoDia? {
         return observarChamada(turmaId, data).first()
+    }
+
+    override fun observarFaltasDoAluno(alunoId: String): Flow<List<FaltaDoAluno>> {
+        return dao.observarFaltasDoAluno(alunoId)
     }
 
     override suspend fun salvar(turmaId: String, data: LocalDate, marcacoes: List<MarcacaoPresenca>): ChamadaDoDia {

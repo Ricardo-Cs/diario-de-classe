@@ -5,6 +5,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Upsert
 import br.com.ricardo.diariodeclasse.data.local.entity.Chamada
+import br.com.ricardo.diariodeclasse.data.local.entity.FaltaDoAluno
 import br.com.ricardo.diariodeclasse.data.local.entity.RegistroPresenca
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
@@ -25,6 +26,17 @@ interface ChamadaDao {
             "AND chamadas.deletedAt IS NULL AND registros_presenca.deletedAt IS NULL"
     )
     fun observarRegistrosDaChamada(turmaId: String, data: LocalDate): Flow<List<RegistroPresenca>>
+
+    /** Faltas do aluno em todas as chamadas, da mais recente para a mais antiga. */
+    @Query(
+        "SELECT chamadas.data AS data, registros_presenca.observacao AS observacao " +
+            "FROM registros_presenca " +
+            "INNER JOIN chamadas ON chamadas.id = registros_presenca.chamadaId " +
+            "WHERE registros_presenca.alunoId = :alunoId AND registros_presenca.presente = 0 " +
+            "AND chamadas.deletedAt IS NULL AND registros_presenca.deletedAt IS NULL " +
+            "ORDER BY chamadas.data DESC"
+    )
+    fun observarFaltasDoAluno(alunoId: String): Flow<List<FaltaDoAluno>>
 
     @Upsert
     suspend fun salvarChamada(chamada: Chamada)

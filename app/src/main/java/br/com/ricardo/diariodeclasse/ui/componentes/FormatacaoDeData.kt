@@ -18,6 +18,28 @@ fun formatarDataPorExtenso(data: LocalDate): String {
     return primeiraLetraMaiuscula + texto.substring(1)
 }
 
+/**
+ * Ex.: "Seg., 05/10" ou, se for de outro ano, "Seg., 15/12/2025". O dia da semana
+ * ajuda a ver padrões (ex.: faltas sempre às segundas).
+ */
+fun formatarDataComDiaDaSemana(data: LocalDate, hoje: LocalDate): String {
+    val padrao: String
+    if (data.year == hoje.year) {
+        padrao = "EEE, dd/MM"
+    } else {
+        padrao = "EEE, dd/MM/yyyy"
+    }
+    val texto: String = data.format(DateTimeFormatter.ofPattern(padrao, PORTUGUES_DO_BRASIL))
+
+    val primeiraLetraMaiuscula: String = texto.substring(0, 1).uppercase(PORTUGUES_DO_BRASIL)
+    return primeiraLetraMaiuscula + texto.substring(1)
+}
+
+/** Ex.: "outubro". */
+fun nomeDoMes(data: LocalDate): String {
+    return data.format(DateTimeFormatter.ofPattern("MMMM", PORTUGUES_DO_BRASIL))
+}
+
 /** "Hoje", "Ontem", "02/10" ou, se for de outro ano, "15/12/2025". */
 @Composable
 fun textoDeDataRelativa(data: LocalDate, hoje: LocalDate): String {

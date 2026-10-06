@@ -2,9 +2,11 @@ package br.com.ricardo.diariodeclasse.data.repository
 
 import br.com.ricardo.diariodeclasse.data.local.dao.ChamadaDao
 import br.com.ricardo.diariodeclasse.data.local.entity.Chamada
+import br.com.ricardo.diariodeclasse.data.local.entity.FaltaDoAluno
 import br.com.ricardo.diariodeclasse.data.local.entity.RegistroPresenca
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -37,6 +39,20 @@ private class FakeChamadaDao : ChamadaDao {
             } else {
                 registros.value.filter { registro -> registro.chamadaId == chamada.id }
             }
+        }
+    }
+
+    /** Junta registros e chamadas como o JOIN do banco real faria. */
+    override fun observarFaltasDoAluno(alunoId: String): Flow<List<FaltaDoAluno>> {
+        return registros.map { lista ->
+            val faltas = mutableListOf<FaltaDoAluno>()
+            for (registro in lista) {
+                val chamada: Chamada? = chamadas.value.firstOrNull { chamada -> chamada.id == registro.chamadaId }
+                if (chamada != null && registro.alunoId == alunoId && !registro.presente) {
+                    faltas.add(FaltaDoAluno(chamada.data, registro.observacao))
+                }
+            }
+            faltas.sortedByDescending { falta -> falta.data }
         }
     }
 
@@ -137,5 +153,19 @@ class ChamadaRepositoryImplTest {
 
         assertEquals(2, chamadaSalva.registros.size)
         assertEquals(dao.registroDoAluno("bruno").id, chamadaSalva.registros.first { registro -> registro.alunoId == "bruno" }.id)
+    }
+
+    @Test
+    fun observarFaltasDoAluno_trazSoAsFaltasDaMaisRecenteParaAMaisAntiga() = runBlocking {
+        val repositorio = repositorioNoInstante(inicio)
+        val ontem: LocalDate = hoje.minusDays(1)
+        val anteontem: LocalDate = hoje.minusDays(2)
+        repositorio.salvar("turma", anteontem, listOf(brunoFaltou))
+        repositorio.salvar("turma", ontem, listOf(brunoFaltou.copy(presente = true, observacao = null)))
+        repositorio.salvar("turma", hoje, listOf(brunoFaltou.copy(observacao = null)))
+
+        val faltas: List<FaltaDoAluno> = repositorio.observarFaltasDoAluno("bruno").first()
+
+        assertEquals(listOf(FaltaDoAluno(hoje, null), FaltaDoAluno(anteontem, "atestado")), faltas)
     }
 }

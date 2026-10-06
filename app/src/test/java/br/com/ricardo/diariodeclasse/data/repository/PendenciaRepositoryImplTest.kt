@@ -30,6 +30,12 @@ private class FakePendenciaDao : PendenciaDao {
         }
     }
 
+    override fun observarDoAlunoPorStatus(alunoId: String, status: StatusPendencia): Flow<List<PendenciaComOrigem>> {
+        return observarDaTurmaPorStatus(turmaId = "", status = status).map { pendencias ->
+            pendencias.filter { item -> item.pendencia.alunoId == alunoId }
+        }
+    }
+
     override suspend fun buscarPorId(id: String): Pendencia? {
         return linhas.value.firstOrNull { pendencia -> pendencia.id == id }
     }

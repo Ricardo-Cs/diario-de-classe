@@ -129,6 +129,16 @@
     <string name="pendencia_outra_data">Outra data</string>
 
     <!-- Aluno e anotações -->
+    <string name="aluno_pendencias">Pendências</string>
+    <string name="aluno_sem_pendencias">Nenhuma pendência em aberto.</string>
+    <string name="aluno_faltas">Faltas</string>
+    <string name="aluno_faltas_no_mes">%1$d em %2$s</string>
+    <string name="aluno_nenhuma_falta_no_mes">Nenhuma em %1$s</string>
+    <string name="aluno_sem_faltas">Nenhuma falta registrada.</string>
+    <plurals name="aluno_faltas_mais_antigas">
+        <item quantity="one">e mais %d falta mais antiga</item>
+        <item quantity="other">e mais %d faltas mais antigas</item>
+    </plurals>
     <string name="aluno_anotacoes">Anotações</string>
     <string name="aluno_sem_anotacoes">Nenhuma anotação sobre %1$s ainda.</string>
     <string name="anotacao_nova">Nova anotação</string>

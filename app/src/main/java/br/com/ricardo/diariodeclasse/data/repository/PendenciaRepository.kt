@@ -15,6 +15,9 @@ interface PendenciaRepository {
     /** Só as que ainda não foram entregues, das mais antigas para as mais novas. */
     fun observarPendentesDaTurma(turmaId: String): Flow<List<PendenciaComOrigem>>
 
+    /** Só as não entregues de um aluno, na mesma ordem da turma. */
+    fun observarPendentesDoAluno(alunoId: String): Flow<List<PendenciaComOrigem>>
+
     suspend fun criar(
         alunoId: String,
         descricao: String,
@@ -41,6 +44,10 @@ class PendenciaRepositoryImpl @Inject constructor(
 
     override fun observarPendentesDaTurma(turmaId: String): Flow<List<PendenciaComOrigem>> {
         return dao.observarDaTurmaPorStatus(turmaId, StatusPendencia.PENDENTE)
+    }
+
+    override fun observarPendentesDoAluno(alunoId: String): Flow<List<PendenciaComOrigem>> {
+        return dao.observarDoAlunoPorStatus(alunoId, StatusPendencia.PENDENTE)
     }
 
     override suspend fun criar(

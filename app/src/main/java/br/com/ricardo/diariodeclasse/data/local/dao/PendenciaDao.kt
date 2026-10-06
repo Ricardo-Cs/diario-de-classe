@@ -30,6 +30,17 @@ interface PendenciaDao {
     )
     fun observarDaTurmaPorStatus(turmaId: String, status: StatusPendencia): Flow<List<PendenciaComOrigem>>
 
+    /** Mesma consulta acima, filtrando por um aluno em vez da turma inteira. */
+    @Query(
+        "SELECT pendencias.*, chamadas.data AS dataDaFalta FROM pendencias " +
+            "LEFT JOIN registros_presenca ON registros_presenca.id = pendencias.registroPresencaId " +
+            "LEFT JOIN chamadas ON chamadas.id = registros_presenca.chamadaId " +
+            "WHERE pendencias.alunoId = :alunoId AND pendencias.status = :status " +
+            "AND pendencias.deletedAt IS NULL " +
+            "ORDER BY pendencias.dataLembrete, pendencias.createdAt"
+    )
+    fun observarDoAlunoPorStatus(alunoId: String, status: StatusPendencia): Flow<List<PendenciaComOrigem>>
+
     @Query("SELECT * FROM pendencias WHERE id = :id AND deletedAt IS NULL")
     suspend fun buscarPorId(id: String): Pendencia?
 

@@ -1,22 +1,16 @@
 package br.com.ricardo.diariodeclasse.ui.alunos
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -31,21 +25,22 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import br.com.ricardo.diariodeclasse.R
 import br.com.ricardo.diariodeclasse.data.local.entity.Anotacao
+import br.com.ricardo.diariodeclasse.data.local.entity.Pendencia
 import br.com.ricardo.diariodeclasse.ui.componentes.BarraSuperior
 import br.com.ricardo.diariodeclasse.ui.componentes.BotaoFlutuante
 import br.com.ricardo.diariodeclasse.ui.componentes.DialogoConfirmacao
-import br.com.ricardo.diariodeclasse.ui.componentes.MensagemCentralizada
 import br.com.ricardo.diariodeclasse.ui.componentes.TelaCarregando
-import br.com.ricardo.diariodeclasse.ui.componentes.textoDeDataRelativa
+import br.com.ricardo.diariodeclasse.ui.pendencias.FolhaPendencia
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 
 /** O que está aberto por cima da tela (no máximo uma coisa por vez). */
 private sealed interface Sobreposicao {
     data object Nenhuma : Sobreposicao
     data object NovaAnotacao : Sobreposicao
     data class EditandoAnotacao(val anotacao: Anotacao) : Sobreposicao
+    data object NovaPendencia : Sobreposicao
+    data class EditandoPendencia(val pendencia: Pendencia) : Sobreposicao
     data object EditandoAluno : Sobreposicao
     data object ConfirmandoExclusaoDoAluno : Sobreposicao
 }
@@ -79,23 +74,33 @@ private fun ConteudoAluno(
     val sobreposicao: MutableState<Sobreposicao> = remember { mutableStateOf(Sobreposicao.Nenhuma) }
     val avisos: SnackbarHostState = remember { SnackbarHostState() }
     val escopo: CoroutineScope = rememberCoroutineScope()
-    val textoDoAviso: String = stringResource(R.string.anotacao_excluida_aviso)
+    val textoAnotacaoExcluida: String = stringResource(R.string.anotacao_excluida_aviso)
+    val textoPendenciaEntregue: String = stringResource(R.string.pendencia_entregue_aviso)
     val textoDesfazer: String = stringResource(R.string.pendencia_desfazer)
 
-    /** Exclui e mostra o aviso com "Desfazer", como nas pendências. */
-    fun excluirAnotacao(anotacao: Anotacao) {
-        viewModel.excluirAnotacao(anotacao.id)
+    /** Aviso no rodapé com "Desfazer", para o caso de um toque por engano. */
+    fun avisarComDesfazer(mensagem: String, aoDesfazer: () -> Unit) {
         escopo.launch {
             avisos.currentSnackbarData?.dismiss()
             val resultado: SnackbarResult = avisos.showSnackbar(
-                message = textoDoAviso,
+                message = mensagem,
                 actionLabel = textoDesfazer,
                 duration = SnackbarDuration.Short,
             )
             if (resultado == SnackbarResult.ActionPerformed) {
-                viewModel.restaurarAnotacao(anotacao.id)
+                aoDesfazer()
             }
         }
+    }
+
+    fun excluirAnotacao(anotacao: Anotacao) {
+        viewModel.excluirAnotacao(anotacao.id)
+        avisarComDesfazer(textoAnotacaoExcluida, aoDesfazer = { viewModel.restaurarAnotacao(anotacao.id) })
+    }
+
+    fun marcarComoEntregue(pendencia: Pendencia) {
+        viewModel.marcarPendenciaComoEntregue(pendencia.id)
+        avisarComDesfazer(textoPendenciaEntregue, aoDesfazer = { viewModel.desfazerEntregaDaPendencia(pendencia.id) })
     }
 
     Scaffold(
@@ -121,29 +126,28 @@ private fun ConteudoAluno(
             )
         },
     ) { espacamentoDasBarras ->
-        val modifier = Modifier.padding(espacamentoDasBarras)
-
-        if (estado.anotacoes.isEmpty()) {
-            MensagemCentralizada(stringResource(R.string.aluno_sem_anotacoes, estado.aluno.nome), modifier)
-        } else {
-            LazyColumn(modifier = modifier.fillMaxSize()) {
-                item {
-                    Text(
-                        text = stringResource(R.string.aluno_anotacoes),
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 4.dp),
-                    )
-                }
-                items(estado.anotacoes, key = { anotacao -> anotacao.id }) { anotacao ->
-                    ItemAnotacao(
-                        anotacao = anotacao,
-                        hoje = estado.hoje,
-                        aoTocar = { sobreposicao.value = Sobreposicao.EditandoAnotacao(anotacao) },
-                    )
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                }
-            }
+        // O espaço extra no fim evita que o botão flutuante cubra a última anotação.
+        LazyColumn(
+            contentPadding = PaddingValues(bottom = 88.dp),
+            modifier = Modifier
+                .padding(espacamentoDasBarras)
+                .fillMaxSize(),
+        ) {
+            secaoDePendencias(
+                aluno = estado.aluno,
+                pendencias = estado.pendencias,
+                hoje = estado.hoje,
+                aoAdicionar = { sobreposicao.value = Sobreposicao.NovaPendencia },
+                aoEditar = { pendencia -> sobreposicao.value = Sobreposicao.EditandoPendencia(pendencia) },
+                aoMarcarComoEntregue = { pendencia -> marcarComoEntregue(pendencia) },
+            )
+            secaoDeFaltas(resumo = estado.faltas, hoje = estado.hoje)
+            secaoDeAnotacoes(
+                aluno = estado.aluno,
+                anotacoes = estado.anotacoes,
+                hoje = estado.hoje,
+                aoTocar = { anotacao -> sobreposicao.value = Sobreposicao.EditandoAnotacao(anotacao) },
+            )
         }
     }
 
@@ -177,6 +181,36 @@ private fun ConteudoAluno(
             aoFechar = fechar,
         )
 
+        is Sobreposicao.NovaPendencia -> FolhaPendencia(
+            titulo = stringResource(R.string.pendencias_nova),
+            alunos = listOf(estado.aluno),
+            alunoInicial = estado.aluno,
+            podeTrocarAluno = false,
+            descricaoInicial = "",
+            dataInicial = estado.hoje,
+            hoje = estado.hoje,
+            aoSalvar = { _, descricao, dataLembrete ->
+                viewModel.criarPendencia(descricao, dataLembrete)
+                fechar()
+            },
+            aoFechar = fechar,
+        )
+
+        is Sobreposicao.EditandoPendencia -> FolhaPendencia(
+            titulo = stringResource(R.string.pendencia_editar),
+            alunos = listOf(estado.aluno),
+            alunoInicial = estado.aluno,
+            podeTrocarAluno = false,
+            descricaoInicial = aberta.pendencia.descricao,
+            dataInicial = aberta.pendencia.dataLembrete,
+            hoje = estado.hoje,
+            aoSalvar = { _, descricao, dataLembrete ->
+                viewModel.editarPendencia(aberta.pendencia.id, descricao, dataLembrete)
+                fechar()
+            },
+            aoFechar = fechar,
+        )
+
         is Sobreposicao.EditandoAluno -> DialogoEditarAluno(
             aluno = estado.aluno,
             aoSalvar = { novoNome ->
@@ -197,23 +231,5 @@ private fun ConteudoAluno(
             },
             aoCancelar = fechar,
         )
-    }
-}
-
-/** Data em destaque discreto ("Hoje", "Ontem", "02/10") e o texto completo abaixo. */
-@Composable
-private fun ItemAnotacao(anotacao: Anotacao, hoje: LocalDate, aoTocar: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = aoTocar)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-    ) {
-        Text(
-            text = textoDeDataRelativa(anotacao.data, hoje),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Text(text = anotacao.texto, style = MaterialTheme.typography.bodyLarge)
     }
 }
