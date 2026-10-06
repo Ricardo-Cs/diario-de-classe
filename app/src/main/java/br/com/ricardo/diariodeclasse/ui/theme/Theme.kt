@@ -6,15 +6,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 
 /**
  * Papéis das cores da paleta:
  * - primary (Molten Lava): ações principais e botões de destaque (inclusive o container,
  *   usado pelos botões flutuantes, para a cor da marca aparecer igual nos dois temas).
  * - secondary (Deep Space Blue): elementos de apoio.
- * - tertiary (Steel Blue): destaques informativos.
- * - error (Brick Red): ações destrutivas e alertas.
- * - background/surface: branco no tema claro; azul-marinho com texto Papaya Whip no escuro.
+ * - tertiary (ocre): ausências (ver [ausencia]).
+ * - error (Brick Red): atrasos e ações destrutivas.
+ * - background/surface: creme "papel" no tema claro, com cartões brancos
+ *   (surfaceContainerLowest) por cima; azul-marinho com texto Papaya Whip no escuro.
  */
 private val EsquemaClaro: ColorScheme = lightColorScheme(
     primary = MoltenLava,
@@ -29,29 +31,29 @@ private val EsquemaClaro: ColorScheme = lightColorScheme(
     secondaryContainer = AzulClaro,
     onSecondaryContainer = DeepSpaceBlue,
 
-    tertiary = SteelBlue,
-    onTertiary = DeepSpaceBlue,
-    tertiaryContainer = AzulClaro,
-    onTertiaryContainer = DeepSpaceBlue,
+    tertiary = Ocre,
+    onTertiary = Branco,
+    tertiaryContainer = OcreClaro,
+    onTertiaryContainer = OcreEscuro,
 
     error = BrickRed,
     onError = Branco,
     errorContainer = VermelhoClaro,
     onErrorContainer = MoltenLava,
 
-    background = Branco,
+    background = CremePapel,
     onBackground = CinzaTexto,
-    surface = Branco,
+    surface = CremePapel,
     onSurface = CinzaTexto,
-    surfaceVariant = CinzaForte,
+    surfaceVariant = CremeForte,
     onSurfaceVariant = CinzaTextoSuave,
     surfaceContainerLowest = Branco,
-    surfaceContainerLow = CinzaMaisClaro,
-    surfaceContainer = CinzaClaro,
-    surfaceContainerHigh = CinzaMedio,
-    surfaceContainerHighest = CinzaForte,
+    surfaceContainerLow = CremeMaisClaro,
+    surfaceContainer = CremeClaro,
+    surfaceContainerHigh = CremeMedio,
+    surfaceContainerHighest = CremeForte,
     outline = CinzaContorno,
-    outlineVariant = CinzaContornoSuave,
+    outlineVariant = CremeContornoSuave,
 )
 
 private val EsquemaEscuro: ColorScheme = darkColorScheme(
@@ -66,10 +68,10 @@ private val EsquemaEscuro: ColorScheme = darkColorScheme(
     secondaryContainer = AzulPetroleo,
     onSecondaryContainer = AzulClaro,
 
-    tertiary = SteelBlue,
-    onTertiary = DeepSpaceBlue,
-    tertiaryContainer = AzulPetroleo,
-    onTertiaryContainer = AzulClaro,
+    tertiary = OcreSuave,
+    onTertiary = OcreTextoEscuro,
+    tertiaryContainer = OcreProfundo,
+    onTertiaryContainer = OcreClaro,
 
     error = VermelhoRosado,
     onError = MoltenLava,
@@ -90,6 +92,17 @@ private val EsquemaEscuro: ColorScheme = darkColorScheme(
     outline = CinzaAzulado,
     outlineVariant = MarinhoContorno,
 )
+
+/**
+ * O Material 3 não tem um papel "ausência"; usamos o `tertiary`, que nenhuma outra
+ * tela usa. Esta propriedade dá um nome claro a esse uso:
+ * `MaterialTheme.colorScheme.ausencia` em vez de um `tertiary` sem contexto.
+ *
+ * É uma "extension property": acrescenta uma propriedade a uma classe que não é
+ * nossa (`ColorScheme`), parecido com adicionar um getter de fora da classe.
+ */
+val ColorScheme.ausencia: Color
+    get() = tertiary
 
 /**
  * Não usamos a "cor dinâmica" do Android 12+ (cores tiradas do papel de parede),

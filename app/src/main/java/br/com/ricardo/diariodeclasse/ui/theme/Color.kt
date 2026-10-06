@@ -16,15 +16,27 @@ val LavaClaro = Color(0xFFFFDAD4)
 val AzulClaro = Color(0xFFCDE3F2)
 val VermelhoClaro = Color(0xFFFFDAD6)
 
-// Cinzas neutros para fundos em camadas (cartões, menus) sobre o fundo branco
-val CinzaMaisClaro = Color(0xFFF7F7F7)
-val CinzaClaro = Color(0xFFF2F2F2)
-val CinzaMedio = Color(0xFFECECEC)
-val CinzaForte = Color(0xFFE6E6E6)
+// Fundo "papel": Papaya Whip clareado (40% dele, 60% branco). Os cartões ficam em branco por cima.
+val CremePapel = Color(0xFFFEF9EE)
+
+// Tons de creme cada vez mais fortes, para fundos em camadas (painéis, menus, diálogos)
+val CremeMaisClaro = Color(0xFFF9F2E4)
+val CremeClaro = Color(0xFFF4ECDC)
+val CremeMedio = Color(0xFFEEE6D5)
+val CremeForte = Color(0xFFE8DFCD)
+val CremeContornoSuave = Color(0xFFD6CCBA)
+
+// Ausência: ocre, que chama atenção sem parecer erro (o vermelho fica para atraso e exclusão)
+val Ocre = Color(0xFF8F5300)
+val OcreClaro = Color(0xFFFFDDB8)
+val OcreEscuro = Color(0xFF2E1600)
+val OcreSuave = Color(0xFFFFB86B)
+val OcreProfundo = Color(0xFF6B3D00)
+val OcreTextoEscuro = Color(0xFF4B2800)
+
 val CinzaTexto = Color(0xFF1C1B1B)
 val CinzaTextoSuave = Color(0xFF4A4544)
 val CinzaContorno = Color(0xFF7A7473)
-val CinzaContornoSuave = Color(0xFFCAC4C3)
 
 // Tons para o tema escuro: fundo azul-marinho a partir do Deep Space Blue
 val LavaRosado = Color(0xFFFFB4A8)

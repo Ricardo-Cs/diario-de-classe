@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import br.com.ricardo.diariodeclasse.R
+import br.com.ricardo.diariodeclasse.ui.theme.ausencia
 import br.com.ricardo.diariodeclasse.ui.componentes.BarraSuperior
 import br.com.ricardo.diariodeclasse.ui.componentes.DialogoConfirmacao
 import br.com.ricardo.diariodeclasse.ui.componentes.MensagemCentralizada
@@ -233,13 +234,13 @@ private fun ResumoDeAusentes(ausentes: Int) {
         Text(
             text = pluralStringResource(R.plurals.chamada_ausentes, ausentes, ausentes),
             style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.error,
+            color = MaterialTheme.colorScheme.ausencia,
         )
     }
 }
 
 /**
- * Tocar na linha alterna presente/faltou. Quem faltou ganha um fundo vermelho bem
+ * Tocar na linha alterna presente/faltou. Quem faltou ganha um fundo ocre bem
  * suave, uma borda fina à esquerda e, abaixo do nome, o atalho para a observação.
  *
  * `IntrinsicSize.Min` faz a linha ter a altura do seu conteúdo, para que a borda
@@ -254,8 +255,8 @@ private fun LinhaDoAluno(
     val corDaBorda: Color
     val corDeFundo: Color
     if (linha.ausente) {
-        corDaBorda = MaterialTheme.colorScheme.error
-        corDeFundo = MaterialTheme.colorScheme.error.copy(alpha = 0.06f)
+        corDaBorda = MaterialTheme.colorScheme.ausencia
+        corDeFundo = MaterialTheme.colorScheme.ausencia.copy(alpha = 0.08f)
     } else {
         corDaBorda = Color.Transparent
         corDeFundo = Color.Transparent
@@ -341,7 +342,7 @@ private fun IndicadorDeSituacao(ausente: Boolean) {
     if (ausente) {
         icone = R.drawable.ic_ausente
         texto = stringResource(R.string.chamada_faltou)
-        cor = MaterialTheme.colorScheme.error
+        cor = MaterialTheme.colorScheme.ausencia
     } else {
         icone = R.drawable.ic_presente
         texto = stringResource(R.string.chamada_presente)

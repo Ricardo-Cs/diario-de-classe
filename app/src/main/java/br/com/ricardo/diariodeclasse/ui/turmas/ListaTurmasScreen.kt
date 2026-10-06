@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -17,6 +16,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import br.com.ricardo.diariodeclasse.R
 import br.com.ricardo.diariodeclasse.data.local.entity.Turma
 import br.com.ricardo.diariodeclasse.ui.componentes.BarraSuperior
+import br.com.ricardo.diariodeclasse.ui.componentes.BotaoFlutuante
 import br.com.ricardo.diariodeclasse.ui.componentes.MensagemCentralizada
 import br.com.ricardo.diariodeclasse.ui.componentes.TelaCarregando
 import br.com.ricardo.diariodeclasse.ui.componentes.nomeDoPeriodo
@@ -32,9 +32,7 @@ fun ListaTurmasScreen(
     Scaffold(
         topBar = { BarraSuperior(titulo = stringResource(R.string.turmas_titulo)) },
         floatingActionButton = {
-            ExtendedFloatingActionButton(onClick = aoCriarTurma) {
-                Text(stringResource(R.string.turmas_nova))
-            }
+            BotaoFlutuante(texto = stringResource(R.string.turmas_nova), aoClicar = aoCriarTurma)
         },
     ) { espacamentoDasBarras ->
         val modifier = Modifier.padding(espacamentoDasBarras)

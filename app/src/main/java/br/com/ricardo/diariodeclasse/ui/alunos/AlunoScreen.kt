@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -33,6 +32,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import br.com.ricardo.diariodeclasse.R
 import br.com.ricardo.diariodeclasse.data.local.entity.Anotacao
 import br.com.ricardo.diariodeclasse.ui.componentes.BarraSuperior
+import br.com.ricardo.diariodeclasse.ui.componentes.BotaoFlutuante
 import br.com.ricardo.diariodeclasse.ui.componentes.DialogoConfirmacao
 import br.com.ricardo.diariodeclasse.ui.componentes.MensagemCentralizada
 import br.com.ricardo.diariodeclasse.ui.componentes.TelaCarregando
@@ -115,9 +115,10 @@ private fun ConteudoAluno(
         },
         snackbarHost = { SnackbarHost(avisos) },
         floatingActionButton = {
-            ExtendedFloatingActionButton(onClick = { sobreposicao.value = Sobreposicao.NovaAnotacao }) {
-                Text(stringResource(R.string.anotacao_nova))
-            }
+            BotaoFlutuante(
+                texto = stringResource(R.string.anotacao_nova),
+                aoClicar = { sobreposicao.value = Sobreposicao.NovaAnotacao },
+            )
         },
     ) { espacamentoDasBarras ->
         val modifier = Modifier.padding(espacamentoDasBarras)

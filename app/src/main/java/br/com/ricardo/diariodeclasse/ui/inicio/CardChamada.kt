@@ -23,6 +23,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import br.com.ricardo.diariodeclasse.R
+import br.com.ricardo.diariodeclasse.ui.theme.ausencia
 import java.time.format.DateTimeFormatter
 
 /**
@@ -37,7 +38,7 @@ fun CardChamada(
     aoAdicionarAlunos: () -> Unit,
 ) {
     OutlinedCard(
-        colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface),
+        colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
         modifier = Modifier.fillMaxWidth(),
     ) {
         Column(
@@ -110,14 +111,14 @@ private fun ConteudoChamadaFeita(situacao: SituacaoDaChamada.Feita, aoEditar: ()
     }
 }
 
-/** "22 presentes · 3 ausentes", com os ausentes em vermelho quando houver. */
+/** "22 presentes · 3 ausentes", com os ausentes em destaque (ocre) quando houver. */
 @Composable
 private fun ResumoDaChamada(presentes: Int, ausentes: Int) {
     val textoDosAusentes: String
     val corDosAusentes: Color
     if (ausentes > 0) {
         textoDosAusentes = pluralStringResource(R.plurals.chamada_ausentes, ausentes, ausentes)
-        corDosAusentes = MaterialTheme.colorScheme.error
+        corDosAusentes = MaterialTheme.colorScheme.ausencia
     } else {
         textoDosAusentes = stringResource(R.string.chamada_nenhum_ausente)
         corDosAusentes = MaterialTheme.colorScheme.onSurfaceVariant

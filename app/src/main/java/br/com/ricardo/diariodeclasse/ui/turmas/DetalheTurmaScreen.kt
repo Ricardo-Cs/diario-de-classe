@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -26,6 +25,7 @@ import br.com.ricardo.diariodeclasse.data.local.entity.Aluno
 import br.com.ricardo.diariodeclasse.data.local.entity.Turma
 import br.com.ricardo.diariodeclasse.ui.alunos.DialogoAdicionarAlunos
 import br.com.ricardo.diariodeclasse.ui.componentes.BarraSuperior
+import br.com.ricardo.diariodeclasse.ui.componentes.BotaoFlutuante
 import br.com.ricardo.diariodeclasse.ui.componentes.DialogoConfirmacao
 import br.com.ricardo.diariodeclasse.ui.componentes.MensagemCentralizada
 import br.com.ricardo.diariodeclasse.ui.componentes.TelaCarregando
@@ -99,9 +99,10 @@ private fun ConteudoDetalheTurma(
             )
         },
         floatingActionButton = {
-            ExtendedFloatingActionButton(onClick = { dialogoAberto.value = Dialogo.AdicionarAlunos }) {
-                Text(stringResource(R.string.turma_adicionar_alunos))
-            }
+            BotaoFlutuante(
+                texto = stringResource(R.string.turma_adicionar_alunos),
+                aoClicar = { dialogoAberto.value = Dialogo.AdicionarAlunos },
+            )
         },
     ) { espacamentoDasBarras ->
         val modifier = Modifier.padding(espacamentoDasBarras)
