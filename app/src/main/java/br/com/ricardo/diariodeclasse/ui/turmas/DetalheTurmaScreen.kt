@@ -25,7 +25,6 @@ import br.com.ricardo.diariodeclasse.R
 import br.com.ricardo.diariodeclasse.data.local.entity.Aluno
 import br.com.ricardo.diariodeclasse.data.local.entity.Turma
 import br.com.ricardo.diariodeclasse.ui.alunos.DialogoAdicionarAlunos
-import br.com.ricardo.diariodeclasse.ui.alunos.DialogoEditarAluno
 import br.com.ricardo.diariodeclasse.ui.componentes.BarraSuperior
 import br.com.ricardo.diariodeclasse.ui.componentes.DialogoConfirmacao
 import br.com.ricardo.diariodeclasse.ui.componentes.MensagemCentralizada
@@ -35,14 +34,13 @@ import br.com.ricardo.diariodeclasse.ui.componentes.TelaCarregando
 private sealed interface Dialogo {
     data object Nenhum : Dialogo
     data object AdicionarAlunos : Dialogo
-    data class EditarAluno(val aluno: Aluno) : Dialogo
-    data class ConfirmarExclusaoAluno(val aluno: Aluno) : Dialogo
     data object ConfirmarExclusaoTurma : Dialogo
 }
 
 @Composable
 fun DetalheTurmaScreen(
     aoEditarTurma: (turmaId: String) -> Unit,
+    aoAbrirAluno: (alunoId: String) -> Unit,
     aoVoltar: () -> Unit,
     viewModel: DetalheTurmaViewModel = hiltViewModel(),
 ) {
@@ -62,6 +60,7 @@ fun DetalheTurmaScreen(
             alunos = estado.alunos,
             viewModel = viewModel,
             aoEditarTurma = aoEditarTurma,
+            aoAbrirAluno = aoAbrirAluno,
             aoVoltar = aoVoltar,
         )
     }
@@ -73,6 +72,7 @@ private fun ConteudoDetalheTurma(
     alunos: List<Aluno>,
     viewModel: DetalheTurmaViewModel,
     aoEditarTurma: (turmaId: String) -> Unit,
+    aoAbrirAluno: (alunoId: String) -> Unit,
     aoVoltar: () -> Unit,
 ) {
     val dialogoAberto: MutableState<Dialogo> = remember { mutableStateOf(Dialogo.Nenhum) }
@@ -111,7 +111,7 @@ private fun ConteudoDetalheTurma(
         } else {
             ListaDeAlunos(
                 alunos = alunos,
-                aoClicarAluno = { aluno -> dialogoAberto.value = Dialogo.EditarAluno(aluno) },
+                aoClicarAluno = { aluno -> aoAbrirAluno(aluno.id) },
                 modifier = modifier,
             )
         }
@@ -126,27 +126,6 @@ private fun ConteudoDetalheTurma(
         is Dialogo.AdicionarAlunos -> DialogoAdicionarAlunos(
             aoAdicionar = { nome -> viewModel.adicionarAluno(nome) },
             aoConcluir = fecharDialogo,
-        )
-
-        is Dialogo.EditarAluno -> DialogoEditarAluno(
-            aluno = dialogo.aluno,
-            aoSalvar = { novoNome ->
-                viewModel.renomearAluno(dialogo.aluno, novoNome)
-                fecharDialogo()
-            },
-            aoExcluir = { dialogoAberto.value = Dialogo.ConfirmarExclusaoAluno(dialogo.aluno) },
-            aoCancelar = fecharDialogo,
-        )
-
-        is Dialogo.ConfirmarExclusaoAluno -> DialogoConfirmacao(
-            titulo = stringResource(R.string.aluno_excluir_titulo),
-            mensagem = stringResource(R.string.aluno_excluir_mensagem, dialogo.aluno.nome),
-            textoConfirmar = stringResource(R.string.excluir),
-            aoConfirmar = {
-                viewModel.excluirAluno(dialogo.aluno)
-                fecharDialogo()
-            },
-            aoCancelar = fecharDialogo,
         )
 
         is Dialogo.ConfirmarExclusaoTurma -> DialogoConfirmacao(

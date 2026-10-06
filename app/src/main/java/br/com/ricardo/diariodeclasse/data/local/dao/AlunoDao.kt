@@ -17,6 +17,9 @@ interface AlunoDao {
     )
     fun observarDaTurma(turmaId: String): Flow<List<Aluno>>
 
+    @Query("SELECT * FROM alunos WHERE id = :id AND deletedAt IS NULL")
+    fun observarPorId(id: String): Flow<Aluno?>
+
     @Insert
     suspend fun inserir(aluno: Aluno)
 

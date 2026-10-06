@@ -10,6 +10,8 @@ import javax.inject.Inject
 
 interface AlunoRepository {
     fun observarAlunosDaTurma(turmaId: String): Flow<List<Aluno>>
+    /** Emite `null` se o aluno não existe ou foi excluído. */
+    fun observarAluno(id: String): Flow<Aluno?>
     suspend fun criar(turmaId: String, nome: String): Aluno
     suspend fun renomear(aluno: Aluno, novoNome: String)
     suspend fun excluir(id: String)
@@ -22,6 +24,8 @@ class AlunoRepositoryImpl @Inject constructor(
 
     override fun observarAlunosDaTurma(turmaId: String): Flow<List<Aluno>> =
         dao.observarDaTurma(turmaId)
+
+    override fun observarAluno(id: String): Flow<Aluno?> = dao.observarPorId(id)
 
     override suspend fun criar(turmaId: String, nome: String): Aluno {
         val agora = Instant.now(clock)

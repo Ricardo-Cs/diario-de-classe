@@ -64,22 +64,6 @@ class DetalheTurmaViewModel @Inject constructor(
         }
     }
 
-    fun renomearAluno(aluno: Aluno, novoNome: String) {
-        val nomeSemEspacosNasPontas: String = novoNome.trim()
-        if (nomeSemEspacosNasPontas.isEmpty()) {
-            return
-        }
-        viewModelScope.launch {
-            alunoRepository.renomear(aluno, nomeSemEspacosNasPontas)
-        }
-    }
-
-    fun excluirAluno(aluno: Aluno) {
-        viewModelScope.launch {
-            alunoRepository.excluir(aluno.id)
-        }
-    }
-
     /** Depois de excluir, o Flow da turma emite `null` e a tela volta sozinha. */
     fun excluirTurma() {
         viewModelScope.launch {

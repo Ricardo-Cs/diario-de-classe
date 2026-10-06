@@ -2,6 +2,8 @@ package br.com.ricardo.diariodeclasse.di
 
 import br.com.ricardo.diariodeclasse.data.repository.AlunoRepository
 import br.com.ricardo.diariodeclasse.data.repository.AlunoRepositoryImpl
+import br.com.ricardo.diariodeclasse.data.repository.AnotacaoRepository
+import br.com.ricardo.diariodeclasse.data.repository.AnotacaoRepositoryImpl
 import br.com.ricardo.diariodeclasse.data.repository.ChamadaRepository
 import br.com.ricardo.diariodeclasse.data.repository.ChamadaRepositoryImpl
 import br.com.ricardo.diariodeclasse.data.repository.PendenciaRepository
@@ -40,4 +42,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindPendenciaRepository(impl: PendenciaRepositoryImpl): PendenciaRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindAnotacaoRepository(impl: AnotacaoRepositoryImpl): AnotacaoRepository
 }

@@ -51,3 +51,6 @@ data class ChamadaRoute(val turmaId: String, val data: String)
 
 @Serializable
 data class PendenciasRoute(val turmaId: String)
+
+@Serializable
+data class AlunoRoute(val alunoId: String)

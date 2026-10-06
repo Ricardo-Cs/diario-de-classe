@@ -9,6 +9,10 @@
     <string name="excluir">Excluir</string>
     <string name="concluir">Concluir</string>
 
+    <!-- Datas -->
+    <string name="data_hoje">Hoje</string>
+    <string name="data_ontem">Ontem</string>
+
     <!-- Navegação principal -->
     <string name="aba_inicio">Início</string>
     <string name="aba_turma">Turma</string>
@@ -108,6 +112,15 @@
     <string name="pendencia_hoje">Hoje</string>
     <string name="pendencia_amanha">Amanhã</string>
     <string name="pendencia_outra_data">Outra data</string>
+
+    <!-- Aluno e anotações -->
+    <string name="aluno_anotacoes">Anotações</string>
+    <string name="aluno_sem_anotacoes">Nenhuma anotação sobre %1$s ainda.</string>
+    <string name="anotacao_nova">Nova anotação</string>
+    <string name="anotacao_editar">Editar anotação</string>
+    <string name="anotacao_campo_texto">Anotação</string>
+    <string name="anotacao_campo_texto_exemplo">Ex.: reconheceu todas as vogais hoje</string>
+    <string name="anotacao_excluida_aviso">Anotação excluída</string>
 
     <!-- Lista de turmas -->
     <string name="turmas_titulo">Turmas</string>

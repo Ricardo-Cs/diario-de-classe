@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import br.com.ricardo.diariodeclasse.data.local.AppDatabase
 import br.com.ricardo.diariodeclasse.data.local.dao.AlunoDao
+import br.com.ricardo.diariodeclasse.data.local.dao.AnotacaoDao
 import br.com.ricardo.diariodeclasse.data.local.dao.ChamadaDao
 import br.com.ricardo.diariodeclasse.data.local.dao.PendenciaDao
 import br.com.ricardo.diariodeclasse.data.local.dao.TurmaDao
@@ -39,6 +40,9 @@ object DatabaseModule {
 
     @Provides
     fun providePendenciaDao(database: AppDatabase): PendenciaDao = database.pendenciaDao()
+
+    @Provides
+    fun provideAnotacaoDao(database: AppDatabase): AnotacaoDao = database.anotacaoDao()
 
     @Provides
     @Singleton

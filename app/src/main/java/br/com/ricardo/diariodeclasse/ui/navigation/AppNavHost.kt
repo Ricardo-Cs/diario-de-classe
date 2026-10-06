@@ -17,6 +17,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import br.com.ricardo.diariodeclasse.ui.alunos.AlunoScreen
 import br.com.ricardo.diariodeclasse.ui.chamada.ChamadaScreen
 import br.com.ricardo.diariodeclasse.ui.diario.DiarioScreen
 import br.com.ricardo.diariodeclasse.ui.inicio.InicioScreen
@@ -111,6 +112,13 @@ fun AppNavHost() {
                 composable<DetalheTurmaRoute> {
                     DetalheTurmaScreen(
                         aoEditarTurma = { turmaId -> navController.navigate(FormularioTurmaRoute(turmaId)) },
+                        aoAbrirAluno = { alunoId -> navController.navigate(AlunoRoute(alunoId)) },
+                        aoVoltar = { navController.popBackStack() },
+                    )
+                }
+
+                composable<AlunoRoute> {
+                    AlunoScreen(
                         aoVoltar = { navController.popBackStack() },
                     )
                 }

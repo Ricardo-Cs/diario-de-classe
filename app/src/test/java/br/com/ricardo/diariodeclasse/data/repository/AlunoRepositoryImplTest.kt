@@ -27,6 +27,12 @@ private class FakeAlunoDao : AlunoDao {
         }
     }
 
+    override fun observarPorId(id: String): Flow<Aluno?> {
+        return todasAsLinhas.map { alunos ->
+            alunos.firstOrNull { aluno -> aluno.id == id && aluno.deletedAt == null }
+        }
+    }
+
     override suspend fun inserir(aluno: Aluno) {
         todasAsLinhas.value = todasAsLinhas.value + aluno
     }
