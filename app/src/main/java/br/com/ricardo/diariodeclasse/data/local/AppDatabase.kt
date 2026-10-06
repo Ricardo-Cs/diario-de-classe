@@ -5,8 +5,11 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import br.com.ricardo.diariodeclasse.data.local.dao.AlunoDao
+import br.com.ricardo.diariodeclasse.data.local.dao.ChamadaDao
 import br.com.ricardo.diariodeclasse.data.local.dao.TurmaDao
 import br.com.ricardo.diariodeclasse.data.local.entity.Aluno
+import br.com.ricardo.diariodeclasse.data.local.entity.Chamada
+import br.com.ricardo.diariodeclasse.data.local.entity.RegistroPresenca
 import br.com.ricardo.diariodeclasse.data.local.entity.Turma
 
 /**
@@ -16,19 +19,22 @@ import br.com.ricardo.diariodeclasse.data.local.entity.Turma
  * Histórico:
  * 1 → turmas
  * 2 → alunos
+ * 3 → chamadas e registros de presença
  */
 @Database(
-    entities = [Turma::class, Aluno::class],
-    version = 2,
+    entities = [Turma::class, Aluno::class, Chamada::class, RegistroPresenca::class],
+    version = 3,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
+        AutoMigration(from = 2, to = 3),
     ],
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun turmaDao(): TurmaDao
     abstract fun alunoDao(): AlunoDao
+    abstract fun chamadaDao(): ChamadaDao
 
     companion object {
         const val NOME = "diario.db"

@@ -30,14 +30,14 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import br.com.ricardo.diariodeclasse.R
 import br.com.ricardo.diariodeclasse.data.local.entity.Turma
+import br.com.ricardo.diariodeclasse.ui.componentes.formatarDataPorExtenso
 import br.com.ricardo.diariodeclasse.ui.componentes.nomeDoPeriodo
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 @Composable
 fun InicioScreen(
     aoCadastrarTurma: () -> Unit,
+    aoAbrirChamada: (turmaId: String, data: LocalDate) -> Unit,
     viewModel: InicioViewModel = hiltViewModel(),
 ) {
     val estado: InicioUiState = viewModel.uiState.collectAsStateWithLifecycle().value
@@ -74,6 +74,10 @@ fun InicioScreen(
                         todasAsTurmas = turmas.todas,
                         aoSelecionarTurma = { turmaId -> viewModel.selecionarTurma(turmaId) },
                     )
+                    // Provisório: vira o card da chamada na próxima etapa.
+                    Button(onClick = { aoAbrirChamada(turmas.turmaAtiva.id, estado.hoje) }) {
+                        Text(stringResource(R.string.inicio_fazer_chamada))
+                    }
                 }
             }
         }
@@ -103,16 +107,6 @@ private fun textoDaSaudacao(saudacao: Saudacao): String {
         Saudacao.BOA_NOITE -> R.string.saudacao_boa_noite
     }
     return stringResource(idDoTexto)
-}
-
-/** Ex.: "Terça-feira, 6 de outubro". */
-private fun formatarDataPorExtenso(data: LocalDate): String {
-    val portuguesDoBrasil: Locale = Locale.forLanguageTag("pt-BR")
-    val formato: DateTimeFormatter = DateTimeFormatter.ofPattern("EEEE, d 'de' MMMM", portuguesDoBrasil)
-    val texto: String = data.format(formato)
-
-    val primeiraLetraMaiuscula: String = texto.substring(0, 1).uppercase(portuguesDoBrasil)
-    return primeiraLetraMaiuscula + texto.substring(1)
 }
 
 /**

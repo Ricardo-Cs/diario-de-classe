@@ -41,3 +41,10 @@ object DiarioRoute
 
 @Serializable
 object MaisRoute
+
+/**
+ * A data vai como texto ("2026-10-06") porque a rota precisa ser serializável
+ * e o `LocalDate` não é por padrão.
+ */
+@Serializable
+data class ChamadaRoute(val turmaId: String, val data: String)

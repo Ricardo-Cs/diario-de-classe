@@ -17,6 +17,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import br.com.ricardo.diariodeclasse.ui.chamada.ChamadaScreen
 import br.com.ricardo.diariodeclasse.ui.diario.DiarioScreen
 import br.com.ricardo.diariodeclasse.ui.inicio.InicioScreen
 import br.com.ricardo.diariodeclasse.ui.mais.MaisScreen
@@ -66,6 +67,15 @@ fun AppNavHost() {
                 composable<InicioRoute> {
                     InicioScreen(
                         aoCadastrarTurma = { navController.navigate(FormularioTurmaRoute()) },
+                        aoAbrirChamada = { turmaId, data ->
+                            navController.navigate(ChamadaRoute(turmaId, data.toString()))
+                        },
+                    )
+                }
+
+                composable<ChamadaRoute> {
+                    ChamadaScreen(
+                        aoVoltar = { navController.popBackStack() },
                     )
                 }
             }
@@ -107,15 +117,22 @@ fun AppNavHost() {
     }
 }
 
-/** Em formulários a barra some, para dar espaço ao teclado e evitar sair no meio da edição. */
+/**
+ * Em formulários (cadastro de turma, chamada) a barra some, para dar espaço
+ * ao teclado e evitar sair no meio do preenchimento.
+ */
 private fun mostraBarraInferior(destinoAtual: NavDestination?): Boolean {
     // Antes de o NavHost montar a primeira tela, o destino ainda é nulo; o app sempre
     // começa no Início, então já mostramos a barra para ela não "piscar".
     if (destinoAtual == null) {
         return true
     }
-    val estaEmFormulario = destinoAtual.hasRoute(FormularioTurmaRoute::class)
-    return !estaEmFormulario
+    val estaNoFormularioDeTurma: Boolean = destinoAtual.hasRoute(FormularioTurmaRoute::class)
+    val estaNaChamada: Boolean = destinoAtual.hasRoute(ChamadaRoute::class)
+    if (estaNoFormularioDeTurma || estaNaChamada) {
+        return false
+    }
+    return true
 }
 
 /**

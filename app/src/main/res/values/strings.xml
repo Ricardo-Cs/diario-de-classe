@@ -23,6 +23,32 @@
     <string name="inicio_trocar_turma">Trocar turma</string>
     <string name="inicio_sem_turmas">Cadastre sua primeira turma para começar a usar o diário.</string>
     <string name="inicio_cadastrar_turma">Cadastrar turma</string>
+    <string name="inicio_fazer_chamada">Fazer chamada</string>
+
+    <!-- Chamada -->
+    <string name="chamada_titulo">Chamada</string>
+    <string name="chamada_titulo_edicao">Editar chamada</string>
+    <string name="chamada_instrucao">Toque nos alunos que faltaram.</string>
+    <plurals name="chamada_alunos">
+        <item quantity="one">%d aluno</item>
+        <item quantity="other">%d alunos</item>
+    </plurals>
+    <plurals name="chamada_ausentes">
+        <item quantity="one">%d ausente</item>
+        <item quantity="other">%d ausentes</item>
+    </plurals>
+    <string name="chamada_nenhum_ausente">Nenhum ausente</string>
+    <string name="chamada_presente">Presente</string>
+    <string name="chamada_faltou">Faltou</string>
+    <string name="chamada_adicionar_observacao">Adicionar observação</string>
+    <string name="chamada_observacao_de">Observação · %1$s</string>
+    <string name="chamada_observacao">Observação</string>
+    <string name="chamada_observacao_exemplo">Ex.: atestado, família avisou</string>
+    <string name="chamada_sugestao_atestado">Atestado</string>
+    <string name="chamada_sugestao_familia_avisou">Família avisou</string>
+    <string name="chamada_remover_observacao">Remover</string>
+    <string name="chamada_salvar">Salvar chamada</string>
+    <string name="chamada_sem_alunos">Cadastre os alunos desta turma para fazer a chamada.</string>
 
     <!-- Lista de turmas -->
     <string name="turmas_titulo">Turmas</string>
