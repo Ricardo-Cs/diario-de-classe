@@ -3,6 +3,7 @@ package br.com.ricardo.diariodeclasse.data.repository
 import br.com.ricardo.diariodeclasse.data.local.dao.PendenciaDao
 import br.com.ricardo.diariodeclasse.data.local.entity.Pendencia
 import br.com.ricardo.diariodeclasse.data.local.entity.PendenciaComOrigem
+import br.com.ricardo.diariodeclasse.data.local.entity.PendenciaParaLembrete
 import br.com.ricardo.diariodeclasse.data.local.entity.StatusPendencia
 import kotlinx.coroutines.flow.Flow
 import java.time.Clock
@@ -17,6 +18,9 @@ interface PendenciaRepository {
 
     /** Só as não entregues de um aluno, na mesma ordem da turma. */
     fun observarPendentesDoAluno(alunoId: String): Flow<List<PendenciaComOrigem>>
+
+    /** Não entregues, de todas as turmas, com lembrete para [data] ou já vencido. */
+    suspend fun buscarParaLembrete(data: LocalDate): List<PendenciaParaLembrete>
 
     suspend fun criar(
         alunoId: String,
@@ -48,6 +52,10 @@ class PendenciaRepositoryImpl @Inject constructor(
 
     override fun observarPendentesDoAluno(alunoId: String): Flow<List<PendenciaComOrigem>> {
         return dao.observarDoAlunoPorStatus(alunoId, StatusPendencia.PENDENTE)
+    }
+
+    override suspend fun buscarParaLembrete(data: LocalDate): List<PendenciaParaLembrete> {
+        return dao.buscarParaLembrete(data, StatusPendencia.PENDENTE)
     }
 
     override suspend fun criar(

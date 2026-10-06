@@ -34,7 +34,7 @@ data class Pendencia(
     @PrimaryKey override val id: String,
     val alunoId: String,
     val descricao: String,
-    /** Dia a partir do qual a pendência aparece como "para hoje" (e, no futuro, gera notificação). */
+    /** Dia a partir do qual a pendência aparece como "para hoje" e entra na notificação diária. */
     val dataLembrete: LocalDate,
     val status: StatusPendencia,
     val registroPresencaId: String? = null,

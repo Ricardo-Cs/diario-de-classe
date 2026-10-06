@@ -3,6 +3,7 @@ package br.com.ricardo.diariodeclasse.data.repository
 import br.com.ricardo.diariodeclasse.data.local.dao.PendenciaDao
 import br.com.ricardo.diariodeclasse.data.local.entity.Pendencia
 import br.com.ricardo.diariodeclasse.data.local.entity.PendenciaComOrigem
+import br.com.ricardo.diariodeclasse.data.local.entity.PendenciaParaLembrete
 import br.com.ricardo.diariodeclasse.data.local.entity.StatusPendencia
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,6 +35,17 @@ private class FakePendenciaDao : PendenciaDao {
         return observarDaTurmaPorStatus(turmaId = "", status = status).map { pendencias ->
             pendencias.filter { item -> item.pendencia.alunoId == alunoId }
         }
+    }
+
+    /** Sem a tabela de alunos aqui, o "nome" devolvido é o próprio alunoId. */
+    override suspend fun buscarParaLembrete(data: LocalDate, status: StatusPendencia): List<PendenciaParaLembrete> {
+        val encontradas = mutableListOf<PendenciaParaLembrete>()
+        for (pendencia in linhas.value) {
+            if (pendencia.status == status && !pendencia.dataLembrete.isAfter(data) && pendencia.deletedAt == null) {
+                encontradas.add(PendenciaParaLembrete(nomeDoAluno = pendencia.alunoId, descricao = pendencia.descricao))
+            }
+        }
+        return encontradas
     }
 
     override suspend fun buscarPorId(id: String): Pendencia? {

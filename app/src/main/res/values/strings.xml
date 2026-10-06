@@ -128,6 +128,16 @@
     <string name="pendencia_amanha">Amanhã</string>
     <string name="pendencia_outra_data">Outra data</string>
 
+    <!-- Notificação diária de pendências -->
+    <string name="notificacao_canal_nome">Lembretes de pendências</string>
+    <string name="notificacao_canal_descricao">Aviso pela manhã com as atividades pendentes do dia.</string>
+    <plurals name="notificacao_titulo">
+        <item quantity="one">%d pendência para hoje</item>
+        <item quantity="other">%d pendências para hoje</item>
+    </plurals>
+    <string name="notificacao_linha">%1$s: %2$s</string>
+    <string name="notificacao_e_mais">e mais %1$d</string>
+
     <!-- Aluno e anotações -->
     <string name="aluno_pendencias">Pendências</string>
     <string name="aluno_sem_pendencias">Nenhuma pendência em aberto.</string>
