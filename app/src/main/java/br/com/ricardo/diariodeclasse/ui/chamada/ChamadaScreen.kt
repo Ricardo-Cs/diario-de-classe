@@ -1,18 +1,20 @@
 package br.com.ricardo.diariodeclasse.ui.chamada
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -20,6 +22,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -30,25 +33,33 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.hapticfeedback.HapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import br.com.ricardo.diariodeclasse.R
-import br.com.ricardo.diariodeclasse.ui.theme.ausencia
 import br.com.ricardo.diariodeclasse.ui.componentes.BarraSuperior
 import br.com.ricardo.diariodeclasse.ui.componentes.DialogoConfirmacao
 import br.com.ricardo.diariodeclasse.ui.componentes.MensagemCentralizada
 import br.com.ricardo.diariodeclasse.ui.componentes.TelaCarregando
 import br.com.ricardo.diariodeclasse.ui.componentes.formatarDataPorExtenso
+import br.com.ricardo.diariodeclasse.ui.theme.ausencia
 
 @Composable
 fun ChamadaScreen(
@@ -118,7 +129,11 @@ private fun ConteudoChamada(
         topBar = { BarraSuperior(titulo = titulo, aoVoltar = { tentarVoltar() }) },
         bottomBar = {
             if (temAlunos) {
-                BotaoSalvar(salvando = estado.salvando, aoSalvar = { viewModel.salvar() })
+                BotaoSalvar(
+                    ausentes = estado.quantidadeDeAusentes(),
+                    salvando = estado.salvando,
+                    aoSalvar = { viewModel.salvar() },
+                )
             }
         },
     ) { espacamentoDasBarras ->
@@ -243,8 +258,12 @@ private fun ResumoDeAusentes(ausentes: Int) {
  * Tocar na linha alterna presente/faltou. Quem faltou ganha um fundo ocre bem
  * suave, uma borda fina à esquerda e, abaixo do nome, o atalho para a observação.
  *
- * `IntrinsicSize.Min` faz a linha ter a altura do seu conteúdo, para que a borda
- * (`fillMaxHeight`) acompanhe a altura do texto em vez de ocupar a tela inteira.
+ * A borda é desenhada com `drawBehind`, que pinta atrás do conteúdo usando a
+ * altura real da linha a cada quadro. Assim ela acompanha a animação do atalho
+ * da observação, abrindo e fechando junto com a linha.
+ *
+ * `toggleable` (em vez de `clickable`) diz ao Android que a linha é um item
+ * marcável: o leitor de tela anuncia o nome, a situação e se está marcada.
  */
 @Composable
 private fun LinhaDoAluno(
@@ -252,41 +271,82 @@ private fun LinhaDoAluno(
     aoTocar: () -> Unit,
     aoTocarObservacao: () -> Unit,
 ) {
-    val corDaBorda: Color
-    val corDeFundo: Color
-    if (linha.ausente) {
-        corDaBorda = MaterialTheme.colorScheme.ausencia
-        corDeFundo = MaterialTheme.colorScheme.ausencia.copy(alpha = 0.08f)
-    } else {
-        corDaBorda = Color.Transparent
-        corDeFundo = Color.Transparent
-    }
+    val corDaBorda: Color = animarCorDaFalta(linha.ausente, opacidadeNaFalta = 1f)
+    val corDeFundo: Color = animarCorDaFalta(linha.ausente, opacidadeNaFalta = 0.08f)
+    val vibracao: HapticFeedback = LocalHapticFeedback.current
 
     Row(
+        verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .height(IntrinsicSize.Min)
             .fillMaxWidth()
             .background(corDeFundo)
-            .clickable(onClick = aoTocar),
+            .drawBehind { desenharBordaEsquerda(corDaBorda) }
+            .toggleable(
+                value = linha.ausente,
+                role = Role.Checkbox,
+                onValueChange = { vaiFicarAusente ->
+                    vibrarAoMarcar(vibracao, vaiFicarAusente)
+                    aoTocar()
+                },
+            )
+            .padding(horizontal = 16.dp, vertical = 12.dp),
     ) {
-        Box(
-            modifier = Modifier
-                .width(3.dp)
-                .fillMaxHeight()
-                .background(corDaBorda),
-        )
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(start = 13.dp, end = 16.dp, top = 12.dp, bottom = 12.dp),
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(text = linha.aluno.nome, style = MaterialTheme.typography.bodyLarge)
-                if (linha.ausente) {
-                    AtalhoDaObservacao(observacao = linha.observacao, aoTocar = aoTocarObservacao)
-                }
+        Column(modifier = Modifier.weight(1f)) {
+            Text(text = linha.aluno.nome, style = MaterialTheme.typography.bodyLarge)
+            // Em vez de surgir de repente, o atalho "abre" a linha para baixo
+            // e some do mesmo jeito ao desmarcar a falta.
+            AnimatedVisibility(
+                visible = linha.ausente,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut(),
+            ) {
+                AtalhoDaObservacao(observacao = linha.observacao, aoTocar = aoTocarObservacao)
             }
-            IndicadorDeSituacao(ausente = linha.ausente)
         }
+        IndicadorDeSituacao(ausente = linha.ausente)
+    }
+}
+
+/**
+ * Faixa de 3dp na borda esquerda, com a altura atual da linha (`size.height`).
+ * Dentro do `DrawScope` (o "canvas" do Compose), `toPx()` converte dp em pixels da tela.
+ */
+private fun DrawScope.desenharBordaEsquerda(cor: Color) {
+    val largura: Float = 3.dp.toPx()
+    drawRect(color = cor, size = Size(width = largura, height = size.height))
+}
+
+/**
+ * Cor de ausência que aparece e some suavemente (`animateColorAsState`), em vez de
+ * trocar de uma vez. Ao ficar presente, anima só a opacidade até zero; animar
+ * até `Color.Transparent` (que é preto transparente) faria a cor passar por um tom
+ * acinzentado no meio do caminho.
+ */
+@Composable
+private fun animarCorDaFalta(ausente: Boolean, opacidadeNaFalta: Float): Color {
+    val corDaAusencia: Color = MaterialTheme.colorScheme.ausencia
+
+    val corDesejada: Color
+    if (ausente) {
+        corDesejada = corDaAusencia.copy(alpha = opacidadeNaFalta)
+    } else {
+        corDesejada = corDaAusencia.copy(alpha = 0f)
+    }
+
+    val corAnimada: State<Color> = animateColorAsState(targetValue = corDesejada, label = "corDaFalta")
+    return corAnimada.value
+}
+
+/**
+ * Vibração curta e diferente para marcar e desmarcar a falta: a professora sente
+ * que o toque foi registrado sem precisar olhar. Respeita a configuração de
+ * vibração do aparelho.
+ */
+private fun vibrarAoMarcar(vibracao: HapticFeedback, vaiFicarAusente: Boolean) {
+    if (vaiFicarAusente) {
+        vibracao.performHapticFeedback(HapticFeedbackType.ToggleOn)
+    } else {
+        vibracao.performHapticFeedback(HapticFeedbackType.ToggleOff)
     }
 }
 
@@ -361,9 +421,22 @@ private fun IndicadorDeSituacao(ausente: Boolean) {
     }
 }
 
-/** `navigationBarsPadding` afasta o botão da barra de gestos do sistema. */
+/**
+ * O botão repete a contagem de ausentes ("Salvar chamada · 3 ausentes"): com a
+ * lista rolada, o cabeçalho some, mas o botão continua visível e a professora
+ * confere o total antes de salvar.
+ *
+ * `navigationBarsPadding` afasta o botão da barra de gestos do sistema.
+ */
 @Composable
-private fun BotaoSalvar(salvando: Boolean, aoSalvar: () -> Unit) {
+private fun BotaoSalvar(ausentes: Int, salvando: Boolean, aoSalvar: () -> Unit) {
+    val texto: String
+    if (ausentes == 0) {
+        texto = stringResource(R.string.chamada_salvar_todos_presentes)
+    } else {
+        texto = pluralStringResource(R.plurals.chamada_salvar_com_ausentes, ausentes, ausentes)
+    }
+
     Surface(color = MaterialTheme.colorScheme.surface, shadowElevation = 4.dp) {
         Button(
             onClick = aoSalvar,
@@ -373,7 +446,7 @@ private fun BotaoSalvar(salvando: Boolean, aoSalvar: () -> Unit) {
                 .fillMaxWidth()
                 .padding(16.dp),
         ) {
-            Text(stringResource(R.string.chamada_salvar))
+            Text(texto)
         }
     }
 }

@@ -79,7 +79,11 @@
     <string name="chamada_sugestao_atestado">Atestado</string>
     <string name="chamada_sugestao_familia_avisou">Família avisou</string>
     <string name="chamada_remover_observacao">Remover</string>
-    <string name="chamada_salvar">Salvar chamada</string>
+    <string name="chamada_salvar_todos_presentes">Salvar chamada · todos presentes</string>
+    <plurals name="chamada_salvar_com_ausentes">
+        <item quantity="one">Salvar chamada · %d ausente</item>
+        <item quantity="other">Salvar chamada · %d ausentes</item>
+    </plurals>
     <string name="chamada_pendencias_titulo">Atividades para quem faltou</string>
     <string name="chamada_pendencias_explicacao">Chamada salva. Registre o que os ausentes vão precisar fazer depois.</string>
     <string name="chamada_pendencias_para_quem">Para quem</string>
