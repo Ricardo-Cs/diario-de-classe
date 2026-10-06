@@ -9,6 +9,13 @@
     <string name="excluir">Excluir</string>
     <string name="concluir">Concluir</string>
 
+    <!-- Navegação principal -->
+    <string name="aba_inicio">Início</string>
+    <string name="aba_turma">Turma</string>
+    <string name="aba_diario">Diário</string>
+    <string name="aba_mais">Mais</string>
+    <string name="em_construcao">Em construção.</string>
+
     <!-- Lista de turmas -->
     <string name="turmas_titulo">Turmas</string>
     <string name="turmas_vazio">Nenhuma turma cadastrada ainda.</string>
