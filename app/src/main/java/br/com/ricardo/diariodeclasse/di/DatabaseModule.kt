@@ -7,6 +7,7 @@ import br.com.ricardo.diariodeclasse.data.local.AppDatabase
 import br.com.ricardo.diariodeclasse.data.local.dao.AlunoDao
 import br.com.ricardo.diariodeclasse.data.local.dao.AnotacaoDao
 import br.com.ricardo.diariodeclasse.data.local.dao.AtividadeRecenteDao
+import br.com.ricardo.diariodeclasse.data.local.dao.BackupDao
 import br.com.ricardo.diariodeclasse.data.local.dao.ChamadaDao
 import br.com.ricardo.diariodeclasse.data.local.dao.PendenciaDao
 import br.com.ricardo.diariodeclasse.data.local.dao.TurmaDao
@@ -59,6 +60,9 @@ object DatabaseModule {
 
     @Provides
     fun provideAtividadeRecenteDao(database: AppDatabase): AtividadeRecenteDao = database.atividadeRecenteDao()
+
+    @Provides
+    fun provideBackupDao(database: AppDatabase): BackupDao = database.backupDao()
 
     @Provides
     @Singleton

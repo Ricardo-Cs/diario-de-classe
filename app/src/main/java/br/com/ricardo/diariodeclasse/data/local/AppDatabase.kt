@@ -7,6 +7,7 @@ import androidx.room.TypeConverters
 import br.com.ricardo.diariodeclasse.data.local.dao.AlunoDao
 import br.com.ricardo.diariodeclasse.data.local.dao.AnotacaoDao
 import br.com.ricardo.diariodeclasse.data.local.dao.AtividadeRecenteDao
+import br.com.ricardo.diariodeclasse.data.local.dao.BackupDao
 import br.com.ricardo.diariodeclasse.data.local.dao.ChamadaDao
 import br.com.ricardo.diariodeclasse.data.local.dao.PendenciaDao
 import br.com.ricardo.diariodeclasse.data.local.dao.TurmaDao
@@ -54,6 +55,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun pendenciaDao(): PendenciaDao
     abstract fun anotacaoDao(): AnotacaoDao
     abstract fun atividadeRecenteDao(): AtividadeRecenteDao
+    abstract fun backupDao(): BackupDao
 
     companion object {
         const val NOME = "diario.db"
