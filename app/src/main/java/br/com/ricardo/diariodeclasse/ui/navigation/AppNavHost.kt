@@ -64,7 +64,9 @@ fun AppNavHost() {
 
             navigation<InicioGrafo>(startDestination = InicioRoute) {
                 composable<InicioRoute> {
-                    InicioScreen()
+                    InicioScreen(
+                        aoCadastrarTurma = { navController.navigate(FormularioTurmaRoute()) },
+                    )
                 }
             }
 

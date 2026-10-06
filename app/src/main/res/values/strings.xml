@@ -16,6 +16,14 @@
     <string name="aba_mais">Mais</string>
     <string name="em_construcao">Em construção.</string>
 
+    <!-- Início -->
+    <string name="saudacao_bom_dia">Bom dia!</string>
+    <string name="saudacao_boa_tarde">Boa tarde!</string>
+    <string name="saudacao_boa_noite">Boa noite!</string>
+    <string name="inicio_trocar_turma">Trocar turma</string>
+    <string name="inicio_sem_turmas">Cadastre sua primeira turma para começar a usar o diário.</string>
+    <string name="inicio_cadastrar_turma">Cadastrar turma</string>
+
     <!-- Lista de turmas -->
     <string name="turmas_titulo">Turmas</string>
     <string name="turmas_vazio">Nenhuma turma cadastrada ainda.</string>
