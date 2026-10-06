@@ -1,5 +1,6 @@
 package br.com.ricardo.diariodeclasse.ui.chamada
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -42,6 +44,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import br.com.ricardo.diariodeclasse.R
 import br.com.ricardo.diariodeclasse.ui.componentes.BarraSuperior
+import br.com.ricardo.diariodeclasse.ui.componentes.DialogoConfirmacao
 import br.com.ricardo.diariodeclasse.ui.componentes.MensagemCentralizada
 import br.com.ricardo.diariodeclasse.ui.componentes.TelaCarregando
 import br.com.ricardo.diariodeclasse.ui.componentes.formatarDataPorExtenso
@@ -89,9 +92,29 @@ private fun ConteudoChamada(
 
     // Aluno cuja observação está sendo escrita; `null` = painel fechado.
     val alunoEditandoObservacao: MutableState<AlunoNaChamada?> = remember { mutableStateOf(null) }
+    val confirmandoDescarte: MutableState<Boolean> = remember { mutableStateOf(false) }
+
+    // Depois de salvar, a chamada já está gravada e voltar não perde nada.
+    val perderiaAlteracoes: Boolean = estado.etapa is EtapaDaChamada.Marcando &&
+        !estado.salvando &&
+        estado.temAlteracoesNaoSalvas()
+
+    fun tentarVoltar() {
+        if (perderiaAlteracoes) {
+            confirmandoDescarte.value = true
+        } else {
+            aoVoltar()
+        }
+    }
+
+    // Intercepta o "voltar" do sistema (gesto ou botão) só enquanto há algo a perder;
+    // com `enabled = false`, o voltar segue o caminho normal da navegação.
+    BackHandler(enabled = perderiaAlteracoes) {
+        tentarVoltar()
+    }
 
     Scaffold(
-        topBar = { BarraSuperior(titulo = titulo, aoVoltar = aoVoltar) },
+        topBar = { BarraSuperior(titulo = titulo, aoVoltar = { tentarVoltar() }) },
         bottomBar = {
             if (temAlunos) {
                 BotaoSalvar(salvando = estado.salvando, aoSalvar = { viewModel.salvar() })
@@ -142,6 +165,19 @@ private fun ConteudoChamada(
                 alunoEditandoObservacao.value = null
             },
             aoFechar = { alunoEditandoObservacao.value = null },
+        )
+    }
+
+    if (confirmandoDescarte.value) {
+        DialogoConfirmacao(
+            titulo = stringResource(R.string.chamada_descartar_titulo),
+            mensagem = stringResource(R.string.chamada_descartar_mensagem),
+            textoConfirmar = stringResource(R.string.chamada_descartar),
+            aoConfirmar = {
+                confirmandoDescarte.value = false
+                aoVoltar()
+            },
+            aoCancelar = { confirmandoDescarte.value = false },
         )
     }
 }
@@ -253,7 +289,13 @@ private fun LinhaDoAluno(
     }
 }
 
-/** Mostra a prévia da observação ou, se ainda não houver, o convite para adicionar. */
+/**
+ * Mostra a prévia da observação ou, se ainda não houver, o convite para adicionar.
+ *
+ * O atalho fica dentro da linha que alterna a presença: com uma área de toque
+ * pequena, um toque um pouco fora desmarcaria a falta. Por isso a altura mínima
+ * de 48dp (o tamanho de toque recomendado pelo Android).
+ */
 @Composable
 private fun AtalhoDaObservacao(observacao: String, aoTocar: () -> Unit) {
     val temObservacao: Boolean = observacao.isNotBlank()
@@ -261,9 +303,9 @@ private fun AtalhoDaObservacao(observacao: String, aoTocar: () -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .padding(top = 2.dp)
+            .heightIn(min = 48.dp)
             .clickable(onClick = aoTocar)
-            .padding(vertical = 4.dp),
+            .padding(end = 8.dp),
     ) {
         Icon(
             painter = painterResource(R.drawable.ic_anotacao),

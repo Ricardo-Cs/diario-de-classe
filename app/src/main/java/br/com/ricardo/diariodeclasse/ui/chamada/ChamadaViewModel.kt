@@ -66,11 +66,21 @@ sealed interface ChamadaUiState {
         val turma: Turma,
         val data: LocalDate,
         val alunos: List<AlunoNaChamada>,
+        /** As marcações como estavam ao abrir a tela, para saber se algo mudou. */
+        val alunosAoAbrir: List<AlunoNaChamada>,
         /** `true` quando a chamada do dia já existia e a tela está editando. */
         val editando: Boolean,
         val salvando: Boolean = false,
         val etapa: EtapaDaChamada = EtapaDaChamada.Marcando,
     ) : ChamadaUiState {
+
+        /**
+         * Compara as listas item a item (`==` em `data class` compara os campos).
+         * Marcar e desmarcar o mesmo aluno volta ao original e não conta como alteração.
+         */
+        fun temAlteracoesNaoSalvas(): Boolean {
+            return alunos != alunosAoAbrir
+        }
 
         fun quantidadeDeAusentes(): Int {
             var quantidade = 0
@@ -129,6 +139,8 @@ class ChamadaViewModel @Inject constructor(
             turma = turma,
             data = data,
             alunos = linhas,
+            // `toList()` cria uma cópia: a referência guardada não muda se `linhas` mudar.
+            alunosAoAbrir = linhas.toList(),
             editando = chamadaSalva != null,
         )
     }

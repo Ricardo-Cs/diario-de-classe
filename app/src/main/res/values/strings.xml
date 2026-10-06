@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">DiarioDeClasse</string>
+    <string name="app_name">Diário de Classe</string>
 
     <!-- Ações comuns -->
     <string name="voltar">Voltar</string>
@@ -15,7 +15,7 @@
 
     <!-- Navegação principal -->
     <string name="aba_inicio">Início</string>
-    <string name="aba_turma">Turma</string>
+    <string name="aba_turma">Turmas</string>
     <string name="aba_diario">Diário</string>
     <string name="aba_mais">Mais</string>
     <string name="em_construcao">Em construção.</string>
@@ -90,6 +90,9 @@
         <item quantity="one">%1$s · %2$d aluno</item>
         <item quantity="other">%1$s · %2$d alunos</item>
     </plurals>
+    <string name="chamada_descartar_titulo">Descartar a chamada?</string>
+    <string name="chamada_descartar_mensagem">As alterações feitas nesta chamada ainda não foram salvas.</string>
+    <string name="chamada_descartar">Descartar</string>
     <string name="chamada_sem_alunos">Cadastre os alunos desta turma para fazer a chamada.</string>
 
     <!-- Pendências -->

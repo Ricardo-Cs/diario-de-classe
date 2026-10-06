@@ -3,6 +3,7 @@ package br.com.ricardo.diariodeclasse.ui.inicio
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -21,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -119,6 +121,8 @@ private fun textoDaSaudacao(saudacao: Saudacao): String {
 
 /**
  * Botão com a turma ativa; ao tocar, abre um menu com as demais turmas.
+ * Com uma turma só não há o que trocar: mostra apenas o nome, sem seta nem menu.
+ *
  * `remember { mutableStateOf(...) }` é o "useState" do Compose: guarda se o menu
  * está aberto e redesenha o componente quando o valor muda.
  */
@@ -128,6 +132,11 @@ private fun SeletorDeTurma(
     todasAsTurmas: List<Turma>,
     aoSelecionarTurma: (turmaId: String) -> Unit,
 ) {
+    if (todasAsTurmas.size < 2) {
+        NomeDaTurmaAtiva(turmaAtiva)
+        return
+    }
+
     val menuAberto: MutableState<Boolean> = remember { mutableStateOf(false) }
 
     Box {
@@ -155,6 +164,24 @@ private fun SeletorDeTurma(
                 )
             }
         }
+    }
+}
+
+/** Mesmo ícone e texto do botão do seletor, sem parecer tocável. */
+@Composable
+private fun NomeDaTurmaAtiva(turma: Turma) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+            painter = painterResource(R.drawable.ic_turma),
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.width(8.dp))
+        Text(
+            text = descricaoDaTurma(turma),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 
