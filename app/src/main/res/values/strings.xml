@@ -60,6 +60,16 @@
     <string name="chamada_sugestao_familia_avisou">Família avisou</string>
     <string name="chamada_remover_observacao">Remover</string>
     <string name="chamada_salvar">Salvar chamada</string>
+    <string name="chamada_pendencias_titulo">Atividades para quem faltou</string>
+    <string name="chamada_pendencias_explicacao">Chamada salva. Registre o que os ausentes vão precisar fazer depois.</string>
+    <string name="chamada_pendencias_para_quem">Para quem</string>
+    <string name="chamada_pendencias_ja_tem">%1$s (já tem)</string>
+    <string name="chamada_pendencias_adicionar">Adicionar</string>
+    <string name="chamada_pendencias_pular">Pular</string>
+    <plurals name="chamada_pendencias_adicionada">
+        <item quantity="one">%1$s · %2$d aluno</item>
+        <item quantity="other">%1$s · %2$d alunos</item>
+    </plurals>
     <string name="chamada_sem_alunos">Cadastre os alunos desta turma para fazer a chamada.</string>
 
     <!-- Pendências -->

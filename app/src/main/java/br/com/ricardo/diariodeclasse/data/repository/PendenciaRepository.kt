@@ -21,6 +21,9 @@ interface PendenciaRepository {
         registroPresencaId: String? = null,
     ): Pendencia
 
+    /** Dentre os registros de falta informados, devolve os que já têm pendência ligada. */
+    suspend fun buscarFaltasComPendencia(registroPresencaIds: List<String>): List<String>
+
     suspend fun marcarComoEntregue(id: String)
 
     /** Volta a pendência para "pendente" (botão "Desfazer" depois de marcar por engano). */
@@ -55,6 +58,13 @@ class PendenciaRepositoryImpl @Inject constructor(
         )
         dao.inserir(pendencia)
         return pendencia
+    }
+
+    override suspend fun buscarFaltasComPendencia(registroPresencaIds: List<String>): List<String> {
+        if (registroPresencaIds.isEmpty()) {
+            return emptyList()
+        }
+        return dao.buscarRegistrosComPendencia(registroPresencaIds)
     }
 
     override suspend fun marcarComoEntregue(id: String) {

@@ -130,4 +130,12 @@ class ChamadaRepositoryImplTest {
 
         assertEquals(2, dao.registros.value.size)
     }
+
+    @Test
+    fun salvar_devolveAChamadaGravadaComOsIdsDosRegistros() = runBlocking {
+        val chamadaSalva = repositorioNoInstante(inicio).salvar("turma", hoje, listOf(anaPresente, brunoFaltou))
+
+        assertEquals(2, chamadaSalva.registros.size)
+        assertEquals(dao.registroDoAluno("bruno").id, chamadaSalva.registros.first { registro -> registro.alunoId == "bruno" }.id)
+    }
 }

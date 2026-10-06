@@ -30,8 +30,11 @@ interface ChamadaRepository {
     fun observarChamada(turmaId: String, data: LocalDate): Flow<ChamadaDoDia?>
     suspend fun buscarChamada(turmaId: String, data: LocalDate): ChamadaDoDia?
 
-    /** Cria a chamada do dia ou atualiza a existente. */
-    suspend fun salvar(turmaId: String, data: LocalDate, marcacoes: List<MarcacaoPresenca>)
+    /**
+     * Cria a chamada do dia ou atualiza a existente. Devolve a chamada como ficou
+     * gravada, para quem chamou saber os ids dos registros (ex.: ligar pendências às faltas).
+     */
+    suspend fun salvar(turmaId: String, data: LocalDate, marcacoes: List<MarcacaoPresenca>): ChamadaDoDia
 }
 
 class ChamadaRepositoryImpl @Inject constructor(
@@ -56,7 +59,7 @@ class ChamadaRepositoryImpl @Inject constructor(
         return observarChamada(turmaId, data).first()
     }
 
-    override suspend fun salvar(turmaId: String, data: LocalDate, marcacoes: List<MarcacaoPresenca>) {
+    override suspend fun salvar(turmaId: String, data: LocalDate, marcacoes: List<MarcacaoPresenca>): ChamadaDoDia {
         val agora: Instant = Instant.now(clock)
         val chamadaExistente: ChamadaDoDia? = buscarChamada(turmaId, data)
 
@@ -86,6 +89,12 @@ class ChamadaRepositoryImpl @Inject constructor(
         }
 
         dao.salvarChamadaComRegistros(chamada, registrosParaGravar)
+
+        val chamadaGravada: ChamadaDoDia? = buscarChamada(turmaId, data)
+        if (chamadaGravada == null) {
+            throw IllegalStateException("A chamada acabou de ser gravada e não foi encontrada")
+        }
+        return chamadaGravada
     }
 
     private fun buscarRegistroDoAluno(registros: List<RegistroPresenca>, alunoId: String): RegistroPresenca? {

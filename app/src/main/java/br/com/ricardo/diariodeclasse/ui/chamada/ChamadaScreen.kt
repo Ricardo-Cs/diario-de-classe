@@ -63,8 +63,9 @@ fun ChamadaScreen(
         }
 
         is ChamadaUiState.Carregado -> {
-            LaunchedEffect(estado.salvo) {
-                if (estado.salvo) {
+            val chamadaConcluida: Boolean = estado.etapa is EtapaDaChamada.Concluida
+            LaunchedEffect(chamadaConcluida) {
+                if (chamadaConcluida) {
                     aoVoltar()
                 }
             }
@@ -117,6 +118,18 @@ private fun ConteudoChamada(
                 }
             }
         }
+    }
+
+    val etapa: EtapaDaChamada = estado.etapa
+    if (etapa is EtapaDaChamada.OferecendoPendencias) {
+        FolhaPendenciasDaFalta(
+            dataDaChamada = estado.data,
+            etapa = etapa,
+            aoAdicionar = { descricao, registroPresencaIds, dataLembrete ->
+                viewModel.adicionarAtividadeParaAusentes(descricao, registroPresencaIds, dataLembrete)
+            },
+            aoConcluir = { viewModel.concluir() },
+        )
     }
 
     val linhaEmEdicao: AlunoNaChamada? = alunoEditandoObservacao.value

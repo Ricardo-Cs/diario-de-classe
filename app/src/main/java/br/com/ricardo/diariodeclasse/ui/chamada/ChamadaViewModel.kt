@@ -11,6 +11,7 @@ import br.com.ricardo.diariodeclasse.data.repository.AlunoRepository
 import br.com.ricardo.diariodeclasse.data.repository.ChamadaDoDia
 import br.com.ricardo.diariodeclasse.data.repository.ChamadaRepository
 import br.com.ricardo.diariodeclasse.data.repository.MarcacaoPresenca
+import br.com.ricardo.diariodeclasse.data.repository.PendenciaRepository
 import br.com.ricardo.diariodeclasse.data.repository.TurmaRepository
 import br.com.ricardo.diariodeclasse.ui.navigation.ChamadaRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,6 +21,35 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
+
+/** Um ausente da chamada salva, a quem a professora pode atribuir atividades. */
+data class AusenteDaChamada(
+    val aluno: Aluno,
+    val registroPresencaId: String,
+    /** Já tem pendência ligada a esta falta (ex.: chamada editada depois). */
+    val jaTemPendencia: Boolean,
+)
+
+/** Resumo de uma atividade já registrada no painel, para a professora ver o que fez. */
+data class AtividadeAdicionada(
+    val descricao: String,
+    val quantidadeDeAlunos: Int,
+)
+
+/**
+ * Em que passo a tela está:
+ * - marcando as faltas;
+ * - chamada salva, oferecendo registrar atividades para os ausentes;
+ * - concluída (a tela deve fechar).
+ */
+sealed interface EtapaDaChamada {
+    data object Marcando : EtapaDaChamada
+    data class OferecendoPendencias(
+        val ausentes: List<AusenteDaChamada>,
+        val adicionadas: List<AtividadeAdicionada>,
+    ) : EtapaDaChamada
+    data object Concluida : EtapaDaChamada
+}
 
 /** Uma linha da tela: o aluno e o que a professora marcou para ele. */
 data class AlunoNaChamada(
@@ -39,7 +69,7 @@ sealed interface ChamadaUiState {
         /** `true` quando a chamada do dia já existia e a tela está editando. */
         val editando: Boolean,
         val salvando: Boolean = false,
-        val salvo: Boolean = false,
+        val etapa: EtapaDaChamada = EtapaDaChamada.Marcando,
     ) : ChamadaUiState {
 
         fun quantidadeDeAusentes(): Int {
@@ -65,6 +95,7 @@ class ChamadaViewModel @Inject constructor(
     private val turmaRepository: TurmaRepository,
     private val alunoRepository: AlunoRepository,
     private val chamadaRepository: ChamadaRepository,
+    private val pendenciaRepository: PendenciaRepository,
 ) : ViewModel() {
 
     private val rota: ChamadaRoute = savedStateHandle.toRoute<ChamadaRoute>()
@@ -171,6 +202,9 @@ class ChamadaViewModel @Inject constructor(
         if (estado !is ChamadaUiState.Carregado || estado.salvando) {
             return
         }
+        if (estado.etapa !is EtapaDaChamada.Marcando) {
+            return
+        }
         estadoMutavel.value = estado.copy(salvando = true)
 
         val marcacoes = mutableListOf<MarcacaoPresenca>()
@@ -179,9 +213,108 @@ class ChamadaViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            chamadaRepository.salvar(estado.turma.id, estado.data, marcacoes)
-            estadoMutavel.value = estado.copy(salvando = false, salvo = true)
+            val chamadaSalva: ChamadaDoDia = chamadaRepository.salvar(estado.turma.id, estado.data, marcacoes)
+            val ausentes: List<AusenteDaChamada> = montarAusentes(estado.alunos, chamadaSalva)
+
+            val proximaEtapa: EtapaDaChamada
+            if (ausentes.isEmpty()) {
+                proximaEtapa = EtapaDaChamada.Concluida
+            } else {
+                proximaEtapa = EtapaDaChamada.OferecendoPendencias(ausentes = ausentes, adicionadas = emptyList())
+            }
+            estadoMutavel.value = estado.copy(salvando = false, etapa = proximaEtapa)
         }
+    }
+
+    /** Liga cada aluno que faltou ao id do registro de falta que acabou de ser gravado. */
+    private suspend fun montarAusentes(linhas: List<AlunoNaChamada>, chamadaSalva: ChamadaDoDia): List<AusenteDaChamada> {
+        val faltas = mutableListOf<RegistroPresenca>()
+        for (linha in linhas) {
+            if (!linha.ausente) {
+                continue
+            }
+            val registro: RegistroPresenca? = buscarRegistroDoAluno(chamadaSalva, linha.aluno.id)
+            if (registro != null) {
+                faltas.add(registro)
+            }
+        }
+
+        val idsDasFaltas = mutableListOf<String>()
+        for (falta in faltas) {
+            idsDasFaltas.add(falta.id)
+        }
+        val faltasComPendencia: List<String> = pendenciaRepository.buscarFaltasComPendencia(idsDasFaltas)
+
+        val ausentes = mutableListOf<AusenteDaChamada>()
+        for (linha in linhas) {
+            val registro: RegistroPresenca? = buscarRegistroDoAluno(chamadaSalva, linha.aluno.id)
+            if (linha.ausente && registro != null) {
+                ausentes.add(
+                    AusenteDaChamada(
+                        aluno = linha.aluno,
+                        registroPresencaId = registro.id,
+                        jaTemPendencia = registro.id in faltasComPendencia,
+                    )
+                )
+            }
+        }
+        return ausentes
+    }
+
+    /**
+     * Cria a mesma atividade para cada ausente escolhido, ligada à falta dele.
+     * O painel continua aberto para a professora registrar outra atividade, se quiser.
+     */
+    fun adicionarAtividadeParaAusentes(descricao: String, registroPresencaIds: List<String>, dataLembrete: LocalDate) {
+        val estado: ChamadaUiState = estadoMutavel.value
+        if (estado !is ChamadaUiState.Carregado) {
+            return
+        }
+        val etapa: EtapaDaChamada = estado.etapa
+        if (etapa !is EtapaDaChamada.OferecendoPendencias) {
+            return
+        }
+        val descricaoLimpa: String = descricao.trim()
+        if (descricaoLimpa.isEmpty() || registroPresencaIds.isEmpty()) {
+            return
+        }
+
+        viewModelScope.launch {
+            for (ausente in etapa.ausentes) {
+                if (ausente.registroPresencaId in registroPresencaIds) {
+                    pendenciaRepository.criar(
+                        alunoId = ausente.aluno.id,
+                        descricao = descricaoLimpa,
+                        dataLembrete = dataLembrete,
+                        registroPresencaId = ausente.registroPresencaId,
+                    )
+                }
+            }
+            registrarAtividadeAdicionada(AtividadeAdicionada(descricaoLimpa, registroPresencaIds.size))
+        }
+    }
+
+    /** Relê o estado atual: outra atividade pode ter sido adicionada enquanto esta gravava. */
+    private fun registrarAtividadeAdicionada(adicionada: AtividadeAdicionada) {
+        val estadoAtual: ChamadaUiState = estadoMutavel.value
+        if (estadoAtual !is ChamadaUiState.Carregado) {
+            return
+        }
+        val etapaAtual: EtapaDaChamada = estadoAtual.etapa
+        if (etapaAtual !is EtapaDaChamada.OferecendoPendencias) {
+            return
+        }
+        val novaEtapa = etapaAtual.copy(adicionadas = etapaAtual.adicionadas + adicionada)
+        estadoMutavel.value = estadoAtual.copy(etapa = novaEtapa)
+    }
+
+    /** "Pular", "Concluir" ou fechar o painel: a chamada já está salva, então a tela pode fechar. */
+    fun concluir() {
+        val estado: ChamadaUiState = estadoMutavel.value
+        if (estado !is ChamadaUiState.Carregado) {
+            return
+        }
+        estadoMutavel.value = estado.copy(etapa = EtapaDaChamada.Concluida)
     }
 
     /**

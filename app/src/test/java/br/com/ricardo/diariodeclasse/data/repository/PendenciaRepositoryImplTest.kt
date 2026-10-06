@@ -32,6 +32,17 @@ private class FakePendenciaDao : PendenciaDao {
         return linhas.value.firstOrNull { pendencia -> pendencia.id == id }
     }
 
+    override suspend fun buscarRegistrosComPendencia(registroPresencaIds: List<String>): List<String> {
+        val encontrados = mutableListOf<String>()
+        for (pendencia in linhas.value) {
+            val registroId: String? = pendencia.registroPresencaId
+            if (registroId != null && registroId in registroPresencaIds && registroId !in encontrados) {
+                encontrados.add(registroId)
+            }
+        }
+        return encontrados
+    }
+
     override suspend fun inserir(pendencia: Pendencia) {
         linhas.value = linhas.value + pendencia
     }
@@ -103,5 +114,29 @@ class PendenciaRepositoryImplTest {
         assertTrue(paraHoje.estaPendenteEm(hoje))
         assertFalse(paraAmanha.estaPendenteEm(hoje))
         assertFalse(entregue.estaPendenteEm(hoje))
+    }
+
+    @Test
+    fun criarAPartirDaFalta_guardaOVinculo() = runBlocking {
+        val pendencia = repositorioNoInstante(inicio).criar("ana", "Ficha", hoje, registroPresencaId = "falta-ana")
+
+        assertEquals("falta-ana", pendencia.registroPresencaId)
+    }
+
+    @Test
+    fun buscarFaltasComPendencia_devolveSoAsQueTemPendencia() = runBlocking {
+        val repositorio = repositorioNoInstante(inicio)
+        repositorio.criar("ana", "Ficha", hoje, registroPresencaId = "falta-ana")
+        repositorio.criar("ana", "Leitura", hoje, registroPresencaId = "falta-ana")
+        repositorio.criar("carla", "Avulsa", hoje)
+
+        val comPendencia = repositorio.buscarFaltasComPendencia(listOf("falta-ana", "falta-bruno"))
+
+        assertEquals(listOf("falta-ana"), comPendencia)
+    }
+
+    @Test
+    fun buscarFaltasComPendencia_listaVazia() = runBlocking {
+        assertTrue(repositorioNoInstante(inicio).buscarFaltasComPendencia(emptyList()).isEmpty())
     }
 }

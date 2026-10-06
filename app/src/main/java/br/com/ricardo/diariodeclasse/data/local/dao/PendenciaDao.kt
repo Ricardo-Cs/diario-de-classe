@@ -26,6 +26,13 @@ interface PendenciaDao {
     @Query("SELECT * FROM pendencias WHERE id = :id AND deletedAt IS NULL")
     suspend fun buscarPorId(id: String): Pendencia?
 
+    /** Dentre os registros de falta informados, quais já têm alguma pendência ligada. */
+    @Query(
+        "SELECT DISTINCT registroPresencaId FROM pendencias " +
+            "WHERE registroPresencaId IN (:registroPresencaIds) AND deletedAt IS NULL"
+    )
+    suspend fun buscarRegistrosComPendencia(registroPresencaIds: List<String>): List<String>
+
     @Insert
     suspend fun inserir(pendencia: Pendencia)
 
