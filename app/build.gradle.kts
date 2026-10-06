@@ -1,3 +1,6 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -5,6 +8,20 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
 }
+
+/**
+ * Dados da chave de assinatura do APK de release. Ficam no `local.properties`
+ * (fora do git), nunca neste arquivo. Sem eles, o build de release sai sem
+ * assinatura e o build de debug continua funcionando normalmente.
+ */
+val propriedadesLocais = Properties()
+val arquivoDePropriedadesLocais: File = rootProject.file("local.properties")
+if (arquivoDePropriedadesLocais.exists()) {
+    val entrada = FileInputStream(arquivoDePropriedadesLocais)
+    propriedadesLocais.load(entrada)
+    entrada.close()
+}
+val caminhoDaChave: String? = propriedadesLocais.getProperty("assinatura.arquivo")
 
 android {
     namespace = "br.com.ricardo.diariodeclasse"
@@ -22,8 +39,22 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            if (caminhoDaChave != null) {
+                storeFile = file(caminhoDaChave)
+                storePassword = propriedadesLocais.getProperty("assinatura.senhaDoArquivo")
+                keyAlias = propriedadesLocais.getProperty("assinatura.apelido")
+                keyPassword = propriedadesLocais.getProperty("assinatura.senhaDaChave")
+            }
+        }
+    }
+
     buildTypes {
         release {
+            if (caminhoDaChave != null) {
+                signingConfig = signingConfigs.getByName("release")
+            }
             optimization {
                 enable = false
             }

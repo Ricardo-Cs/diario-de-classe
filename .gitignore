@@ -13,3 +13,8 @@
 .externalNativeBuild
 .cxx
 local.properties
+# Chave de assinatura do APK: nunca versionar (fica fora do projeto)
+*.jks
+*.keystore
+# APKs gerados pelo assistente "Generate Signed APK" do Android Studio
+/app/release/
