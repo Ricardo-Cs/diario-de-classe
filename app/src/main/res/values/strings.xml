@@ -83,6 +83,7 @@
     <!-- Pendências -->
     <string name="pendencias_titulo">Pendências</string>
     <string name="pendencias_nova">Nova pendência</string>
+    <string name="pendencia_editar">Editar pendência</string>
     <string name="pendencias_vazio">Nenhuma pendência em aberto nesta turma.</string>
     <string name="pendencias_sem_alunos">Cadastre os alunos desta turma para registrar pendências.</string>
     <plurals name="pendencias_total">

@@ -22,6 +22,9 @@ interface PendenciaRepository {
         registroPresencaId: String? = null,
     ): Pendencia
 
+    /** Altera a atividade e/ou a data do lembrete. O aluno não muda. */
+    suspend fun editar(id: String, descricao: String, dataLembrete: LocalDate)
+
     /** Dentre os registros de falta informados, devolve os que já têm pendência ligada. */
     suspend fun buscarFaltasComPendencia(registroPresencaIds: List<String>): List<String>
 
@@ -59,6 +62,16 @@ class PendenciaRepositoryImpl @Inject constructor(
         )
         dao.inserir(pendencia)
         return pendencia
+    }
+
+    override suspend fun editar(id: String, descricao: String, dataLembrete: LocalDate) {
+        val pendencia: Pendencia = dao.buscarPorId(id) ?: return
+        val editada = pendencia.copy(
+            descricao = descricao,
+            dataLembrete = dataLembrete,
+            updatedAt = Instant.now(clock),
+        )
+        dao.atualizar(editada)
     }
 
     override suspend fun buscarFaltasComPendencia(registroPresencaIds: List<String>): List<String> {

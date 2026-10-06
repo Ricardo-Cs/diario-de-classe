@@ -34,23 +34,30 @@ import br.com.ricardo.diariodeclasse.data.local.entity.Aluno
 import java.time.LocalDate
 
 /**
- * Painel para criar uma pendência avulsa. Quando aberto a partir de um aluno
- * ([alunoInicial]), ele já vem escolhido e a professora só digita a atividade.
+ * Painel para criar ou editar uma pendência.
+ * - Criando a partir de um aluno ([alunoInicial]), ele já vem escolhido e a
+ *   professora só digita a atividade.
+ * - Editando, o aluno fica fixo ([podeTrocarAluno] = `false`): a pendência pode
+ *   estar ligada a uma falta daquele aluno.
  *
  * `ModalBottomSheet` ainda é experimental no Material 3; o `@OptIn` fica só aqui.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FolhaNovaPendencia(
+fun FolhaPendencia(
+    titulo: String,
     alunos: List<Aluno>,
     alunoInicial: Aluno?,
+    podeTrocarAluno: Boolean,
+    descricaoInicial: String,
+    dataInicial: LocalDate,
     hoje: LocalDate,
     aoSalvar: (alunoId: String, descricao: String, dataLembrete: LocalDate) -> Unit,
     aoFechar: () -> Unit,
 ) {
     val alunoEscolhido: MutableState<Aluno?> = remember { mutableStateOf(alunoInicial) }
-    val descricao: MutableState<String> = remember { mutableStateOf("") }
-    val dataLembrete: MutableState<LocalDate> = remember { mutableStateOf(hoje) }
+    val descricao: MutableState<String> = remember { mutableStateOf(descricaoInicial) }
+    val dataLembrete: MutableState<LocalDate> = remember { mutableStateOf(dataInicial) }
 
     val aluno: Aluno? = alunoEscolhido.value
     val podeSalvar: Boolean = aluno != null && descricao.value.isNotBlank()
@@ -66,15 +73,23 @@ fun FolhaNovaPendencia(
                 .imePadding(),
         ) {
             Text(
-                text = stringResource(R.string.pendencias_nova),
+                text = titulo,
                 style = MaterialTheme.typography.titleMedium,
             )
 
-            SeletorDeAluno(
-                alunos = alunos,
-                alunoEscolhido = aluno,
-                aoEscolher = { escolhido -> alunoEscolhido.value = escolhido },
-            )
+            if (podeTrocarAluno) {
+                SeletorDeAluno(
+                    alunos = alunos,
+                    alunoEscolhido = aluno,
+                    aoEscolher = { escolhido -> alunoEscolhido.value = escolhido },
+                )
+            } else if (aluno != null) {
+                Text(
+                    text = aluno.nome,
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.secondary,
+                )
+            }
 
             OutlinedTextField(
                 value = descricao.value,

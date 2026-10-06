@@ -141,4 +141,20 @@ class PendenciaRepositoryImplTest {
     fun buscarFaltasComPendencia_listaVazia() = runBlocking {
         assertTrue(repositorioNoInstante(inicio).buscarFaltasComPendencia(emptyList()).isEmpty())
     }
+
+    @Test
+    fun editar_mudaAtividadeEDataEAtualizaUpdatedAt() = runBlocking {
+        val pendencia = repositorioNoInstante(inicio).criar("ana", "Ficha", hoje, registroPresencaId = "falta-ana")
+        val umaHoraDepois = inicio.plusSeconds(3600)
+
+        repositorioNoInstante(umaHoraDepois).editar(pendencia.id, "Ficha p. 12", hoje.plusDays(2))
+
+        val salva = dao.buscarPorId(pendencia.id)!!
+        assertEquals("Ficha p. 12", salva.descricao)
+        assertEquals(hoje.plusDays(2), salva.dataLembrete)
+        assertEquals("ana", salva.alunoId)
+        assertEquals("falta-ana", salva.registroPresencaId)
+        assertEquals(inicio, salva.createdAt)
+        assertEquals(umaHoraDepois, salva.updatedAt)
+    }
 }

@@ -127,6 +127,16 @@ class PendenciasViewModel @Inject constructor(
         }
     }
 
+    fun editarPendencia(pendenciaId: String, descricao: String, dataLembrete: LocalDate) {
+        val descricaoLimpa: String = descricao.trim()
+        if (descricaoLimpa.isEmpty()) {
+            return
+        }
+        viewModelScope.launch {
+            pendenciaRepository.editar(pendenciaId, descricaoLimpa, dataLembrete)
+        }
+    }
+
     fun marcarComoEntregue(pendenciaId: String) {
         viewModelScope.launch {
             pendenciaRepository.marcarComoEntregue(pendenciaId)

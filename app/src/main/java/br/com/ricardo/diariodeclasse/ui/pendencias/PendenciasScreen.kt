@@ -1,5 +1,6 @@
 package br.com.ricardo.diariodeclasse.ui.pendencias
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -44,10 +45,11 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-/** Estado do painel de nova pendência: fechado, ou aberto (com ou sem aluno já escolhido). */
-private sealed interface PainelNovaPendencia {
-    data object Fechado : PainelNovaPendencia
-    data class Aberto(val alunoInicial: Aluno?) : PainelNovaPendencia
+/** Estado do painel de pendência: fechado, criando (com ou sem aluno já escolhido) ou editando. */
+private sealed interface PainelDePendencia {
+    data object Fechado : PainelDePendencia
+    data class Criando(val alunoInicial: Aluno?) : PainelDePendencia
+    data class Editando(val pendencia: Pendencia, val aluno: Aluno) : PainelDePendencia
 }
 
 @Composable
@@ -76,7 +78,7 @@ private fun ConteudoPendencias(
     viewModel: PendenciasViewModel,
     aoVoltar: () -> Unit,
 ) {
-    val painel: MutableState<PainelNovaPendencia> = remember { mutableStateOf(PainelNovaPendencia.Fechado) }
+    val painel: MutableState<PainelDePendencia> = remember { mutableStateOf(PainelDePendencia.Fechado) }
     val avisos: SnackbarHostState = remember { SnackbarHostState() }
     // Escopo de coroutine preso à tela: `showSnackbar` é `suspend` (espera o aviso sumir).
     val escopo: CoroutineScope = rememberCoroutineScope()
@@ -105,7 +107,7 @@ private fun ConteudoPendencias(
         snackbarHost = { SnackbarHost(avisos) },
         floatingActionButton = {
             if (temAlunos) {
-                ExtendedFloatingActionButton(onClick = { painel.value = PainelNovaPendencia.Aberto(alunoInicial = null) }) {
+                ExtendedFloatingActionButton(onClick = { painel.value = PainelDePendencia.Criando(alunoInicial = null) }) {
                     Text(stringResource(R.string.pendencias_nova))
                 }
             }
@@ -127,13 +129,14 @@ private fun ConteudoPendencias(
                     item(key = grupo.aluno.id) {
                         CabecalhoDoAluno(
                             grupo = grupo,
-                            aoAdicionar = { painel.value = PainelNovaPendencia.Aberto(alunoInicial = grupo.aluno) },
+                            aoAdicionar = { painel.value = PainelDePendencia.Criando(alunoInicial = grupo.aluno) },
                         )
                     }
                     items(grupo.pendencias, key = { item -> item.pendencia.id }) { item ->
                         LinhaDaPendencia(
                             item = item,
                             hoje = estado.hoje,
+                            aoEditar = { painel.value = PainelDePendencia.Editando(item.pendencia, grupo.aluno) },
                             aoMarcarComoEntregue = { marcarComoEntregue(item.pendencia) },
                         )
                     }
@@ -145,17 +148,39 @@ private fun ConteudoPendencias(
         }
     }
 
-    val painelAtual: PainelNovaPendencia = painel.value
-    if (painelAtual is PainelNovaPendencia.Aberto) {
-        FolhaNovaPendencia(
+    val fecharPainel = { painel.value = PainelDePendencia.Fechado }
+
+    when (val painelAtual: PainelDePendencia = painel.value) {
+        is PainelDePendencia.Fechado -> {}
+
+        is PainelDePendencia.Criando -> FolhaPendencia(
+            titulo = stringResource(R.string.pendencias_nova),
             alunos = estado.alunos,
             alunoInicial = painelAtual.alunoInicial,
+            podeTrocarAluno = true,
+            descricaoInicial = "",
+            dataInicial = estado.hoje,
             hoje = estado.hoje,
             aoSalvar = { alunoId, descricao, dataLembrete ->
                 viewModel.criarPendencia(alunoId, descricao, dataLembrete)
-                painel.value = PainelNovaPendencia.Fechado
+                fecharPainel()
             },
-            aoFechar = { painel.value = PainelNovaPendencia.Fechado },
+            aoFechar = fecharPainel,
+        )
+
+        is PainelDePendencia.Editando -> FolhaPendencia(
+            titulo = stringResource(R.string.pendencia_editar),
+            alunos = estado.alunos,
+            alunoInicial = painelAtual.aluno,
+            podeTrocarAluno = false,
+            descricaoInicial = painelAtual.pendencia.descricao,
+            dataInicial = painelAtual.pendencia.dataLembrete,
+            hoje = estado.hoje,
+            aoSalvar = { _, descricao, dataLembrete ->
+                viewModel.editarPendencia(painelAtual.pendencia.id, descricao, dataLembrete)
+                fecharPainel()
+            },
+            aoFechar = fecharPainel,
         )
     }
 }
@@ -204,11 +229,14 @@ private fun CabecalhoDoAluno(grupo: GrupoDePendencias, aoAdicionar: () -> Unit) 
 private fun LinhaDaPendencia(
     item: PendenciaComOrigem,
     hoje: LocalDate,
+    aoEditar: () -> Unit,
     aoMarcarComoEntregue: () -> Unit,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(start = 16.dp, end = 4.dp, bottom = 4.dp),
+        modifier = Modifier
+            .clickable(onClick = aoEditar)
+            .padding(start = 16.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(text = item.pendencia.descricao, style = MaterialTheme.typography.bodyLarge)
