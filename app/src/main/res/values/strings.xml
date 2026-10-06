@@ -24,6 +24,7 @@
     <string name="inicio_sem_turmas">Cadastre sua primeira turma para começar a usar o diário.</string>
     <string name="inicio_cadastrar_turma">Cadastrar turma</string>
     <string name="inicio_fazer_chamada">Fazer chamada</string>
+    <string name="inicio_ver_pendencias">Ver pendências</string>
     <string name="inicio_chamada_de_hoje">Chamada de hoje</string>
     <string name="inicio_chamada_nao_feita">Ainda não foi feita</string>
     <string name="inicio_chamada_concluida">Concluída às %1$s</string>
@@ -60,6 +61,32 @@
     <string name="chamada_remover_observacao">Remover</string>
     <string name="chamada_salvar">Salvar chamada</string>
     <string name="chamada_sem_alunos">Cadastre os alunos desta turma para fazer a chamada.</string>
+
+    <!-- Pendências -->
+    <string name="pendencias_titulo">Pendências</string>
+    <string name="pendencias_nova">Nova pendência</string>
+    <string name="pendencias_vazio">Nenhuma pendência em aberto nesta turma.</string>
+    <string name="pendencias_sem_alunos">Cadastre os alunos desta turma para registrar pendências.</string>
+    <plurals name="pendencias_total">
+        <item quantity="one">%d pendência</item>
+        <item quantity="other">%d pendências</item>
+    </plurals>
+    <string name="pendencias_para_hoje">%1$d para hoje</string>
+    <string name="pendencia_lembrete_desde">Pendente desde %1$s</string>
+    <string name="pendencia_lembrete_hoje">Para hoje</string>
+    <string name="pendencia_lembrete_amanha">Para amanhã</string>
+    <string name="pendencia_lembrete_data">Para %1$s</string>
+    <string name="pendencia_marcar_entregue">Marcar como entregue</string>
+    <string name="pendencia_entregue_aviso">Pendência marcada como entregue</string>
+    <string name="pendencia_desfazer">Desfazer</string>
+    <string name="pendencia_adicionar_para">Adicionar pendência para %1$s</string>
+    <string name="pendencia_escolher_aluno">Escolher aluno</string>
+    <string name="pendencia_campo_descricao">Atividade</string>
+    <string name="pendencia_campo_descricao_exemplo">Ex.: ficha de matemática, p. 12</string>
+    <string name="pendencia_lembrar">Lembrar</string>
+    <string name="pendencia_hoje">Hoje</string>
+    <string name="pendencia_amanha">Amanhã</string>
+    <string name="pendencia_outra_data">Outra data</string>
 
     <!-- Lista de turmas -->
     <string name="turmas_titulo">Turmas</string>

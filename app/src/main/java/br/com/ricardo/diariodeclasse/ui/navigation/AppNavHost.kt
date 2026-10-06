@@ -21,6 +21,7 @@ import br.com.ricardo.diariodeclasse.ui.chamada.ChamadaScreen
 import br.com.ricardo.diariodeclasse.ui.diario.DiarioScreen
 import br.com.ricardo.diariodeclasse.ui.inicio.InicioScreen
 import br.com.ricardo.diariodeclasse.ui.mais.MaisScreen
+import br.com.ricardo.diariodeclasse.ui.pendencias.PendenciasScreen
 import br.com.ricardo.diariodeclasse.ui.turmas.DetalheTurmaScreen
 import br.com.ricardo.diariodeclasse.ui.turmas.FormularioTurmaScreen
 import br.com.ricardo.diariodeclasse.ui.turmas.ListaTurmasScreen
@@ -70,12 +71,19 @@ fun AppNavHost() {
                         aoAbrirChamada = { turmaId, data ->
                             navController.navigate(ChamadaRoute(turmaId, data.toString()))
                         },
+                        aoAbrirPendencias = { turmaId -> navController.navigate(PendenciasRoute(turmaId)) },
                         aoAbrirTurma = { turmaId ->
                             // Vai para a aba Turma e abre a turma lá, para a barra
                             // inferior destacar a aba certa.
                             navegarParaAba(navController, AbaPrincipal.TURMA)
                             navController.navigate(DetalheTurmaRoute(turmaId))
                         },
+                    )
+                }
+
+                composable<PendenciasRoute> {
+                    PendenciasScreen(
+                        aoVoltar = { navController.popBackStack() },
                     )
                 }
 

@@ -4,6 +4,8 @@ import br.com.ricardo.diariodeclasse.data.repository.AlunoRepository
 import br.com.ricardo.diariodeclasse.data.repository.AlunoRepositoryImpl
 import br.com.ricardo.diariodeclasse.data.repository.ChamadaRepository
 import br.com.ricardo.diariodeclasse.data.repository.ChamadaRepositoryImpl
+import br.com.ricardo.diariodeclasse.data.repository.PendenciaRepository
+import br.com.ricardo.diariodeclasse.data.repository.PendenciaRepositoryImpl
 import br.com.ricardo.diariodeclasse.data.repository.TurmaAtivaRepository
 import br.com.ricardo.diariodeclasse.data.repository.TurmaAtivaRepositoryImpl
 import br.com.ricardo.diariodeclasse.data.repository.TurmaRepository
@@ -34,4 +36,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindChamadaRepository(impl: ChamadaRepositoryImpl): ChamadaRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindPendenciaRepository(impl: PendenciaRepositoryImpl): PendenciaRepository
 }

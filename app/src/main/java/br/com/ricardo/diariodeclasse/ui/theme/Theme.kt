@@ -21,6 +21,8 @@ private val EsquemaClaro: ColorScheme = lightColorScheme(
     onPrimary = Branco,
     primaryContainer = MoltenLava,
     onPrimaryContainer = PapayaWhip,
+    // Usado em elementos sobre fundo invertido, como o "Desfazer" dos avisos (snackbar).
+    inversePrimary = LavaRosado,
 
     secondary = DeepSpaceBlue,
     onSecondary = Branco,
@@ -57,6 +59,7 @@ private val EsquemaEscuro: ColorScheme = darkColorScheme(
     onPrimary = MoltenLava,
     primaryContainer = MoltenLava,
     onPrimaryContainer = LavaClaro,
+    inversePrimary = MoltenLava,
 
     secondary = AzulCeu,
     onSecondary = DeepSpaceBlue,

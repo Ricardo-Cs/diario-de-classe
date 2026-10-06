@@ -5,6 +5,7 @@ import androidx.room.Room
 import br.com.ricardo.diariodeclasse.data.local.AppDatabase
 import br.com.ricardo.diariodeclasse.data.local.dao.AlunoDao
 import br.com.ricardo.diariodeclasse.data.local.dao.ChamadaDao
+import br.com.ricardo.diariodeclasse.data.local.dao.PendenciaDao
 import br.com.ricardo.diariodeclasse.data.local.dao.TurmaDao
 import dagger.Module
 import dagger.Provides
@@ -35,6 +36,9 @@ object DatabaseModule {
 
     @Provides
     fun provideChamadaDao(database: AppDatabase): ChamadaDao = database.chamadaDao()
+
+    @Provides
+    fun providePendenciaDao(database: AppDatabase): PendenciaDao = database.pendenciaDao()
 
     @Provides
     @Singleton

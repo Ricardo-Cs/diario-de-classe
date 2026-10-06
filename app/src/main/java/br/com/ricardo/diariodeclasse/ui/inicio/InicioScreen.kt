@@ -17,6 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -39,6 +40,7 @@ fun InicioScreen(
     aoCadastrarTurma: () -> Unit,
     aoAbrirChamada: (turmaId: String, data: LocalDate) -> Unit,
     aoAbrirTurma: (turmaId: String) -> Unit,
+    aoAbrirPendencias: (turmaId: String) -> Unit,
     viewModel: InicioViewModel = hiltViewModel(),
 ) {
     val estado: InicioUiState = viewModel.uiState.collectAsStateWithLifecycle().value
@@ -80,6 +82,10 @@ fun InicioScreen(
                         aoAbrirChamada = { aoAbrirChamada(turmas.turmaAtiva.id, estado.hoje) },
                         aoAdicionarAlunos = { aoAbrirTurma(turmas.turmaAtiva.id) },
                     )
+                    // Provisório: vira o card de pendências mais adiante.
+                    TextButton(onClick = { aoAbrirPendencias(turmas.turmaAtiva.id) }) {
+                        Text(stringResource(R.string.inicio_ver_pendencias))
+                    }
                 }
             }
         }

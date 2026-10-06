@@ -48,3 +48,6 @@ object MaisRoute
  */
 @Serializable
 data class ChamadaRoute(val turmaId: String, val data: String)
+
+@Serializable
+data class PendenciasRoute(val turmaId: String)
