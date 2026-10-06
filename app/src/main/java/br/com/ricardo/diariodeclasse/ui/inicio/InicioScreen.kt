@@ -85,6 +85,7 @@ fun InicioScreen(
                         resumo = turmas.pendencias,
                         aoAbrirPendencias = { aoAbrirPendencias(turmas.turmaAtiva.id) },
                     )
+                    SecaoAtividadeRecente(atividades = turmas.atividadeRecente, hoje = estado.hoje)
                 }
             }
         }

@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.ricardo.diariodeclasse.data.local.entity.Turma
 import br.com.ricardo.diariodeclasse.data.repository.AlunoRepository
+import br.com.ricardo.diariodeclasse.data.repository.AtividadeRecente
+import br.com.ricardo.diariodeclasse.data.repository.AtividadeRecenteRepository
 import br.com.ricardo.diariodeclasse.data.repository.ChamadaRepository
 import br.com.ricardo.diariodeclasse.data.repository.PendenciaRepository
 import br.com.ricardo.diariodeclasse.data.repository.TurmaAtivaRepository
@@ -41,15 +43,20 @@ sealed interface TurmasDoInicio {
         val todas: List<Turma>,
         val chamadaDeHoje: SituacaoDaChamada,
         val pendencias: ResumoDePendencias,
+        val atividadeRecente: List<AtividadeRecente>,
     ) : TurmasDoInicio
 }
 
-/** Turma ativa e a situação dela no dia (chamada e pendências), sempre calculadas juntas. */
+/** Turma ativa e a situação dela no dia (chamada, pendências, últimos registros), sempre calculadas juntas. */
 private data class DadosDoDia(
     val turmaAtiva: Turma,
     val chamadaDeHoje: SituacaoDaChamada,
     val pendencias: ResumoDePendencias,
+    val atividadeRecente: List<AtividadeRecente>,
 )
+
+/** A seção de atividade recente é só para conferência rápida: poucas linhas bastam. */
+private const val LIMITE_DE_ATIVIDADES_RECENTES = 5
 
 private data class TurmaNoDia(
     val turma: Turma?,
@@ -63,6 +70,7 @@ class InicioViewModel @Inject constructor(
     private val alunoRepository: AlunoRepository,
     private val chamadaRepository: ChamadaRepository,
     private val pendenciaRepository: PendenciaRepository,
+    private val atividadeRecenteRepository: AtividadeRecenteRepository,
     private val clock: Clock,
 ) : ViewModel() {
 
@@ -114,11 +122,13 @@ class InicioViewModel @Inject constructor(
             alunoRepository.observarAlunosDaTurma(turma.id),
             chamadaRepository.observarChamada(turma.id, turmaNoDia.data),
             pendenciaRepository.observarPendentesDaTurma(turma.id),
-        ) { alunos, chamada, pendencias ->
+            atividadeRecenteRepository.observarDaTurma(turma.id, LIMITE_DE_ATIVIDADES_RECENTES),
+        ) { alunos, chamada, pendencias, atividadeRecente ->
             DadosDoDia(
                 turmaAtiva = turma,
                 chamadaDeHoje = calcularSituacaoDaChamada(alunos, chamada, clock.zone),
                 pendencias = calcularResumoDePendencias(alunos, pendencias, turmaNoDia.data),
+                atividadeRecente = atividadeRecente,
             )
         }
     }
@@ -137,6 +147,7 @@ class InicioViewModel @Inject constructor(
                 todas = todasAsTurmas,
                 chamadaDeHoje = dados.chamadaDeHoje,
                 pendencias = dados.pendencias,
+                atividadeRecente = dados.atividadeRecente,
             )
         }
 
