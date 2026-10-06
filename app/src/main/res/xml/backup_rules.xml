@@ -1,13 +1,13 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-   Sample backup rules file; uncomment and customize as necessary.
-   See https://developer.android.com/guide/topics/data/autobackup
-   for details.
-   Note: This file is ignored for devices older than API 31
-   See https://developer.android.com/about/versions/12/backup-restore
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Regras do Auto Backup para Android 11 (API 30) ou anterior.
+    O Android 12+ usa data_extraction_rules.xml; mantenha os dois iguais.
+
+    O que vai para a conta Google da professora:
+    - o banco do diário (turmas, alunos, chamadas, pendências, anotações);
+    - as preferências do DataStore (ex.: turma ativa).
 -->
 <full-backup-content>
-    <!--
-   <include domain="sharedpref" path="."/>
-   <exclude domain="sharedpref" path="device.xml"/>
--->
+    <include domain="database" path="diario.db" />
+    <include domain="file" path="datastore/" />
 </full-backup-content>

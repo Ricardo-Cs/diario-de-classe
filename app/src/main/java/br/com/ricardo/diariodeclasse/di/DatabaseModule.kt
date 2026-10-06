@@ -2,6 +2,7 @@ package br.com.ricardo.diariodeclasse.di
 
 import android.content.Context
 import androidx.room.Room
+import androidx.room.RoomDatabase
 import br.com.ricardo.diariodeclasse.data.local.AppDatabase
 import br.com.ricardo.diariodeclasse.data.local.dao.AlunoDao
 import br.com.ricardo.diariodeclasse.data.local.dao.AnotacaoDao
@@ -25,10 +26,21 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
 
+    /**
+     * Por padrão o Room usa o modo WAL: as gravações recentes ficam num arquivo
+     * à parte (`diario.db-wal`) até serem juntadas ao banco. O Auto Backup do
+     * Android copia os arquivos e poderia levar um `diario.db` sem as últimas
+     * alterações. No modo `TRUNCATE`, cada gravação vai direto para o `diario.db`,
+     * então o arquivo copiado está sempre completo. Para um app deste tamanho,
+     * a diferença de desempenho não é perceptível.
+     */
     @Provides
     @Singleton
-    fun provideDatabase(@ApplicationContext context: Context): AppDatabase =
-        Room.databaseBuilder(context, AppDatabase::class.java, AppDatabase.NOME).build()
+    fun provideDatabase(@ApplicationContext context: Context): AppDatabase {
+        return Room.databaseBuilder(context, AppDatabase::class.java, AppDatabase.NOME)
+            .setJournalMode(RoomDatabase.JournalMode.TRUNCATE)
+            .build()
+    }
 
     @Provides
     fun provideTurmaDao(database: AppDatabase): TurmaDao = database.turmaDao()
