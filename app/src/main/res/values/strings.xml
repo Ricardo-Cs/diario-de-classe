@@ -46,6 +46,7 @@
     <string name="atividade_anotacao_registrada">Anotação registrada</string>
     <string name="atividade_anotacao_editada">Anotação editada</string>
     <string name="inicio_chamada_de_hoje">Chamada de hoje</string>
+    <string name="inicio_chamada_outro_dia">Outro dia</string>
     <string name="inicio_chamada_nao_feita">Ainda não foi feita</string>
     <string name="inicio_chamada_concluida">Concluída às %1$s</string>
     <plurals name="inicio_alunos_na_turma">

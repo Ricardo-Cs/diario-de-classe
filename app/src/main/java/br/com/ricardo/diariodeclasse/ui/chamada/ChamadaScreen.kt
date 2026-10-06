@@ -163,6 +163,7 @@ private fun ConteudoChamada(
     if (etapa is EtapaDaChamada.OferecendoPendencias) {
         FolhaPendenciasDaFalta(
             dataDaChamada = estado.data,
+            hoje = estado.hoje,
             etapa = etapa,
             aoAdicionar = { descricao, registroPresencaIds, dataLembrete ->
                 viewModel.adicionarAtividadeParaAusentes(descricao, registroPresencaIds, dataLembrete)

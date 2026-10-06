@@ -43,20 +43,21 @@ import java.time.LocalDate
  * gravada: tudo aqui é opcional, e fechar o painel não desfaz nada.
  *
  * A mesma atividade pode ir para vários ausentes de uma vez (todos marcados por
- * padrão, exceto quem já tem pendência desta falta). O lembrete começa em
- * "Amanhã", quando o aluno normalmente volta.
+ * padrão, exceto quem já tem pendência desta falta). O lembrete começa no dia
+ * seguinte à falta, quando o aluno normalmente volta (ver [lembreteInicialDaFalta]).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FolhaPendenciasDaFalta(
     dataDaChamada: LocalDate,
+    hoje: LocalDate,
     etapa: EtapaDaChamada.OferecendoPendencias,
     aoAdicionar: (descricao: String, registroPresencaIds: List<String>, dataLembrete: LocalDate) -> Unit,
     aoConcluir: () -> Unit,
 ) {
     val descricao: MutableState<String> = remember { mutableStateOf("") }
     val selecionados: MutableState<List<String>> = remember { mutableStateOf(selecaoInicial(etapa.ausentes)) }
-    val dataLembrete: MutableState<LocalDate> = remember { mutableStateOf(dataDaChamada.plusDays(1)) }
+    val dataLembrete: MutableState<LocalDate> = remember { mutableStateOf(lembreteInicialDaFalta(dataDaChamada, hoje)) }
 
     val podeAdicionar: Boolean = descricao.value.isNotBlank() && selecionados.value.isNotEmpty()
 
@@ -102,7 +103,7 @@ fun FolhaPendenciasDaFalta(
             )
 
             EscolhaDoLembrete(
-                hoje = dataDaChamada,
+                hoje = hoje,
                 dataEscolhida = dataLembrete.value,
                 aoEscolher = { data -> dataLembrete.value = data },
             )

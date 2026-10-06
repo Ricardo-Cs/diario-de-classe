@@ -80,7 +80,9 @@ fun InicioScreen(
                     )
                     CardChamada(
                         situacao = turmas.chamadaDeHoje,
+                        hoje = estado.hoje,
                         aoAbrirChamada = { aoAbrirChamada(turmas.turmaAtiva.id, estado.hoje) },
+                        aoAbrirChamadaDeOutroDia = { data -> aoAbrirChamada(turmas.turmaAtiva.id, data) },
                         aoAdicionarAlunos = { aoAbrirTurma(turmas.turmaAtiva.id) },
                     )
                     CardPendencias(

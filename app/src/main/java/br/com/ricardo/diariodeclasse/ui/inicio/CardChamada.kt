@@ -14,7 +14,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,20 +27,30 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import br.com.ricardo.diariodeclasse.R
+import br.com.ricardo.diariodeclasse.ui.componentes.DialogoCalendario
 import br.com.ricardo.diariodeclasse.ui.theme.ausencia
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 /**
  * Principal elemento do Início. Muda conforme a chamada do dia:
  * ainda não feita (com botão de destaque), já feita (resumo + editar)
  * ou impossível de fazer porque a turma não tem alunos.
+ *
+ * "Outro dia" abre o calendário para registrar uma chamada esquecida ou corrigir
+ * uma antiga. Só aceita datas até hoje: não existe chamada de amanhã.
  */
 @Composable
 fun CardChamada(
     situacao: SituacaoDaChamada,
+    hoje: LocalDate,
     aoAbrirChamada: () -> Unit,
+    aoAbrirChamadaDeOutroDia: (data: LocalDate) -> Unit,
     aoAdicionarAlunos: () -> Unit,
 ) {
+    val calendarioAberto: MutableState<Boolean> = remember { mutableStateOf(false) }
+    val turmaTemAlunos: Boolean = situacao !is SituacaoDaChamada.TurmaSemAlunos
+
     OutlinedCard(
         colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
         modifier = Modifier.fillMaxWidth(),
@@ -45,11 +59,19 @@ fun CardChamada(
             verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier.padding(16.dp),
         ) {
-            Text(
-                text = stringResource(R.string.inicio_chamada_de_hoje),
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = stringResource(R.string.inicio_chamada_de_hoje),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.weight(1f))
+                if (turmaTemAlunos) {
+                    TextButton(onClick = { calendarioAberto.value = true }) {
+                        Text(stringResource(R.string.inicio_chamada_outro_dia))
+                    }
+                }
+            }
 
             when (situacao) {
                 is SituacaoDaChamada.TurmaSemAlunos -> ConteudoTurmaSemAlunos(aoAdicionarAlunos)
@@ -57,6 +79,19 @@ fun CardChamada(
                 is SituacaoDaChamada.Feita -> ConteudoChamadaFeita(situacao, aoAbrirChamada)
             }
         }
+    }
+
+    if (calendarioAberto.value) {
+        // Começa em ontem: o caso mais comum é a chamada esquecida do dia anterior.
+        DialogoCalendario(
+            dataInicial = hoje.minusDays(1),
+            ultimaDataPermitida = hoje,
+            aoEscolher = { data ->
+                calendarioAberto.value = false
+                aoAbrirChamadaDeOutroDia(data)
+            },
+            aoCancelar = { calendarioAberto.value = false },
+        )
     }
 }
 

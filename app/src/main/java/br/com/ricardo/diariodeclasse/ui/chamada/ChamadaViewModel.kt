@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.time.Clock
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -64,7 +65,9 @@ sealed interface ChamadaUiState {
 
     data class Carregado(
         val turma: Turma,
+        /** Dia da chamada; pode ser anterior a [hoje] (chamada esquecida ou corrigida depois). */
         val data: LocalDate,
+        val hoje: LocalDate,
         val alunos: List<AlunoNaChamada>,
         /** As marcações como estavam ao abrir a tela, para saber se algo mudou. */
         val alunosAoAbrir: List<AlunoNaChamada>,
@@ -106,6 +109,7 @@ class ChamadaViewModel @Inject constructor(
     private val alunoRepository: AlunoRepository,
     private val chamadaRepository: ChamadaRepository,
     private val pendenciaRepository: PendenciaRepository,
+    private val clock: Clock,
 ) : ViewModel() {
 
     private val rota: ChamadaRoute = savedStateHandle.toRoute<ChamadaRoute>()
@@ -138,6 +142,7 @@ class ChamadaViewModel @Inject constructor(
         estadoMutavel.value = ChamadaUiState.Carregado(
             turma = turma,
             data = data,
+            hoje = LocalDate.now(clock),
             alunos = linhas,
             // `toList()` cria uma cópia: a referência guardada não muda se `linhas` mudar.
             alunosAoAbrir = linhas.toList(),
