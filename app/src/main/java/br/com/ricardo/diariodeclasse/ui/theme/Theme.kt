@@ -1,58 +1,112 @@
 package br.com.ricardo.diariodeclasse.ui.theme
 
-import android.app.Activity
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+/**
+ * Papéis das cores da paleta:
+ * - primary (Molten Lava): ações principais e botões de destaque (inclusive o container,
+ *   usado pelos botões flutuantes, para a cor da marca aparecer igual nos dois temas).
+ * - secondary (Deep Space Blue): elementos de apoio.
+ * - tertiary (Steel Blue): destaques informativos.
+ * - error (Brick Red): ações destrutivas e alertas.
+ * - background/surface: branco no tema claro; azul-marinho com texto Papaya Whip no escuro.
+ */
+private val EsquemaClaro: ColorScheme = lightColorScheme(
+    primary = MoltenLava,
+    onPrimary = Branco,
+    primaryContainer = MoltenLava,
+    onPrimaryContainer = PapayaWhip,
+
+    secondary = DeepSpaceBlue,
+    onSecondary = Branco,
+    secondaryContainer = AzulClaro,
+    onSecondaryContainer = DeepSpaceBlue,
+
+    tertiary = SteelBlue,
+    onTertiary = DeepSpaceBlue,
+    tertiaryContainer = AzulClaro,
+    onTertiaryContainer = DeepSpaceBlue,
+
+    error = BrickRed,
+    onError = Branco,
+    errorContainer = VermelhoClaro,
+    onErrorContainer = MoltenLava,
+
+    background = Branco,
+    onBackground = CinzaTexto,
+    surface = Branco,
+    onSurface = CinzaTexto,
+    surfaceVariant = CinzaForte,
+    onSurfaceVariant = CinzaTextoSuave,
+    surfaceContainerLowest = Branco,
+    surfaceContainerLow = CinzaMaisClaro,
+    surfaceContainer = CinzaClaro,
+    surfaceContainerHigh = CinzaMedio,
+    surfaceContainerHighest = CinzaForte,
+    outline = CinzaContorno,
+    outlineVariant = CinzaContornoSuave,
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+private val EsquemaEscuro: ColorScheme = darkColorScheme(
+    primary = LavaRosado,
+    onPrimary = MoltenLava,
+    primaryContainer = MoltenLava,
+    onPrimaryContainer = LavaClaro,
 
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    secondary = AzulCeu,
+    onSecondary = DeepSpaceBlue,
+    secondaryContainer = AzulPetroleo,
+    onSecondaryContainer = AzulClaro,
+
+    tertiary = SteelBlue,
+    onTertiary = DeepSpaceBlue,
+    tertiaryContainer = AzulPetroleo,
+    onTertiaryContainer = AzulClaro,
+
+    error = VermelhoRosado,
+    onError = MoltenLava,
+    errorContainer = VermelhoProfundo,
+    onErrorContainer = VermelhoClaro,
+
+    background = MarinhoFundo,
+    onBackground = PapayaWhip,
+    surface = MarinhoFundo,
+    onSurface = PapayaWhip,
+    surfaceVariant = MarinhoVariante,
+    onSurfaceVariant = BegeTextoSuave,
+    surfaceContainerLowest = MarinhoMaisEscuro,
+    surfaceContainerLow = MarinhoLeve,
+    surfaceContainer = MarinhoMedio,
+    surfaceContainerHigh = MarinhoForte,
+    surfaceContainerHighest = MarinhoMaisForte,
+    outline = CinzaAzulado,
+    outlineVariant = MarinhoContorno,
 )
 
+/**
+ * Não usamos a "cor dinâmica" do Android 12+ (cores tiradas do papel de parede),
+ * para que o app tenha sempre a paleta própria.
+ */
 @Composable
 fun DiarioDeClasseTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
-    content: @Composable () -> Unit
+    temaEscuro: Boolean = isSystemInDarkTheme(),
+    content: @Composable () -> Unit,
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+    val esquemaDeCores: ColorScheme
+    if (temaEscuro) {
+        esquemaDeCores = EsquemaEscuro
+    } else {
+        esquemaDeCores = EsquemaClaro
     }
 
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = esquemaDeCores,
         typography = Typography,
-        content = content
+        content = content,
     )
 }
