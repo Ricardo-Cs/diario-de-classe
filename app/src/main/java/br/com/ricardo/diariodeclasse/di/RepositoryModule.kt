@@ -10,6 +10,8 @@ import br.com.ricardo.diariodeclasse.data.repository.ChamadaRepository
 import br.com.ricardo.diariodeclasse.data.repository.ChamadaRepositoryImpl
 import br.com.ricardo.diariodeclasse.data.repository.LembreteDiarioRepository
 import br.com.ricardo.diariodeclasse.data.repository.LembreteDiarioRepositoryImpl
+import br.com.ricardo.diariodeclasse.data.repository.LembreteRepository
+import br.com.ricardo.diariodeclasse.data.repository.LembreteRepositoryImpl
 import br.com.ricardo.diariodeclasse.data.repository.MetaRepository
 import br.com.ricardo.diariodeclasse.data.repository.MetaRepositoryImpl
 import br.com.ricardo.diariodeclasse.data.repository.MetricaRepository
@@ -70,4 +72,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindMetaRepository(impl: MetaRepositoryImpl): MetaRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindLembreteRepository(impl: LembreteRepositoryImpl): LembreteRepository
 }

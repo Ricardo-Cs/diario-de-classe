@@ -26,8 +26,9 @@ const val FORMATO_DO_ARQUIVO = "diario-de-classe"
  *     lista vazia como padrão, então arquivos da versão 1 continuam sendo lidos.
  * 3 → metas livres: métrica, nível-alvo e prazo opcionais; aluno na meta com "atingiu em".
  *     Um app da versão 2 não leria uma meta sem métrica, por isso o número mudou.
+ * 4 → lembretes da professora (lista vazia como padrão para arquivos antigos).
  */
-const val VERSAO_DO_FORMATO = 3
+const val VERSAO_DO_FORMATO = 4
 
 /** Só o começo do arquivo: lido antes do resto para checar formato e versão. */
 @Serializable
@@ -53,6 +54,7 @@ data class ArquivoDeBackup(
     val resultadosDaSondagem: List<ResultadoDaSondagemNoArquivo> = emptyList(),
     val metas: List<MetaNoArquivo> = emptyList(),
     val alunosNaMeta: List<AlunoNaMetaNoArquivo> = emptyList(),
+    val lembretes: List<LembreteNoArquivo> = emptyList(),
 )
 
 @Serializable
@@ -187,6 +189,17 @@ data class AlunoNaMetaNoArquivo(
     val alunoId: String,
     val nivelInicialId: String? = null,
     val atingiuEm: String? = null,
+    val createdAt: String,
+    val updatedAt: String,
+    val deletedAt: String? = null,
+)
+
+@Serializable
+data class LembreteNoArquivo(
+    val id: String,
+    val descricao: String,
+    val data: String,
+    val concluidoEm: String? = null,
     val createdAt: String,
     val updatedAt: String,
     val deletedAt: String? = null,

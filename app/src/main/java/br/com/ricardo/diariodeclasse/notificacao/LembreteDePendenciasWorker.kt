@@ -8,8 +8,10 @@ import androidx.work.PeriodicWorkRequest
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import br.com.ricardo.diariodeclasse.data.local.entity.Lembrete
 import br.com.ricardo.diariodeclasse.data.local.entity.PendenciaParaLembrete
 import br.com.ricardo.diariodeclasse.data.repository.LembreteDiarioRepository
+import br.com.ricardo.diariodeclasse.data.repository.LembreteRepository
 import br.com.ricardo.diariodeclasse.data.repository.PendenciaRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -19,7 +21,8 @@ import java.time.LocalDateTime
 import java.util.concurrent.TimeUnit
 
 /**
- * Tarefa em segundo plano que roda de hora em hora, mesmo com o app fechado
+ * Aviso diário de pendências dos alunos e de lembretes da professora (duas
+ * notificações separadas). Tarefa em segundo plano que roda de hora em hora, mesmo com o app fechado
  * ou depois de o celular reiniciar (o WorkManager guarda o agendamento).
  *
  * Por que de hora em hora, e não uma vez por dia às 7h? Para economizar bateria,
@@ -35,8 +38,10 @@ class LembreteDePendenciasWorker @AssistedInject constructor(
     @Assisted context: Context,
     @Assisted parametros: WorkerParameters,
     private val pendenciaRepository: PendenciaRepository,
+    private val lembreteRepository: LembreteRepository,
     private val lembreteDiarioRepository: LembreteDiarioRepository,
     private val notificacao: NotificacaoDePendencias,
+    private val notificacaoDeLembretes: NotificacaoDeLembretes,
     private val clock: Clock,
 ) : CoroutineWorker(context, parametros) {
 
@@ -56,6 +61,10 @@ class LembreteDePendenciasWorker @AssistedInject constructor(
         val hoje: LocalDate = agora.toLocalDate()
         val pendencias: List<PendenciaParaLembrete> = pendenciaRepository.buscarParaLembrete(hoje)
         notificacao.mostrar(pendencias)
+
+        // Lembretes da professora: os de hoje e os atrasados, que voltam a cada dia útil até serem concluídos.
+        val lembretes: List<Lembrete> = lembreteRepository.buscarParaNotificar(hoje)
+        notificacaoDeLembretes.mostrar(lembretes, hoje)
 
         // Registra o dia mesmo sem pendências: o que for criado mais tarde,
         // a professora acabou de anotar e não precisa de aviso.

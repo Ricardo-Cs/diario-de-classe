@@ -1,17 +1,10 @@
 package br.com.ricardo.diariodeclasse.notificacao
 
-import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
-import br.com.ricardo.diariodeclasse.MainActivity
 import br.com.ricardo.diariodeclasse.R
 import br.com.ricardo.diariodeclasse.data.local.entity.PendenciaParaLembrete
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -40,13 +33,8 @@ class NotificacaoDePendencias @Inject constructor(
         gerenciador.createNotificationChannel(canal)
     }
 
-    /** No Android 13+ a notificação só aparece se a professora tiver permitido. */
     fun temPermissao(): Boolean {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-            return true
-        }
-        val permissao: Int = ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
-        return permissao == PackageManager.PERMISSION_GRANTED
+        return temPermissaoParaNotificar(context)
     }
 
     fun mostrar(pendencias: List<PendenciaParaLembrete>) {
@@ -67,7 +55,7 @@ class NotificacaoDePendencias @Inject constructor(
             .setContentTitle(titulo)
             .setContentText(textoDaLinha(pendencias.first()))
             .setStyle(montarListaExpandida(pendencias))
-            .setContentIntent(criarAcaoDeAbrirApp())
+            .setContentIntent(criarAcaoDeAbrirApp(context))
             .setAutoCancel(true)
             .build()
 
@@ -95,23 +83,6 @@ class NotificacaoDePendencias @Inject constructor(
 
     private fun textoDaLinha(pendencia: PendenciaParaLembrete): String {
         return context.getString(R.string.notificacao_linha, pendencia.nomeDoAluno, pendencia.descricao)
-    }
-
-    /**
-     * Abre o app como se fosse pelo ícone: se ele já estiver aberto, volta para
-     * onde a professora estava em vez de recomeçar do zero.
-     *
-     * `PendingIntent` é uma "intenção guardada" que o sistema executa depois em
-     * nome do app (quando ela tocar na notificação). `FLAG_IMMUTABLE` é exigido
-     * desde o Android 12 e impede que outros apps alterem essa intenção.
-     */
-    private fun criarAcaoDeAbrirApp(): PendingIntent {
-        val abrirApp = Intent(context, MainActivity::class.java)
-        abrirApp.action = Intent.ACTION_MAIN
-        abrirApp.addCategory(Intent.CATEGORY_LAUNCHER)
-        abrirApp.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-
-        return PendingIntent.getActivity(context, 0, abrirApp, PendingIntent.FLAG_IMMUTABLE)
     }
 
     companion object {

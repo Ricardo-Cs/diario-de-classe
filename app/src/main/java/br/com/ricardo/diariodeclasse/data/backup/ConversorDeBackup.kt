@@ -5,6 +5,7 @@ import br.com.ricardo.diariodeclasse.data.local.entity.AlunoNaMeta
 import br.com.ricardo.diariodeclasse.data.local.entity.Anotacao
 import br.com.ricardo.diariodeclasse.data.local.entity.Chamada
 import br.com.ricardo.diariodeclasse.data.local.entity.DadosDoDiario
+import br.com.ricardo.diariodeclasse.data.local.entity.Lembrete
 import br.com.ricardo.diariodeclasse.data.local.entity.Meta
 import br.com.ricardo.diariodeclasse.data.local.entity.Metrica
 import br.com.ricardo.diariodeclasse.data.local.entity.NivelDaMetrica
@@ -74,6 +75,7 @@ object ConversorDeBackup {
             resultadosDaSondagem = dados.resultadosDaSondagem.map { resultado -> resultadoParaArquivo(resultado) },
             metas = dados.metas.map { meta -> metaParaArquivo(meta) },
             alunosNaMeta = dados.alunosNaMeta.map { linha -> alunoNaMetaParaArquivo(linha) },
+            lembretes = dados.lembretes.map { lembrete -> lembreteParaArquivo(lembrete) },
         )
         return jsonDoArquivo.encodeToString(ArquivoDeBackup.serializer(), arquivo)
     }
@@ -132,6 +134,7 @@ object ConversorDeBackup {
             resultadosDaSondagem = arquivo.resultadosDaSondagem.map { resultado -> resultadoDoArquivo(resultado) },
             metas = arquivo.metas.map { meta -> metaDoArquivo(meta) },
             alunosNaMeta = arquivo.alunosNaMeta.map { linha -> alunoNaMetaDoArquivo(linha) },
+            lembretes = arquivo.lembretes.map { lembrete -> lembreteDoArquivo(lembrete) },
         )
     }
 
@@ -286,6 +289,18 @@ object ConversorDeBackup {
         )
     }
 
+    private fun lembreteParaArquivo(lembrete: Lembrete): LembreteNoArquivo {
+        return LembreteNoArquivo(
+            id = lembrete.id,
+            descricao = lembrete.descricao,
+            data = lembrete.data.toString(),
+            concluidoEm = textoOuNulo(lembrete.concluidoEm),
+            createdAt = lembrete.createdAt.toString(),
+            updatedAt = lembrete.updatedAt.toString(),
+            deletedAt = textoOuNulo(lembrete.deletedAt),
+        )
+    }
+
     // --- Arquivo → entidade ---
 
     private fun turmaDoArquivo(turma: TurmaNoArquivo): Turma {
@@ -434,6 +449,18 @@ object ConversorDeBackup {
             createdAt = Instant.parse(linha.createdAt),
             updatedAt = Instant.parse(linha.updatedAt),
             deletedAt = instanteOuNulo(linha.deletedAt),
+        )
+    }
+
+    private fun lembreteDoArquivo(lembrete: LembreteNoArquivo): Lembrete {
+        return Lembrete(
+            id = lembrete.id,
+            descricao = lembrete.descricao,
+            data = LocalDate.parse(lembrete.data),
+            concluidoEm = instanteOuNulo(lembrete.concluidoEm),
+            createdAt = Instant.parse(lembrete.createdAt),
+            updatedAt = Instant.parse(lembrete.updatedAt),
+            deletedAt = instanteOuNulo(lembrete.deletedAt),
         )
     }
 

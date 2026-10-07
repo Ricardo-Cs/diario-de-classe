@@ -5,6 +5,7 @@ import br.com.ricardo.diariodeclasse.data.local.entity.AlunoNaMeta
 import br.com.ricardo.diariodeclasse.data.local.entity.Anotacao
 import br.com.ricardo.diariodeclasse.data.local.entity.Chamada
 import br.com.ricardo.diariodeclasse.data.local.entity.DadosDoDiario
+import br.com.ricardo.diariodeclasse.data.local.entity.Lembrete
 import br.com.ricardo.diariodeclasse.data.local.entity.Meta
 import br.com.ricardo.diariodeclasse.data.local.entity.Metrica
 import br.com.ricardo.diariodeclasse.data.local.entity.NivelDaMetrica
@@ -95,6 +96,12 @@ class ConversorDeBackupTest {
             resultadosDaSondagem = listOf(resultado),
             metas = listOf(meta, metaAMao),
             alunosNaMeta = listOf(anaNaMeta, anaNaMetaAMao),
+            lembretes = listOf(
+                Lembrete(
+                    id = "lembrete", descricao = "Entregar portfólio", data = hoje.plusDays(7),
+                    concluidoEm = agora, createdAt = agora, updatedAt = agora,
+                ),
+            ),
         )
     }
 

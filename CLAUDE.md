@@ -80,7 +80,12 @@ Os níveis são os da psicogênese da língua escrita (pré-silábico, silábico
 - Duas formas de acompanhar, escolhidas na criação e fixas depois:
   - **marcando à mão** (padrão): ela marca quem atingiu (sim/não). Ex.: "conhecer a família numérica do 10 ao 80";
   - **pela métrica**: "estes alunos chegam ao nível Alfabético até 06/11", com progresso **calculado** a partir das sondagens.
-- O que é sobre a própria professora (entregar portfólio, plano de ação) **não é meta**: é lembrete (ainda não implementado).
+- O que é sobre a própria professora (entregar portfólio, plano de ação) **não é meta**: é **lembrete**.
+
+**Lembretes da professora**
+- Descrição + data; gerais (não pertencem a uma turma).
+- Aparecem no Início quando atrasados ou nos próximos 7 dias; a lista completa fica na tela "Lembretes".
+- Notificação diária própria (canal separado das pendências) com os do dia e os atrasados, até serem concluídos.
 
 **Grupos**
 - Grupos são **marcadores sem ordem** criados pela professora (ex.: "precisa de atenção"). Um aluno pode estar em vários grupos.
@@ -143,6 +148,7 @@ Como o app substitui o caderno, perder o aparelho não pode significar perder o 
 - `Grupo` — turma + nome + descrição (ex.: "precisa de atenção")
 - `ParticipacaoNoGrupo` — aluno + grupo + entrou em + saiu em (uma linha por passagem pelo grupo)
 - `Anotacao` — aluno + texto + data (tags ainda não implementadas)
+- `Lembrete` — descrição + data + concluído em (da professora, sem turma)
 
 Todas as entidades seguem as regras da seção 4 (UUID, timestamps, soft delete).
 

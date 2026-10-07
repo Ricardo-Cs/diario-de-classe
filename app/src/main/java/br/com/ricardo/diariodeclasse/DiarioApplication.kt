@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import br.com.ricardo.diariodeclasse.notificacao.LembreteDePendenciasWorker
+import br.com.ricardo.diariodeclasse.notificacao.NotificacaoDeLembretes
 import br.com.ricardo.diariodeclasse.notificacao.NotificacaoDePendencias
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
@@ -27,6 +28,9 @@ class DiarioApplication : Application(), Configuration.Provider {
     @Inject
     lateinit var notificacaoDePendencias: NotificacaoDePendencias
 
+    @Inject
+    lateinit var notificacaoDeLembretes: NotificacaoDeLembretes
+
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
             .setWorkerFactory(fabricaDeWorkers)
@@ -35,6 +39,7 @@ class DiarioApplication : Application(), Configuration.Provider {
     override fun onCreate() {
         super.onCreate()
         notificacaoDePendencias.criarCanal()
+        notificacaoDeLembretes.criarCanal()
         LembreteDePendenciasWorker.agendar(this)
     }
 }

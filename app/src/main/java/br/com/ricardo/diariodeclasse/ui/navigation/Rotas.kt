@@ -64,6 +64,10 @@ data class AlunoRoute(val alunoId: String)
 @Serializable
 data class AlunoNoInicioRoute(val alunoId: String)
 
+/** Lembretes da professora; fica na pilha do Início, onde fica o card deles. */
+@Serializable
+object LembretesRoute
+
 /** A mesma tela do aluno, aberta a partir da aba Diário (pela tela da meta). */
 @Serializable
 data class AlunoNoDiarioRoute(val alunoId: String)

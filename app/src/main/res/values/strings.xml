@@ -131,6 +131,45 @@
     <string name="notificacao_linha">%1$s: %2$s</string>
     <string name="notificacao_e_mais">e mais %1$d</string>
 
+    <!-- Lembretes da professora -->
+    <string name="inicio_lembretes_titulo">Lembretes</string>
+    <string name="inicio_nenhum_lembrete">Nenhum lembrete para os próximos dias</string>
+    <string name="inicio_ver_lembretes">Ver lembretes</string>
+    <string name="inicio_ver_todos_lembretes">Ver todos</string>
+    <string name="lembretes_titulo">Lembretes</string>
+    <string name="lembretes_vazio">Nenhum lembrete em aberto. Use para entregas e prazos seus, como portfólios e plano de ação.</string>
+    <string name="lembretes_concluidos">Concluídos</string>
+    <string name="lembrete_novo">Novo lembrete</string>
+    <string name="lembrete_editar">Editar lembrete</string>
+    <string name="lembrete_campo_descricao">O que fazer</string>
+    <string name="lembrete_campo_descricao_exemplo">Ex.: entregar o portfólio socioemocional</string>
+    <string name="lembrete_campo_data">Até quando</string>
+    <string name="lembrete_escolher_data">Escolher data</string>
+    <string name="lembrete_marcar_feito">Marcar como feito</string>
+    <string name="lembrete_reabrir">Marcar como não feito</string>
+    <string name="lembrete_concluido_aviso">Lembrete concluído</string>
+    <string name="lembrete_excluido_aviso">Lembrete excluído</string>
+    <string name="lembrete_hoje">Hoje</string>
+    <string name="lembrete_amanha">Amanhã</string>
+    <plurals name="lembrete_em_dias">
+        <item quantity="one">Em %1$d dia (%2$s)</item>
+        <item quantity="other">Em %1$d dias (%2$s)</item>
+    </plurals>
+    <plurals name="lembrete_atrasado">
+        <item quantity="one">Atrasado há %1$d dia (%2$s)</item>
+        <item quantity="other">Atrasado há %1$d dias (%2$s)</item>
+    </plurals>
+
+    <!-- Notificação diária de lembretes -->
+    <string name="notificacao_lembretes_canal_nome">Lembretes da professora</string>
+    <string name="notificacao_lembretes_canal_descricao">Aviso pela manhã com os seus lembretes do dia e os atrasados.</string>
+    <plurals name="notificacao_lembretes_titulo">
+        <item quantity="one">%d lembrete para hoje</item>
+        <item quantity="other">%d lembretes para hoje</item>
+    </plurals>
+    <string name="notificacao_lembrete_hoje">%1$s · hoje</string>
+    <string name="notificacao_lembrete_atrasado">%1$s · atrasado desde %2$s</string>
+
     <!-- Aluno e anotações -->
     <string name="aluno_pendencias">Pendências</string>
     <string name="aluno_sem_pendencias">Nenhuma pendência em aberto.</string>

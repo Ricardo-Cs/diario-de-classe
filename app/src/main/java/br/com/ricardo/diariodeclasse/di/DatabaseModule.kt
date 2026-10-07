@@ -8,6 +8,7 @@ import br.com.ricardo.diariodeclasse.data.local.dao.AlunoDao
 import br.com.ricardo.diariodeclasse.data.local.dao.AnotacaoDao
 import br.com.ricardo.diariodeclasse.data.local.dao.BackupDao
 import br.com.ricardo.diariodeclasse.data.local.dao.ChamadaDao
+import br.com.ricardo.diariodeclasse.data.local.dao.LembreteDao
 import br.com.ricardo.diariodeclasse.data.local.dao.MetaDao
 import br.com.ricardo.diariodeclasse.data.local.dao.MetricaDao
 import br.com.ricardo.diariodeclasse.data.local.dao.PendenciaDao
@@ -64,6 +65,9 @@ object DatabaseModule {
 
     @Provides
     fun provideMetaDao(database: AppDatabase): MetaDao = database.metaDao()
+
+    @Provides
+    fun provideLembreteDao(database: AppDatabase): LembreteDao = database.lembreteDao()
 
     @Provides
     fun provideBackupDao(database: AppDatabase): BackupDao = database.backupDao()

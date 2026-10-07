@@ -2,12 +2,15 @@ package br.com.ricardo.diariodeclasse.ui.inicio
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import br.com.ricardo.diariodeclasse.data.local.entity.Lembrete
 import br.com.ricardo.diariodeclasse.data.local.entity.Turma
 import br.com.ricardo.diariodeclasse.data.repository.AlunoRepository
 import br.com.ricardo.diariodeclasse.data.repository.ChamadaRepository
+import br.com.ricardo.diariodeclasse.data.repository.LembreteRepository
 import br.com.ricardo.diariodeclasse.data.repository.PendenciaRepository
 import br.com.ricardo.diariodeclasse.data.repository.TurmaAtivaRepository
 import br.com.ricardo.diariodeclasse.data.repository.TurmaRepository
+import br.com.ricardo.diariodeclasse.ui.lembretes.lembretesDoInicio
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -26,11 +29,17 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import javax.inject.Inject
 
-/** O cabeçalho (saudação e data) aparece sempre; o resto depende das turmas. */
+/**
+ * O cabeçalho (saudação e data) aparece sempre; chamada e pendências dependem
+ * das turmas. Os lembretes são da professora, não de uma turma: aparecem mesmo
+ * sem turma cadastrada.
+ */
 data class InicioUiState(
     val saudacao: Saudacao,
     val hoje: LocalDate,
     val turmas: TurmasDoInicio,
+    /** Em aberto, atrasados e dos próximos dias (ver `lembretesDoInicio`). */
+    val lembretes: List<Lembrete>,
 )
 
 sealed interface TurmasDoInicio {
@@ -63,6 +72,7 @@ class InicioViewModel @Inject constructor(
     private val alunoRepository: AlunoRepository,
     private val chamadaRepository: ChamadaRepository,
     private val pendenciaRepository: PendenciaRepository,
+    private val lembreteRepository: LembreteRepository,
     private val clock: Clock,
 ) : ViewModel() {
 
@@ -83,8 +93,9 @@ class InicioViewModel @Inject constructor(
         agora,
         dadosDoDia,
         turmaRepository.observarTurmas(),
-    ) { dataEHora, dados, todasAsTurmas ->
-        criarEstado(dataEHora, dados, todasAsTurmas)
+        lembreteRepository.observarEmAberto(),
+    ) { dataEHora, dados, todasAsTurmas, lembretesEmAberto ->
+        criarEstado(dataEHora, dados, todasAsTurmas, lembretesEmAberto)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
@@ -127,6 +138,7 @@ class InicioViewModel @Inject constructor(
         dataEHora: LocalDateTime,
         dados: DadosDoDia?,
         todasAsTurmas: List<Turma>,
+        lembretesEmAberto: List<Lembrete>,
     ): InicioUiState {
         val turmas: TurmasDoInicio
         if (dados == null) {
@@ -140,10 +152,12 @@ class InicioViewModel @Inject constructor(
             )
         }
 
+        val hoje: LocalDate = dataEHora.toLocalDate()
         return InicioUiState(
             saudacao = saudacaoParaHorario(dataEHora.toLocalTime()),
-            hoje = dataEHora.toLocalDate(),
+            hoje = hoje,
             turmas = turmas,
+            lembretes = lembretesDoInicio(lembretesEmAberto, hoje),
         )
     }
 
@@ -153,7 +167,20 @@ class InicioViewModel @Inject constructor(
             saudacao = saudacaoParaHorario(dataEHora.toLocalTime()),
             hoje = dataEHora.toLocalDate(),
             turmas = TurmasDoInicio.Carregando,
+            lembretes = emptyList(),
         )
+    }
+
+    fun marcarLembreteComoConcluido(lembreteId: String) {
+        viewModelScope.launch {
+            lembreteRepository.marcarComoConcluido(lembreteId)
+        }
+    }
+
+    fun reabrirLembrete(lembreteId: String) {
+        viewModelScope.launch {
+            lembreteRepository.reabrir(lembreteId)
+        }
     }
 
     /**

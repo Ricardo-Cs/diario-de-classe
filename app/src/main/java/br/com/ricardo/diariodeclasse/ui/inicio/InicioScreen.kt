@@ -9,8 +9,14 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -18,8 +24,11 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import br.com.ricardo.diariodeclasse.R
+import br.com.ricardo.diariodeclasse.data.local.entity.Lembrete
 import br.com.ricardo.diariodeclasse.ui.componentes.SeletorDeTurma
 import br.com.ricardo.diariodeclasse.ui.componentes.formatarDataPorExtenso
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 @Composable
@@ -28,9 +37,14 @@ fun InicioScreen(
     aoAbrirChamada: (turmaId: String, data: LocalDate) -> Unit,
     aoAbrirTurma: (turmaId: String) -> Unit,
     aoAbrirPendencias: (turmaId: String) -> Unit,
+    aoAbrirLembretes: () -> Unit,
     viewModel: InicioViewModel = hiltViewModel(),
 ) {
     val estado: InicioUiState = viewModel.uiState.collectAsStateWithLifecycle().value
+    val avisos: SnackbarHostState = remember { SnackbarHostState() }
+    val escopo: CoroutineScope = rememberCoroutineScope()
+    val textoConcluido: String = stringResource(R.string.lembrete_concluido_aviso)
+    val textoDesfazer: String = stringResource(R.string.pendencia_desfazer)
 
     // Roda toda vez que a tela volta ao primeiro plano (como o `onResume` de uma Activity).
     LifecycleResumeEffect(Unit) {
@@ -38,7 +52,23 @@ fun InicioScreen(
         onPauseOrDispose { }
     }
 
-    Scaffold { espacamentoDasBarras ->
+    /** Conclui e oferece "Desfazer", para o caso de um toque por engano. */
+    fun concluirLembrete(lembrete: Lembrete) {
+        viewModel.marcarLembreteComoConcluido(lembrete.id)
+        escopo.launch {
+            avisos.currentSnackbarData?.dismiss()
+            val resultado: SnackbarResult = avisos.showSnackbar(
+                message = textoConcluido,
+                actionLabel = textoDesfazer,
+                duration = SnackbarDuration.Short,
+            )
+            if (resultado == SnackbarResult.ActionPerformed) {
+                viewModel.reabrirLembrete(lembrete.id)
+            }
+        }
+    }
+
+    Scaffold(snackbarHost = { SnackbarHost(avisos) }) { espacamentoDasBarras ->
         Column(
             modifier = Modifier
                 .padding(espacamentoDasBarras)
@@ -74,7 +104,18 @@ fun InicioScreen(
                     CardPendencias(
                         resumo = turmas.pendencias,
                         aoAbrirPendencias = { aoAbrirPendencias(turmas.turmaAtiva.id) },
-                    )                }
+                    )
+                }
+            }
+
+            // Fora do `when`: os lembretes são da professora e não dependem de turma.
+            if (estado.turmas !is TurmasDoInicio.Carregando) {
+                CardLembretes(
+                    lembretes = estado.lembretes,
+                    hoje = estado.hoje,
+                    aoConcluir = { lembrete -> concluirLembrete(lembrete) },
+                    aoAbrirLembretes = aoAbrirLembretes,
+                )
             }
         }
     }

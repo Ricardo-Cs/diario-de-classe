@@ -8,6 +8,7 @@ import br.com.ricardo.diariodeclasse.data.local.dao.AlunoDao
 import br.com.ricardo.diariodeclasse.data.local.dao.AnotacaoDao
 import br.com.ricardo.diariodeclasse.data.local.dao.BackupDao
 import br.com.ricardo.diariodeclasse.data.local.dao.ChamadaDao
+import br.com.ricardo.diariodeclasse.data.local.dao.LembreteDao
 import br.com.ricardo.diariodeclasse.data.local.dao.MetaDao
 import br.com.ricardo.diariodeclasse.data.local.dao.MetricaDao
 import br.com.ricardo.diariodeclasse.data.local.dao.PendenciaDao
@@ -16,6 +17,7 @@ import br.com.ricardo.diariodeclasse.data.local.entity.Aluno
 import br.com.ricardo.diariodeclasse.data.local.entity.AlunoNaMeta
 import br.com.ricardo.diariodeclasse.data.local.entity.Anotacao
 import br.com.ricardo.diariodeclasse.data.local.entity.Chamada
+import br.com.ricardo.diariodeclasse.data.local.entity.Lembrete
 import br.com.ricardo.diariodeclasse.data.local.entity.Meta
 import br.com.ricardo.diariodeclasse.data.local.entity.Metrica
 import br.com.ricardo.diariodeclasse.data.local.entity.NivelDaMetrica
@@ -37,6 +39,7 @@ import br.com.ricardo.diariodeclasse.data.local.entity.Turma
  * 5 → anotações
  * 6 → métricas (com níveis e sondagens) e metas
  * 7 → metas livres: métrica, nível-alvo e prazo opcionais; aluno na meta ganha "atingiu em"
+ * 8 → lembretes da professora
  */
 @Database(
     entities = [
@@ -52,8 +55,9 @@ import br.com.ricardo.diariodeclasse.data.local.entity.Turma
         ResultadoDaSondagem::class,
         Meta::class,
         AlunoNaMeta::class,
+        Lembrete::class,
     ],
-    version = 7,
+    version = 8,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
@@ -64,6 +68,7 @@ import br.com.ricardo.diariodeclasse.data.local.entity.Turma
         // Tornar colunas opcionais exige recriar a tabela no SQLite; o Room gera
         // essa cópia sozinho (cria a tabela nova, copia as linhas e troca as duas).
         AutoMigration(from = 6, to = 7),
+        AutoMigration(from = 7, to = 8),
     ],
 )
 @TypeConverters(Converters::class)
@@ -75,6 +80,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun anotacaoDao(): AnotacaoDao
     abstract fun metricaDao(): MetricaDao
     abstract fun metaDao(): MetaDao
+    abstract fun lembreteDao(): LembreteDao
     abstract fun backupDao(): BackupDao
 
     companion object {

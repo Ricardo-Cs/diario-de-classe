@@ -21,6 +21,7 @@ import br.com.ricardo.diariodeclasse.ui.alunos.AlunoScreen
 import br.com.ricardo.diariodeclasse.ui.chamada.ChamadaScreen
 import br.com.ricardo.diariodeclasse.ui.diario.DiarioScreen
 import br.com.ricardo.diariodeclasse.ui.inicio.InicioScreen
+import br.com.ricardo.diariodeclasse.ui.lembretes.LembretesScreen
 import br.com.ricardo.diariodeclasse.ui.mais.MaisScreen
 import br.com.ricardo.diariodeclasse.ui.metas.FormularioMetaScreen
 import br.com.ricardo.diariodeclasse.ui.metas.MetaScreen
@@ -78,6 +79,7 @@ fun AppNavHost() {
                             navController.navigate(ChamadaRoute(turmaId, data.toString()))
                         },
                         aoAbrirPendencias = { turmaId -> navController.navigate(PendenciasRoute(turmaId)) },
+                        aoAbrirLembretes = { navController.navigate(LembretesRoute) },
                         aoAbrirTurma = { turmaId ->
                             // Vai para a aba Turma e abre a turma lá, para a barra
                             // inferior destacar a aba certa.
@@ -90,6 +92,12 @@ fun AppNavHost() {
                 composable<PendenciasRoute> {
                     PendenciasScreen(
                         aoAbrirAluno = { alunoId -> navController.navigate(AlunoNoInicioRoute(alunoId)) },
+                        aoVoltar = { navController.popBackStack() },
+                    )
+                }
+
+                composable<LembretesRoute> {
+                    LembretesScreen(
                         aoVoltar = { navController.popBackStack() },
                     )
                 }
