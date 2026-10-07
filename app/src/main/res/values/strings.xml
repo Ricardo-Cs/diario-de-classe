@@ -36,14 +36,6 @@
     <string name="inicio_pendencias_e_mais">e mais %1$d</string>
     <string name="inicio_ver_todas">Ver todas</string>
     <string name="inicio_nenhuma_pendencia_hoje">Nenhuma pendência para hoje</string>
-    <string name="inicio_atividade_recente">Atividade recente</string>
-    <string name="atividade_chamada_registrada">Chamada registrada</string>
-    <string name="atividade_chamada_editada">Chamada editada</string>
-    <string name="atividade_pendencia_criada">Pendência criada</string>
-    <string name="atividade_pendencia_editada">Pendência editada</string>
-    <string name="atividade_pendencia_entregue">Pendência entregue</string>
-    <string name="atividade_anotacao_registrada">Anotação registrada</string>
-    <string name="atividade_anotacao_editada">Anotação editada</string>
     <string name="inicio_chamada_de_hoje">Chamada de hoje</string>
     <string name="inicio_chamada_outro_dia">Outro dia</string>
     <string name="inicio_chamada_nao_feita">Ainda não foi feita</string>

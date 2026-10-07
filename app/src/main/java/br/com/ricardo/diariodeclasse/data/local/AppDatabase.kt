@@ -6,7 +6,6 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import br.com.ricardo.diariodeclasse.data.local.dao.AlunoDao
 import br.com.ricardo.diariodeclasse.data.local.dao.AnotacaoDao
-import br.com.ricardo.diariodeclasse.data.local.dao.AtividadeRecenteDao
 import br.com.ricardo.diariodeclasse.data.local.dao.BackupDao
 import br.com.ricardo.diariodeclasse.data.local.dao.ChamadaDao
 import br.com.ricardo.diariodeclasse.data.local.dao.MetaDao
@@ -72,7 +71,6 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun anotacaoDao(): AnotacaoDao
     abstract fun metricaDao(): MetricaDao
     abstract fun metaDao(): MetaDao
-    abstract fun atividadeRecenteDao(): AtividadeRecenteDao
     abstract fun backupDao(): BackupDao
 
     companion object {

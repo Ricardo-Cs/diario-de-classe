@@ -6,7 +6,6 @@ import androidx.room.RoomDatabase
 import br.com.ricardo.diariodeclasse.data.local.AppDatabase
 import br.com.ricardo.diariodeclasse.data.local.dao.AlunoDao
 import br.com.ricardo.diariodeclasse.data.local.dao.AnotacaoDao
-import br.com.ricardo.diariodeclasse.data.local.dao.AtividadeRecenteDao
 import br.com.ricardo.diariodeclasse.data.local.dao.BackupDao
 import br.com.ricardo.diariodeclasse.data.local.dao.ChamadaDao
 import br.com.ricardo.diariodeclasse.data.local.dao.MetaDao
@@ -65,9 +64,6 @@ object DatabaseModule {
 
     @Provides
     fun provideMetaDao(database: AppDatabase): MetaDao = database.metaDao()
-
-    @Provides
-    fun provideAtividadeRecenteDao(database: AppDatabase): AtividadeRecenteDao = database.atividadeRecenteDao()
 
     @Provides
     fun provideBackupDao(database: AppDatabase): BackupDao = database.backupDao()

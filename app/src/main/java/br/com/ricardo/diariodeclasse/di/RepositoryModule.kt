@@ -4,8 +4,6 @@ import br.com.ricardo.diariodeclasse.data.repository.AlunoRepository
 import br.com.ricardo.diariodeclasse.data.repository.AlunoRepositoryImpl
 import br.com.ricardo.diariodeclasse.data.repository.AnotacaoRepository
 import br.com.ricardo.diariodeclasse.data.repository.AnotacaoRepositoryImpl
-import br.com.ricardo.diariodeclasse.data.repository.AtividadeRecenteRepository
-import br.com.ricardo.diariodeclasse.data.repository.AtividadeRecenteRepositoryImpl
 import br.com.ricardo.diariodeclasse.data.repository.BackupRepository
 import br.com.ricardo.diariodeclasse.data.repository.BackupRepositoryImpl
 import br.com.ricardo.diariodeclasse.data.repository.ChamadaRepository
@@ -56,10 +54,6 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindAnotacaoRepository(impl: AnotacaoRepositoryImpl): AnotacaoRepository
-
-    @Binds
-    @Singleton
-    abstract fun bindAtividadeRecenteRepository(impl: AtividadeRecenteRepositoryImpl): AtividadeRecenteRepository
 
     @Binds
     @Singleton
