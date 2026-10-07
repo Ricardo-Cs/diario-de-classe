@@ -22,6 +22,11 @@ import br.com.ricardo.diariodeclasse.ui.chamada.ChamadaScreen
 import br.com.ricardo.diariodeclasse.ui.diario.DiarioScreen
 import br.com.ricardo.diariodeclasse.ui.inicio.InicioScreen
 import br.com.ricardo.diariodeclasse.ui.mais.MaisScreen
+import br.com.ricardo.diariodeclasse.ui.metas.FormularioMetaScreen
+import br.com.ricardo.diariodeclasse.ui.metas.MetaScreen
+import br.com.ricardo.diariodeclasse.ui.metricas.FormularioMetricaScreen
+import br.com.ricardo.diariodeclasse.ui.metricas.MetricaScreen
+import br.com.ricardo.diariodeclasse.ui.metricas.SondagemScreen
 import br.com.ricardo.diariodeclasse.ui.pendencias.PendenciasScreen
 import br.com.ricardo.diariodeclasse.ui.turmas.DetalheTurmaScreen
 import br.com.ricardo.diariodeclasse.ui.turmas.FormularioTurmaScreen
@@ -138,7 +143,68 @@ fun AppNavHost() {
 
             navigation<DiarioGrafo>(startDestination = DiarioRoute) {
                 composable<DiarioRoute> {
-                    DiarioScreen()
+                    DiarioScreen(
+                        aoCriarMetrica = { turmaId -> navController.navigate(FormularioMetricaRoute(turmaId)) },
+                        aoAbrirMetrica = { metricaId -> navController.navigate(MetricaRoute(metricaId)) },
+                        aoCriarMeta = { turmaId -> navController.navigate(FormularioMetaRoute(turmaId)) },
+                        aoAbrirMeta = { metaId -> navController.navigate(MetaRoute(metaId)) },
+                    )
+                }
+
+                composable<FormularioMetricaRoute> {
+                    FormularioMetricaScreen(
+                        aoVoltar = { navController.popBackStack() },
+                        // Fecha o formulário e a tela da métrica excluída de uma vez.
+                        aoExcluirMetrica = {
+                            navController.popBackStack(route = DiarioRoute, inclusive = false)
+                        },
+                    )
+                }
+
+                composable<MetricaRoute> {
+                    MetricaScreen(
+                        aoEditarMetrica = { turmaId, metricaId ->
+                            navController.navigate(FormularioMetricaRoute(turmaId, metricaId))
+                        },
+                        aoAbrirSondagem = { metricaId, data ->
+                            navController.navigate(SondagemRoute(metricaId, data.toString()))
+                        },
+                        aoVoltar = { navController.popBackStack() },
+                    )
+                }
+
+                composable<SondagemRoute> {
+                    SondagemScreen(
+                        aoVoltar = { navController.popBackStack() },
+                    )
+                }
+
+                composable<FormularioMetaRoute> {
+                    FormularioMetaScreen(
+                        aoVoltar = { navController.popBackStack() },
+                        aoExcluirMeta = {
+                            navController.popBackStack(route = DiarioRoute, inclusive = false)
+                        },
+                    )
+                }
+
+                composable<MetaRoute> {
+                    MetaScreen(
+                        aoEditarMeta = { turmaId, metaId ->
+                            navController.navigate(FormularioMetaRoute(turmaId, metaId))
+                        },
+                        aoAbrirSondagem = { metricaId, data ->
+                            navController.navigate(SondagemRoute(metricaId, data.toString()))
+                        },
+                        aoAbrirAluno = { alunoId -> navController.navigate(AlunoNoDiarioRoute(alunoId)) },
+                        aoVoltar = { navController.popBackStack() },
+                    )
+                }
+
+                composable<AlunoNoDiarioRoute> {
+                    AlunoScreen(
+                        aoVoltar = { navController.popBackStack() },
+                    )
                 }
             }
 
@@ -152,8 +218,8 @@ fun AppNavHost() {
 }
 
 /**
- * Em formulários (cadastro de turma, chamada) a barra some, para dar espaço
- * ao teclado e evitar sair no meio do preenchimento.
+ * Em formulários (cadastro de turma, chamada, sondagem...) a barra some, para dar
+ * espaço ao teclado e evitar sair no meio do preenchimento.
  */
 private fun mostraBarraInferior(destinoAtual: NavDestination?): Boolean {
     // Antes de o NavHost montar a primeira tela, o destino ainda é nulo; o app sempre
@@ -161,9 +227,12 @@ private fun mostraBarraInferior(destinoAtual: NavDestination?): Boolean {
     if (destinoAtual == null) {
         return true
     }
-    val estaNoFormularioDeTurma: Boolean = destinoAtual.hasRoute(FormularioTurmaRoute::class)
-    val estaNaChamada: Boolean = destinoAtual.hasRoute(ChamadaRoute::class)
-    if (estaNoFormularioDeTurma || estaNaChamada) {
+    val estaNumFormulario: Boolean = destinoAtual.hasRoute(FormularioTurmaRoute::class) ||
+        destinoAtual.hasRoute(FormularioMetricaRoute::class) ||
+        destinoAtual.hasRoute(FormularioMetaRoute::class)
+    val estaMarcandoAlunos: Boolean = destinoAtual.hasRoute(ChamadaRoute::class) ||
+        destinoAtual.hasRoute(SondagemRoute::class)
+    if (estaNumFormulario || estaMarcandoAlunos) {
         return false
     }
     return true

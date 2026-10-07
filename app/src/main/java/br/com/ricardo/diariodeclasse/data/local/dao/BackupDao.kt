@@ -5,11 +5,17 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
 import br.com.ricardo.diariodeclasse.data.local.entity.Aluno
+import br.com.ricardo.diariodeclasse.data.local.entity.AlunoNaMeta
 import br.com.ricardo.diariodeclasse.data.local.entity.Anotacao
 import br.com.ricardo.diariodeclasse.data.local.entity.Chamada
 import br.com.ricardo.diariodeclasse.data.local.entity.DadosDoDiario
+import br.com.ricardo.diariodeclasse.data.local.entity.Meta
+import br.com.ricardo.diariodeclasse.data.local.entity.Metrica
+import br.com.ricardo.diariodeclasse.data.local.entity.NivelDaMetrica
 import br.com.ricardo.diariodeclasse.data.local.entity.Pendencia
 import br.com.ricardo.diariodeclasse.data.local.entity.RegistroPresenca
+import br.com.ricardo.diariodeclasse.data.local.entity.ResultadoDaSondagem
+import br.com.ricardo.diariodeclasse.data.local.entity.Sondagem
 import br.com.ricardo.diariodeclasse.data.local.entity.Turma
 
 /**
@@ -39,6 +45,42 @@ interface BackupDao {
 
     @Query("SELECT * FROM anotacoes")
     suspend fun buscarAnotacoes(): List<Anotacao>
+
+    @Query("SELECT * FROM metricas")
+    suspend fun buscarMetricas(): List<Metrica>
+
+    @Query("SELECT * FROM niveis_da_metrica")
+    suspend fun buscarNiveisDaMetrica(): List<NivelDaMetrica>
+
+    @Query("SELECT * FROM sondagens")
+    suspend fun buscarSondagens(): List<Sondagem>
+
+    @Query("SELECT * FROM resultados_da_sondagem")
+    suspend fun buscarResultadosDaSondagem(): List<ResultadoDaSondagem>
+
+    @Query("SELECT * FROM metas")
+    suspend fun buscarMetas(): List<Meta>
+
+    @Query("SELECT * FROM alunos_na_meta")
+    suspend fun buscarAlunosNaMeta(): List<AlunoNaMeta>
+
+    @Query("DELETE FROM alunos_na_meta")
+    suspend fun apagarAlunosNaMeta()
+
+    @Query("DELETE FROM metas")
+    suspend fun apagarMetas()
+
+    @Query("DELETE FROM resultados_da_sondagem")
+    suspend fun apagarResultadosDaSondagem()
+
+    @Query("DELETE FROM sondagens")
+    suspend fun apagarSondagens()
+
+    @Query("DELETE FROM niveis_da_metrica")
+    suspend fun apagarNiveisDaMetrica()
+
+    @Query("DELETE FROM metricas")
+    suspend fun apagarMetricas()
 
     @Query("DELETE FROM anotacoes")
     suspend fun apagarAnotacoes()
@@ -76,6 +118,24 @@ interface BackupDao {
     @Insert
     suspend fun inserirAnotacoes(anotacoes: List<Anotacao>)
 
+    @Insert
+    suspend fun inserirMetricas(metricas: List<Metrica>)
+
+    @Insert
+    suspend fun inserirNiveisDaMetrica(niveis: List<NivelDaMetrica>)
+
+    @Insert
+    suspend fun inserirSondagens(sondagens: List<Sondagem>)
+
+    @Insert
+    suspend fun inserirResultadosDaSondagem(resultados: List<ResultadoDaSondagem>)
+
+    @Insert
+    suspend fun inserirMetas(metas: List<Meta>)
+
+    @Insert
+    suspend fun inserirAlunosNaMeta(alunos: List<AlunoNaMeta>)
+
     /**
      * Lê todas as tabelas dentro de uma transação, para o retrato ser consistente
      * mesmo que algo seja gravado no meio da leitura.
@@ -89,6 +149,12 @@ interface BackupDao {
             registrosPresenca = buscarRegistrosPresenca(),
             pendencias = buscarPendencias(),
             anotacoes = buscarAnotacoes(),
+            metricas = buscarMetricas(),
+            niveisDaMetrica = buscarNiveisDaMetrica(),
+            sondagens = buscarSondagens(),
+            resultadosDaSondagem = buscarResultadosDaSondagem(),
+            metas = buscarMetas(),
+            alunosNaMeta = buscarAlunosNaMeta(),
         )
     }
 
@@ -97,11 +163,17 @@ interface BackupDao {
      * passo falhar (ex.: arquivo com referência quebrada), nada é alterado.
      *
      * A ordem respeita as chaves estrangeiras: apaga primeiro quem aponta para
-     * os outros (anotações, pendências...) e insere primeiro quem é apontado
-     * (turmas, alunos...).
+     * os outros (alunos na meta, metas, resultados...) e insere primeiro quem é
+     * apontado (turmas, alunos...).
      */
     @Transaction
     suspend fun substituirTudo(dados: DadosDoDiario) {
+        apagarAlunosNaMeta()
+        apagarMetas()
+        apagarResultadosDaSondagem()
+        apagarSondagens()
+        apagarNiveisDaMetrica()
+        apagarMetricas()
         apagarAnotacoes()
         apagarPendencias()
         apagarRegistrosPresenca()
@@ -115,5 +187,11 @@ interface BackupDao {
         inserirRegistrosPresenca(dados.registrosPresenca)
         inserirPendencias(dados.pendencias)
         inserirAnotacoes(dados.anotacoes)
+        inserirMetricas(dados.metricas)
+        inserirNiveisDaMetrica(dados.niveisDaMetrica)
+        inserirSondagens(dados.sondagens)
+        inserirResultadosDaSondagem(dados.resultadosDaSondagem)
+        inserirMetas(dados.metas)
+        inserirAlunosNaMeta(dados.alunosNaMeta)
     }
 }

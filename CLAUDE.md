@@ -63,15 +63,26 @@ O desenvolvedor **nunca trabalhou com Kotlin** e precisa **entender e apresentar
 - Deve ser possível criar pendência a partir de uma falta **ou** avulsa (aluno não terminou a atividade em sala, por exemplo).
 - Visão rápida de "o que está pendente hoje" por turma e por aluno.
 
+**Exemplo real da professora (out/2026)**
+> "Temos 14 crianças alfabéticas e 11 silábicas com valor sonoro, temos até a primeira semana de novembro para desestabilizar e elas virarem alfabéticas."
+
+Os níveis são os da psicogênese da língua escrita (pré-silábico, silábico sem valor sonoro, silábico com valor sonoro, silábico-alfabético, alfabético), registrados em **sondagens** periódicas. O exemplo orienta o desenho de Métricas e Metas abaixo.
+
+**Métricas**
+- Primeiro tipo a implementar: **escala de níveis nomeados e ordenados**, definidos pela professora. Cada aluno está em **um nível por vez**.
+- Os níveis são registrados em **sondagens** (métrica + data), e o histórico mostra a evolução de cada aluno.
+- Registrar uma sondagem funciona **como a chamada**: a turma inteira aparece com o último nível já preenchido e a professora toca só em quem mudou.
+- Outros tipos (número, sim/não) entram depois, quando houver um caso real.
+
 **Metas**
 - A professora cria a meta **e escolhe como ela é medida**. O app não impõe critérios.
-- A forma de medição precisa ser flexível (ex.: sim/não, percentual, número com valor-alvo, escala, texto livre).
-- Avaliar compartilhar a estrutura de "tipo de medição" com as Métricas, já que o problema é parecido.
+- Caso principal: **meta ligada a uma métrica**. Exemplo: "estes alunos chegam ao nível Alfabético até 06/11". O progresso é **calculado** a partir das sondagens, sem lançamento manual.
+- Metas livres (sim/não, texto, valor manual) ficam para depois.
 
-**Grupos e métricas**
-- Grupos são **marcadores** criados pela professora (não listas fixas). Um aluno pode estar em vários grupos.
-- Acompanhamento deve gerar **histórico com data**, para mostrar evolução.
-- Métricas exigem estrutura flexível: tipo, escala, valores registrados ao longo do tempo.
+**Grupos**
+- Grupos são **marcadores sem ordem** criados pela professora (ex.: "precisa de atenção"). Um aluno pode estar em vários grupos.
+- **Níveis de uma escala não são grupos**: são exclusivos, têm ordem e alimentam metas. Por isso ficam nas Métricas.
+- A participação no grupo tem **datas de entrada e saída**, para mostrar a evolução.
 
 **Notificações**
 - Agendar com WorkManager (ou AlarmManager se precisar de horário exato).
@@ -120,13 +131,15 @@ Como o app substitui o caderno, perder o aparelho não pode significar perder o 
 - `Chamada` — turma + data (única por turma/dia)
 - `RegistroPresenca` — chamada + aluno + presente/ausente + observação
 - `Pendencia` — aluno + atividade + vínculo **opcional** com a ausência + status (pendente/entregue) + data prevista de lembrete
-- `Meta` — turma + descrição + tipo de medição (definido pela professora) + valor-alvo opcional + status
-- `RegistroMeta` — meta + valor + data (progresso ao longo do tempo)
-- `Grupo` — turma + nome + descrição (ex.: "em alfabetização")
-- `AlunoGrupo` — relação N:N entre aluno e grupo (com datas de entrada/saída para histórico)
-- `Metrica` — turma + nome + tipo/escala
-- `RegistroMetrica` — aluno + métrica + valor + data
-- `Anotacao` — aluno + texto + data + tags
+- `Metrica` — turma + nome (ex.: "Nível de escrita")
+- `NivelDaMetrica` — métrica + nome + ordem (os degraus da escala)
+- `Sondagem` — métrica + data (única por métrica/dia, como a `Chamada`)
+- `ResultadoDaSondagem` — sondagem + aluno + nível (único por sondagem/aluno)
+- `Meta` — turma + descrição + métrica + nível-alvo + prazo; progresso calculado, não armazenado
+- `AlunoNaMeta` — alunos que a meta acompanha (N:N)
+- `Grupo` — turma + nome + descrição (ex.: "precisa de atenção")
+- `ParticipacaoNoGrupo` — aluno + grupo + entrou em + saiu em (uma linha por passagem pelo grupo)
+- `Anotacao` — aluno + texto + data (tags ainda não implementadas)
 
 Todas as entidades seguem as regras da seção 4 (UUID, timestamps, soft delete).
 
@@ -154,15 +167,17 @@ Já existem vários "diários de classe digitais" (apps de secretarias estaduais
 - *Por que anota no papel?* O sistema oficial serve só para a chamada. Todo o resto (faltas, anotações específicas, pendências) vai para um diário manual, que é o que o app deve substituir.
 - *Como as metas são medidas?* A própria professora define as metas e a forma de medição.
 - *Nome do app:* ainda não definido.
+- *Que métricas ela usaria?* Parcialmente respondido: níveis de escrita (psicogênese), acompanhados por sondagens, com meta de avanço até a primeira semana de novembro de 2026 (ver seção 2).
 
 **Em aberto**
-- Que métricas ela usaria no acompanhamento?
+- Há outras métricas além dos níveis de escrita (ex.: matemática, leitura)?
+- Com que frequência ela faz as sondagens?
 - Nome do app.
 
 **Desenvolvimento**
-1. Adicionar dependências: Room, WorkManager, Hilt, Navigation Compose.
-2. Montar estrutura de pacotes MVVM (`data/` com entidades, DAOs e repositórios; `ui/` com telas e ViewModels; `di/`).
-3. Implementar Turmas e Alunos (primeiro CRUD).
-4. Registro de faltas → Pendências → Notificações.
-5. Anotações, grupos, metas e métricas.
-6. Backup/exportação.
+1. ~~Dependências: Room, WorkManager, Hilt, Navigation Compose.~~
+2. ~~Estrutura de pacotes MVVM.~~
+3. ~~Turmas e Alunos.~~
+4. ~~Registro de faltas → Pendências → Notificações.~~
+5. ~~Anotações~~ → ~~Métricas (escala de níveis) e Metas ligadas a métricas~~ (aba Diário) → Grupos → tags nas anotações. Métricas vieram antes porque a meta real da professora tem prazo no início de novembro de 2026.
+6. ~~Backup/exportação JSON~~ (estender a cada entidade nova); relatório em PDF em aberto.

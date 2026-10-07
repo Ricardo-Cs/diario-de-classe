@@ -229,7 +229,7 @@ private fun textoDaUltimaExportacao(estado: MaisUiState): String? {
     }
 }
 
-/** "3 turmas, 74 alunos, 120 chamadas, 5 pendências em aberto e 52 anotações". */
+/** "3 turmas, 74 alunos, 120 chamadas, 5 pendências em aberto, 52 anotações e 4 sondagens". */
 @Composable
 private fun textoDoResumo(resumo: ResumoDoBackup): String {
     val turmas: String = pluralStringResource(R.plurals.importar_turmas, resumo.turmas, resumo.turmas)
@@ -241,9 +241,10 @@ private fun textoDoResumo(resumo: ResumoDoBackup): String {
         resumo.pendenciasEmAberto,
     )
     val anotacoes: String = pluralStringResource(R.plurals.importar_anotacoes, resumo.anotacoes, resumo.anotacoes)
+    val sondagens: String = pluralStringResource(R.plurals.importar_sondagens, resumo.sondagens, resumo.sondagens)
 
-    val inicio = "$turmas, $alunos, $chamadas, $pendencias"
-    return stringResource(R.string.importar_lista_e, inicio, anotacoes)
+    val inicio = "$turmas, $alunos, $chamadas, $pendencias, $anotacoes"
+    return stringResource(R.string.importar_lista_e, inicio, sondagens)
 }
 
 @Composable

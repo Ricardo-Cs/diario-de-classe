@@ -63,3 +63,25 @@ data class AlunoRoute(val alunoId: String)
  */
 @Serializable
 data class AlunoNoInicioRoute(val alunoId: String)
+
+/** A mesma tela do aluno, aberta a partir da aba Diário (pela tela da meta). */
+@Serializable
+data class AlunoNoDiarioRoute(val alunoId: String)
+
+/** `metricaId == null` significa "criar nova métrica". */
+@Serializable
+data class FormularioMetricaRoute(val turmaId: String, val metricaId: String? = null)
+
+@Serializable
+data class MetricaRoute(val metricaId: String)
+
+/** A data vai como texto, pelo mesmo motivo da [ChamadaRoute]. */
+@Serializable
+data class SondagemRoute(val metricaId: String, val data: String)
+
+/** `metaId == null` significa "criar nova meta". */
+@Serializable
+data class FormularioMetaRoute(val turmaId: String, val metaId: String? = null)
+
+@Serializable
+data class MetaRoute(val metaId: String)

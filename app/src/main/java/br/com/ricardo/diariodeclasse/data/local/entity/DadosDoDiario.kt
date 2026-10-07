@@ -8,4 +8,10 @@ data class DadosDoDiario(
     val registrosPresenca: List<RegistroPresenca>,
     val pendencias: List<Pendencia>,
     val anotacoes: List<Anotacao>,
+    val metricas: List<Metrica>,
+    val niveisDaMetrica: List<NivelDaMetrica>,
+    val sondagens: List<Sondagem>,
+    val resultadosDaSondagem: List<ResultadoDaSondagem>,
+    val metas: List<Meta>,
+    val alunosNaMeta: List<AlunoNaMeta>,
 )

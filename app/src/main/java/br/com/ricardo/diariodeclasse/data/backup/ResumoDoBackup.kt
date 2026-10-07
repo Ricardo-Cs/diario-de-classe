@@ -4,7 +4,9 @@ import br.com.ricardo.diariodeclasse.data.local.entity.Aluno
 import br.com.ricardo.diariodeclasse.data.local.entity.Anotacao
 import br.com.ricardo.diariodeclasse.data.local.entity.Chamada
 import br.com.ricardo.diariodeclasse.data.local.entity.DadosDoDiario
+import br.com.ricardo.diariodeclasse.data.local.entity.Metrica
 import br.com.ricardo.diariodeclasse.data.local.entity.Pendencia
+import br.com.ricardo.diariodeclasse.data.local.entity.Sondagem
 import br.com.ricardo.diariodeclasse.data.local.entity.StatusPendencia
 import br.com.ricardo.diariodeclasse.data.local.entity.Turma
 
@@ -19,6 +21,7 @@ data class ResumoDoBackup(
     /** Só as ainda não entregues. */
     val pendenciasEmAberto: Int,
     val anotacoes: Int,
+    val sondagens: Int,
 )
 
 /**
@@ -36,7 +39,28 @@ fun resumirBackup(dados: DadosDoDiario): ResumoDoBackup {
         chamadas = contarChamadasVisiveis(dados.chamadas, turmasVisiveis),
         pendenciasEmAberto = contarPendenciasEmAberto(dados.pendencias, alunosVisiveis),
         anotacoes = contarAnotacoesVisiveis(dados.anotacoes, alunosVisiveis),
+        sondagens = contarSondagensVisiveis(dados.sondagens, idsDasMetricasVisiveis(dados.metricas, turmasVisiveis)),
     )
+}
+
+private fun idsDasMetricasVisiveis(metricas: List<Metrica>, turmasVisiveis: Set<String>): Set<String> {
+    val ids = mutableSetOf<String>()
+    for (metrica in metricas) {
+        if (metrica.deletedAt == null && metrica.turmaId in turmasVisiveis) {
+            ids.add(metrica.id)
+        }
+    }
+    return ids
+}
+
+private fun contarSondagensVisiveis(sondagens: List<Sondagem>, metricasVisiveis: Set<String>): Int {
+    var quantidade = 0
+    for (sondagem in sondagens) {
+        if (sondagem.deletedAt == null && sondagem.metricaId in metricasVisiveis) {
+            quantidade = quantidade + 1
+        }
+    }
+    return quantidade
 }
 
 private fun idsDasTurmasVisiveis(turmas: List<Turma>): Set<String> {

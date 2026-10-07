@@ -30,6 +30,7 @@ import br.com.ricardo.diariodeclasse.data.local.entity.FaltaDoAluno
 import br.com.ricardo.diariodeclasse.data.local.entity.Pendencia
 import br.com.ricardo.diariodeclasse.data.local.entity.PendenciaComOrigem
 import br.com.ricardo.diariodeclasse.ui.componentes.formatarDataComDiaDaSemana
+import br.com.ricardo.diariodeclasse.ui.componentes.formatarDataCurta
 import br.com.ricardo.diariodeclasse.ui.componentes.nomeDoMes
 import br.com.ricardo.diariodeclasse.ui.componentes.textoDeDataRelativa
 import br.com.ricardo.diariodeclasse.ui.pendencias.LinhaDaPendencia
@@ -37,10 +38,10 @@ import br.com.ricardo.diariodeclasse.ui.theme.ausencia
 import java.time.LocalDate
 
 /*
- * As três seções da tela do aluno. Cada uma é uma função de extensão de
+ * As seções da tela do aluno. Cada uma é uma função de extensão de
  * `LazyListScope` (o "this" dentro de `LazyColumn { ... }`): assim cada seção
  * acrescenta os próprios itens à lista, e a tela só chama
- * `secaoDePendencias(...)`, `secaoDeFaltas(...)` e `secaoDeAnotacoes(...)` em sequência.
+ * `secaoDePendencias(...)`, `secaoDeFaltas(...)` etc. em sequência.
  */
 
 /** O que está pendente vem primeiro: é o que pede ação da professora. */
@@ -115,6 +116,61 @@ fun LazyListScope.secaoDeFaltas(resumo: ResumoDasFaltas, hoje: LocalDate) {
 
     item(key = "divisor_faltas") {
         DivisorDeSecao()
+    }
+}
+
+/**
+ * Nível atual em cada métrica e os níveis anteriores. Aluno ainda não avaliado
+ * em nenhuma métrica não mostra a seção: ela só ocuparia espaço.
+ */
+fun LazyListScope.secaoDeAcompanhamento(evolucoes: List<EvolucaoNaMetrica>, hoje: LocalDate) {
+    if (evolucoes.isEmpty()) {
+        return
+    }
+
+    item(key = "cabecalho_acompanhamento") {
+        CabecalhoDaSecao(titulo = stringResource(R.string.aluno_acompanhamento))
+    }
+
+    items(evolucoes, key = { evolucao -> "evolucao_${evolucao.metricaId}" }) { evolucao ->
+        ItemEvolucao(evolucao = evolucao, hoje = hoje)
+    }
+
+    item(key = "divisor_acompanhamento") {
+        DivisorDeSecao()
+    }
+}
+
+/** Só os passos mais recentes, para a seção não crescer a cada sondagem do ano. */
+private const val MAXIMO_DE_PASSOS_ANTERIORES = 3
+
+@Composable
+private fun ItemEvolucao(evolucao: EvolucaoNaMetrica, hoje: LocalDate) {
+    val atual: PassoDaEvolucao = evolucao.passos.first()
+    val anteriores: List<PassoDaEvolucao> = evolucao.passos.drop(1).take(MAXIMO_DE_PASSOS_ANTERIORES)
+
+    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)) {
+        Text(
+            text = evolucao.nomeDaMetrica,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Row(verticalAlignment = Alignment.Bottom) {
+            Text(text = atual.nomeDoNivel, style = MaterialTheme.typography.bodyLarge)
+            Spacer(Modifier.width(8.dp))
+            Text(
+                text = stringResource(R.string.aluno_nivel_desde, formatarDataCurta(atual.desde, hoje)),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        for (passo in anteriores) {
+            Text(
+                text = stringResource(R.string.aluno_nivel_anterior, passo.nomeDoNivel, formatarDataCurta(passo.desde, hoje)),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 

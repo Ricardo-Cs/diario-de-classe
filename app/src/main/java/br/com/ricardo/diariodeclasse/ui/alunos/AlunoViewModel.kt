@@ -6,10 +6,12 @@ import androidx.lifecycle.viewModelScope
 import br.com.ricardo.diariodeclasse.data.local.entity.Aluno
 import br.com.ricardo.diariodeclasse.data.local.entity.Anotacao
 import br.com.ricardo.diariodeclasse.data.local.entity.FaltaDoAluno
+import br.com.ricardo.diariodeclasse.data.local.entity.NivelRegistradoDoAluno
 import br.com.ricardo.diariodeclasse.data.local.entity.PendenciaComOrigem
 import br.com.ricardo.diariodeclasse.data.repository.AlunoRepository
 import br.com.ricardo.diariodeclasse.data.repository.AnotacaoRepository
 import br.com.ricardo.diariodeclasse.data.repository.ChamadaRepository
+import br.com.ricardo.diariodeclasse.data.repository.MetricaRepository
 import br.com.ricardo.diariodeclasse.data.repository.PendenciaRepository
 import br.com.ricardo.diariodeclasse.ui.navigation.AlunoNoInicioRoute
 import br.com.ricardo.diariodeclasse.ui.navigation.AlunoRoute
@@ -35,12 +37,14 @@ sealed interface AlunoUiState {
         val faltas: ResumoDasFaltas,
         /** Mais recentes primeiro. */
         val anotacoes: List<Anotacao>,
+        /** Uma por métrica em que o aluno já foi avaliado. */
+        val evolucoes: List<EvolucaoNaMetrica>,
     ) : AlunoUiState
 }
 
 /**
- * Tela do aluno, a "página do caderno" dele: pendências, faltas e anotações
- * juntas, mais a edição do cadastro.
+ * Tela do aluno, a "página do caderno" dele: pendências, faltas, níveis nas
+ * métricas e anotações juntos, mais a edição do cadastro.
  */
 @HiltViewModel
 class AlunoViewModel @Inject constructor(
@@ -49,13 +53,14 @@ class AlunoViewModel @Inject constructor(
     private val anotacaoRepository: AnotacaoRepository,
     private val pendenciaRepository: PendenciaRepository,
     chamadaRepository: ChamadaRepository,
+    metricaRepository: MetricaRepository,
     private val clock: Clock,
 ) : ViewModel() {
 
     /**
-     * A tela tem duas rotas ([AlunoRoute] na aba Turmas e [AlunoNoInicioRoute] no
-     * Início), e as duas guardam o id com o mesmo nome, "alunoId". Lemos direto
-     * pela chave para servir a qualquer uma delas.
+     * A tela tem três rotas ([AlunoRoute] na aba Turmas, [AlunoNoInicioRoute] no
+     * Início e `AlunoNoDiarioRoute` no Diário), e todas guardam o id com o mesmo
+     * nome, "alunoId". Lemos direto pela chave para servir a qualquer uma delas.
      */
     private val alunoId: String = lerAlunoIdDaRota(savedStateHandle)
 
@@ -64,8 +69,9 @@ class AlunoViewModel @Inject constructor(
         pendenciaRepository.observarPendentesDoAluno(alunoId),
         chamadaRepository.observarFaltasDoAluno(alunoId),
         anotacaoRepository.observarDoAluno(alunoId),
-    ) { aluno, pendencias, faltas, anotacoes ->
-        criarEstado(aluno, pendencias, faltas, anotacoes)
+        metricaRepository.observarNiveisDoAluno(alunoId),
+    ) { aluno, pendencias, faltas, anotacoes, niveis ->
+        criarEstado(aluno, pendencias, faltas, anotacoes, niveis)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
@@ -77,6 +83,7 @@ class AlunoViewModel @Inject constructor(
         pendencias: List<PendenciaComOrigem>,
         faltas: List<FaltaDoAluno>,
         anotacoes: List<Anotacao>,
+        niveis: List<NivelRegistradoDoAluno>,
     ): AlunoUiState {
         if (aluno == null) {
             return AlunoUiState.AlunoNaoEncontrado
@@ -88,6 +95,7 @@ class AlunoViewModel @Inject constructor(
             pendencias = pendencias,
             faltas = calcularResumoDasFaltas(faltas, hoje),
             anotacoes = anotacoes,
+            evolucoes = calcularEvolucaoDoAluno(niveis, hoje),
         )
     }
 

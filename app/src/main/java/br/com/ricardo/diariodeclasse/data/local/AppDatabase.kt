@@ -9,13 +9,21 @@ import br.com.ricardo.diariodeclasse.data.local.dao.AnotacaoDao
 import br.com.ricardo.diariodeclasse.data.local.dao.AtividadeRecenteDao
 import br.com.ricardo.diariodeclasse.data.local.dao.BackupDao
 import br.com.ricardo.diariodeclasse.data.local.dao.ChamadaDao
+import br.com.ricardo.diariodeclasse.data.local.dao.MetaDao
+import br.com.ricardo.diariodeclasse.data.local.dao.MetricaDao
 import br.com.ricardo.diariodeclasse.data.local.dao.PendenciaDao
 import br.com.ricardo.diariodeclasse.data.local.dao.TurmaDao
 import br.com.ricardo.diariodeclasse.data.local.entity.Aluno
+import br.com.ricardo.diariodeclasse.data.local.entity.AlunoNaMeta
 import br.com.ricardo.diariodeclasse.data.local.entity.Anotacao
 import br.com.ricardo.diariodeclasse.data.local.entity.Chamada
+import br.com.ricardo.diariodeclasse.data.local.entity.Meta
+import br.com.ricardo.diariodeclasse.data.local.entity.Metrica
+import br.com.ricardo.diariodeclasse.data.local.entity.NivelDaMetrica
 import br.com.ricardo.diariodeclasse.data.local.entity.Pendencia
 import br.com.ricardo.diariodeclasse.data.local.entity.RegistroPresenca
+import br.com.ricardo.diariodeclasse.data.local.entity.ResultadoDaSondagem
+import br.com.ricardo.diariodeclasse.data.local.entity.Sondagem
 import br.com.ricardo.diariodeclasse.data.local.entity.Turma
 
 /**
@@ -28,6 +36,7 @@ import br.com.ricardo.diariodeclasse.data.local.entity.Turma
  * 3 → chamadas e registros de presença
  * 4 → pendências
  * 5 → anotações
+ * 6 → métricas (com níveis e sondagens) e metas
  */
 @Database(
     entities = [
@@ -37,14 +46,21 @@ import br.com.ricardo.diariodeclasse.data.local.entity.Turma
         RegistroPresenca::class,
         Pendencia::class,
         Anotacao::class,
+        Metrica::class,
+        NivelDaMetrica::class,
+        Sondagem::class,
+        ResultadoDaSondagem::class,
+        Meta::class,
+        AlunoNaMeta::class,
     ],
-    version = 5,
+    version = 6,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
         AutoMigration(from = 2, to = 3),
         AutoMigration(from = 3, to = 4),
         AutoMigration(from = 4, to = 5),
+        AutoMigration(from = 5, to = 6),
     ],
 )
 @TypeConverters(Converters::class)
@@ -54,6 +70,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun chamadaDao(): ChamadaDao
     abstract fun pendenciaDao(): PendenciaDao
     abstract fun anotacaoDao(): AnotacaoDao
+    abstract fun metricaDao(): MetricaDao
+    abstract fun metaDao(): MetaDao
     abstract fun atividadeRecenteDao(): AtividadeRecenteDao
     abstract fun backupDao(): BackupDao
 

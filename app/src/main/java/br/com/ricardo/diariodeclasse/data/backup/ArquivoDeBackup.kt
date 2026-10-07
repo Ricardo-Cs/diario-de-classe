@@ -19,7 +19,13 @@ import kotlinx.serialization.Serializable
 /** Identifica um arquivo deste app; impede importar um JSON qualquer por engano. */
 const val FORMATO_DO_ARQUIVO = "diario-de-classe"
 
-const val VERSAO_DO_FORMATO = 1
+/**
+ * Histórico:
+ * 1 → turmas, alunos, chamadas, pendências e anotações
+ * 2 → métricas (níveis, sondagens e resultados) e metas. Os campos novos têm
+ *     lista vazia como padrão, então arquivos da versão 1 continuam sendo lidos.
+ */
+const val VERSAO_DO_FORMATO = 2
 
 /** Só o começo do arquivo: lido antes do resto para checar formato e versão. */
 @Serializable
@@ -39,6 +45,12 @@ data class ArquivoDeBackup(
     val registrosPresenca: List<RegistroPresencaNoArquivo>,
     val pendencias: List<PendenciaNoArquivo>,
     val anotacoes: List<AnotacaoNoArquivo>,
+    val metricas: List<MetricaNoArquivo> = emptyList(),
+    val niveisDaMetrica: List<NivelDaMetricaNoArquivo> = emptyList(),
+    val sondagens: List<SondagemNoArquivo> = emptyList(),
+    val resultadosDaSondagem: List<ResultadoDaSondagemNoArquivo> = emptyList(),
+    val metas: List<MetaNoArquivo> = emptyList(),
+    val alunosNaMeta: List<AlunoNaMetaNoArquivo> = emptyList(),
 )
 
 @Serializable
@@ -105,6 +117,73 @@ data class AnotacaoNoArquivo(
     val alunoId: String,
     val texto: String,
     val data: String,
+    val createdAt: String,
+    val updatedAt: String,
+    val deletedAt: String? = null,
+)
+
+@Serializable
+data class MetricaNoArquivo(
+    val id: String,
+    val turmaId: String,
+    val nome: String,
+    val createdAt: String,
+    val updatedAt: String,
+    val deletedAt: String? = null,
+)
+
+@Serializable
+data class NivelDaMetricaNoArquivo(
+    val id: String,
+    val metricaId: String,
+    val nome: String,
+    val ordem: Int,
+    val createdAt: String,
+    val updatedAt: String,
+    val deletedAt: String? = null,
+)
+
+@Serializable
+data class SondagemNoArquivo(
+    val id: String,
+    val metricaId: String,
+    val data: String,
+    val createdAt: String,
+    val updatedAt: String,
+    val deletedAt: String? = null,
+)
+
+@Serializable
+data class ResultadoDaSondagemNoArquivo(
+    val id: String,
+    val sondagemId: String,
+    val alunoId: String,
+    val nivelId: String,
+    val createdAt: String,
+    val updatedAt: String,
+    val deletedAt: String? = null,
+)
+
+@Serializable
+data class MetaNoArquivo(
+    val id: String,
+    val turmaId: String,
+    val descricao: String,
+    val metricaId: String,
+    val nivelAlvoId: String,
+    val prazo: String,
+    val encerradaEm: String? = null,
+    val createdAt: String,
+    val updatedAt: String,
+    val deletedAt: String? = null,
+)
+
+@Serializable
+data class AlunoNaMetaNoArquivo(
+    val id: String,
+    val metaId: String,
+    val alunoId: String,
+    val nivelInicialId: String? = null,
     val createdAt: String,
     val updatedAt: String,
     val deletedAt: String? = null,

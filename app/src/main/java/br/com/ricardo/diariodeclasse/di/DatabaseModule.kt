@@ -9,6 +9,8 @@ import br.com.ricardo.diariodeclasse.data.local.dao.AnotacaoDao
 import br.com.ricardo.diariodeclasse.data.local.dao.AtividadeRecenteDao
 import br.com.ricardo.diariodeclasse.data.local.dao.BackupDao
 import br.com.ricardo.diariodeclasse.data.local.dao.ChamadaDao
+import br.com.ricardo.diariodeclasse.data.local.dao.MetaDao
+import br.com.ricardo.diariodeclasse.data.local.dao.MetricaDao
 import br.com.ricardo.diariodeclasse.data.local.dao.PendenciaDao
 import br.com.ricardo.diariodeclasse.data.local.dao.TurmaDao
 import dagger.Module
@@ -57,6 +59,12 @@ object DatabaseModule {
 
     @Provides
     fun provideAnotacaoDao(database: AppDatabase): AnotacaoDao = database.anotacaoDao()
+
+    @Provides
+    fun provideMetricaDao(database: AppDatabase): MetricaDao = database.metricaDao()
+
+    @Provides
+    fun provideMetaDao(database: AppDatabase): MetaDao = database.metaDao()
 
     @Provides
     fun provideAtividadeRecenteDao(database: AppDatabase): AtividadeRecenteDao = database.atividadeRecenteDao()

@@ -1,12 +1,18 @@
 package br.com.ricardo.diariodeclasse.data.backup
 
 import br.com.ricardo.diariodeclasse.data.local.entity.Aluno
+import br.com.ricardo.diariodeclasse.data.local.entity.AlunoNaMeta
 import br.com.ricardo.diariodeclasse.data.local.entity.Anotacao
 import br.com.ricardo.diariodeclasse.data.local.entity.Chamada
 import br.com.ricardo.diariodeclasse.data.local.entity.DadosDoDiario
+import br.com.ricardo.diariodeclasse.data.local.entity.Meta
+import br.com.ricardo.diariodeclasse.data.local.entity.Metrica
+import br.com.ricardo.diariodeclasse.data.local.entity.NivelDaMetrica
 import br.com.ricardo.diariodeclasse.data.local.entity.Pendencia
 import br.com.ricardo.diariodeclasse.data.local.entity.Periodo
 import br.com.ricardo.diariodeclasse.data.local.entity.RegistroPresenca
+import br.com.ricardo.diariodeclasse.data.local.entity.ResultadoDaSondagem
+import br.com.ricardo.diariodeclasse.data.local.entity.Sondagem
 import br.com.ricardo.diariodeclasse.data.local.entity.StatusPendencia
 import br.com.ricardo.diariodeclasse.data.local.entity.Turma
 import org.junit.Assert.assertEquals
@@ -44,6 +50,29 @@ class ConversorDeBackupTest {
             id = "anotacao", alunoId = "ana", texto = "Reconheceu as vogais",
             data = hoje, createdAt = agora, updatedAt = agora,
         )
+        val metrica = Metrica(id = "escrita", turmaId = "turma", nome = "Nível de escrita", createdAt = agora, updatedAt = agora)
+        val silabico = NivelDaMetrica(
+            id = "silabico", metricaId = "escrita", nome = "Silábico", ordem = 0,
+            createdAt = agora, updatedAt = agora,
+        )
+        val alfabetico = NivelDaMetrica(
+            id = "alfabetico", metricaId = "escrita", nome = "Alfabético", ordem = 1,
+            createdAt = agora, updatedAt = agora,
+        )
+        val sondagem = Sondagem(id = "sondagem", metricaId = "escrita", data = hoje, createdAt = agora, updatedAt = agora)
+        val resultado = ResultadoDaSondagem(
+            id = "resultado", sondagemId = "sondagem", alunoId = "ana", nivelId = "silabico",
+            createdAt = agora, updatedAt = agora,
+        )
+        val meta = Meta(
+            id = "meta", turmaId = "turma", descricao = "Virar alfabéticos", metricaId = "escrita",
+            nivelAlvoId = "alfabetico", prazo = hoje.plusDays(31), encerradaEm = hoje,
+            createdAt = agora, updatedAt = agora,
+        )
+        val anaNaMeta = AlunoNaMeta(
+            id = "ana-na-meta", metaId = "meta", alunoId = "ana", nivelInicialId = "silabico",
+            createdAt = agora, updatedAt = agora,
+        )
         return DadosDoDiario(
             turmas = listOf(turma),
             alunos = listOf(ana, brunoExcluido),
@@ -51,6 +80,12 @@ class ConversorDeBackupTest {
             registrosPresenca = listOf(falta),
             pendencias = listOf(pendencia),
             anotacoes = listOf(anotacao),
+            metricas = listOf(metrica),
+            niveisDaMetrica = listOf(silabico, alfabetico),
+            sondagens = listOf(sondagem),
+            resultadosDaSondagem = listOf(resultado),
+            metas = listOf(meta),
+            alunosNaMeta = listOf(anaNaMeta),
         )
     }
 
@@ -65,6 +100,33 @@ class ConversorDeBackupTest {
         val valida = leitura as LeituraDoBackup.Valida
         assertEquals(original, valida.dados)
         assertEquals(agora, valida.exportadoEm)
+    }
+
+    /** Arquivo exportado antes das métricas: sem os campos novos, que viram listas vazias. */
+    @Test
+    fun arquivoDaVersao1_continuaSendoLido() {
+        val json = """
+            {
+              "formato": "$FORMATO_DO_ARQUIVO",
+              "versao": 1,
+              "exportadoEm": "2026-10-01T10:00:00Z",
+              "turmas": [{"id": "turma", "nome": "1º ano A", "anoSerie": "1º ano", "periodo": "MANHA",
+                          "anoLetivo": 2026, "createdAt": "2026-10-01T10:00:00Z", "updatedAt": "2026-10-01T10:00:00Z"}],
+              "alunos": [],
+              "chamadas": [],
+              "registrosPresenca": [],
+              "pendencias": [],
+              "anotacoes": []
+            }
+        """.trimIndent()
+
+        val leitura: LeituraDoBackup = ConversorDeBackup.lerJson(json)
+
+        assertTrue(leitura is LeituraDoBackup.Valida)
+        val dados: DadosDoDiario = (leitura as LeituraDoBackup.Valida).dados
+        assertEquals(1, dados.turmas.size)
+        assertEquals(emptyList<Metrica>(), dados.metricas)
+        assertEquals(emptyList<Meta>(), dados.metas)
     }
 
     @Test
@@ -124,7 +186,20 @@ class ConversorDeBackupTest {
         val resumo: ResumoDoBackup = resumirBackup(diarioDeExemplo())
 
         // Bruno está excluído; a única pendência já foi entregue.
-        assertEquals(ResumoDoBackup(turmas = 1, alunos = 1, chamadas = 1, pendenciasEmAberto = 0, anotacoes = 1), resumo)
+        assertEquals(
+            ResumoDoBackup(turmas = 1, alunos = 1, chamadas = 1, pendenciasEmAberto = 0, anotacoes = 1, sondagens = 1),
+            resumo,
+        )
+    }
+
+    @Test
+    fun resumo_sondagensDeMetricaExcluidaNaoContam() {
+        val dados: DadosDoDiario = diarioDeExemplo()
+        val metricaExcluida: Metrica = dados.metricas.first().copy(deletedAt = agora)
+
+        val resumo: ResumoDoBackup = resumirBackup(dados.copy(metricas = listOf(metricaExcluida)))
+
+        assertEquals(0, resumo.sondagens)
     }
 
     @Test
@@ -135,6 +210,9 @@ class ConversorDeBackupTest {
 
         val resumo: ResumoDoBackup = resumirBackup(semTurma)
 
-        assertEquals(ResumoDoBackup(turmas = 0, alunos = 0, chamadas = 0, pendenciasEmAberto = 0, anotacoes = 0), resumo)
+        assertEquals(
+            ResumoDoBackup(turmas = 0, alunos = 0, chamadas = 0, pendenciasEmAberto = 0, anotacoes = 0, sondagens = 0),
+            resumo,
+        )
     }
 }

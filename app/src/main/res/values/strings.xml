@@ -18,7 +18,6 @@
     <string name="aba_turma">Turmas</string>
     <string name="aba_diario">Diário</string>
     <string name="aba_mais">Mais</string>
-    <string name="em_construcao">Em construção.</string>
 
     <!-- Início -->
     <string name="saudacao_bom_dia">Bom dia!</string>
@@ -196,6 +195,132 @@
     <string name="aluno_excluir_titulo">Excluir aluno?</string>
     <string name="aluno_excluir_mensagem">%1$s deixará de aparecer na turma.</string>
 
+    <!-- Aluno: acompanhamento (níveis das métricas) -->
+    <string name="aluno_acompanhamento">Acompanhamento</string>
+    <string name="aluno_nivel_desde">desde %1$s</string>
+    <string name="aluno_nivel_anterior">%1$s · desde %2$s</string>
+
+    <!-- Diário: métricas e metas da turma -->
+    <string name="diario_sem_turma">Cadastre uma turma para acompanhar métricas e metas.</string>
+    <string name="diario_metas">Metas</string>
+    <string name="diario_nova_meta">Nova meta</string>
+    <string name="diario_sem_metas">Nenhuma meta em andamento.</string>
+    <string name="diario_metas_precisam_de_metrica">Para criar uma meta, crie antes a métrica que ela vai usar (ex.: nível de escrita).</string>
+    <string name="diario_metas_encerradas">Encerradas</string>
+    <string name="diario_metricas">Métricas</string>
+    <string name="diario_nova_metrica">Nova métrica</string>
+    <string name="diario_sem_metricas">Uma métrica é algo que você acompanha em cada aluno ao longo do tempo, como o nível de escrita.</string>
+    <string name="diario_criar_metrica">Criar métrica</string>
+    <string name="diario_ultima_sondagem">Última sondagem: %1$s</string>
+    <string name="diario_nenhuma_sondagem">Nenhuma sondagem ainda</string>
+
+    <!-- Métrica -->
+    <string name="metrica_editar">Editar métrica</string>
+    <string name="metrica_turma_hoje">A turma hoje</string>
+    <string name="metrica_sem_avaliacao">Sem avaliação</string>
+    <string name="metrica_sondagens">Sondagens</string>
+    <string name="metrica_sem_sondagens">Nenhuma sondagem registrada. Comece pela sondagem de hoje.</string>
+    <string name="metrica_outro_dia">Outro dia</string>
+    <string name="metrica_registrar_sondagem_hoje">Registrar sondagem de hoje</string>
+    <string name="metrica_editar_sondagem_hoje">Editar sondagem de hoje</string>
+    <string name="metrica_sem_alunos">Cadastre os alunos desta turma para registrar sondagens.</string>
+    <plurals name="metrica_alunos_avaliados">
+        <item quantity="one">%d aluno avaliado</item>
+        <item quantity="other">%d alunos avaliados</item>
+    </plurals>
+
+    <!-- Formulário de métrica -->
+    <string name="metrica_formulario_titulo_nova">Nova métrica</string>
+    <string name="metrica_formulario_titulo_edicao">Editar métrica</string>
+    <string name="metrica_campo_nome">Nome da métrica</string>
+    <string name="metrica_campo_nome_exemplo">Ex.: Nível de escrita</string>
+    <string name="metrica_usar_modelo">Usar modelo: níveis de escrita</string>
+    <string name="metrica_usar_modelo_descricao">Preenche os 5 níveis da psicogênese da língua escrita. Você pode editar tudo depois.</string>
+    <string name="metrica_niveis">Níveis, do mais inicial ao mais avançado</string>
+    <string name="metrica_campo_nivel">Nível %1$d</string>
+    <string name="metrica_adicionar_nivel">Adicionar nível</string>
+    <string name="metrica_subir_nivel">Subir %1$s</string>
+    <string name="metrica_descer_nivel">Descer %1$s</string>
+    <string name="metrica_remover_nivel">Remover %1$s</string>
+    <string name="metrica_niveis_em_uso">Níveis com alunos avaliados ou usados em metas não podem ser removidos, só renomeados ou reordenados.</string>
+    <string name="metrica_precisa_de_dois_niveis">A escala precisa de pelo menos dois níveis, todos com nome.</string>
+    <string name="metrica_excluir">Excluir métrica</string>
+    <string name="metrica_excluir_titulo">Excluir métrica?</string>
+    <string name="metrica_excluir_mensagem">A métrica %1$s, suas sondagens e as metas ligadas a ela deixarão de aparecer no app.</string>
+    <string name="metrica_modelo_nome">Nível de escrita</string>
+    <string-array name="metrica_modelo_niveis">
+        <item>Pré-silábico</item>
+        <item>Silábico sem valor sonoro</item>
+        <item>Silábico com valor sonoro</item>
+        <item>Silábico-alfabético</item>
+        <item>Alfabético</item>
+    </string-array>
+
+    <!-- Sondagem -->
+    <string name="sondagem_titulo">Sondagem</string>
+    <string name="sondagem_titulo_edicao">Editar sondagem</string>
+    <string name="sondagem_instrucao">O nível da sondagem anterior já vem marcado. Toque em quem mudou.</string>
+    <plurals name="sondagem_mudancas">
+        <item quantity="one">%d mudou de nível</item>
+        <item quantity="other">%d mudaram de nível</item>
+    </plurals>
+    <string name="sondagem_nenhuma_mudanca">Nenhuma mudança</string>
+    <string name="sondagem_nao_avaliado">Não avaliado</string>
+    <string name="sondagem_antes">antes: %1$s</string>
+    <string name="sondagem_salvar">Salvar sondagem</string>
+    <plurals name="sondagem_salvar_com_mudancas">
+        <item quantity="one">Salvar sondagem · %d mudança</item>
+        <item quantity="other">Salvar sondagem · %d mudanças</item>
+    </plurals>
+    <string name="sondagem_nivel_de">Nível de %1$s</string>
+    <string name="sondagem_descartar_titulo">Descartar a sondagem?</string>
+    <string name="sondagem_descartar_mensagem">As alterações feitas nesta sondagem ainda não foram salvas.</string>
+
+    <!-- Meta -->
+    <string name="meta_titulo">Meta</string>
+    <string name="meta_editar">Editar meta</string>
+    <!-- O verbo vem antes dos números para não depender de singular/plural ("1 de 11 chegaram"). -->
+    <string name="meta_chegaram_a">Chegaram a %3$s: %1$d de %2$d</string>
+    <plurals name="meta_prazo_faltam">
+        <item quantity="one">Prazo: %1$s · falta %2$d dia</item>
+        <item quantity="other">Prazo: %1$s · faltam %2$d dias</item>
+    </plurals>
+    <string name="meta_prazo_hoje">Prazo: hoje</string>
+    <plurals name="meta_prazo_vencido">
+        <item quantity="one">Prazo: %1$s · venceu há %2$d dia</item>
+        <item quantity="other">Prazo: %1$s · venceu há %2$d dias</item>
+    </plurals>
+    <string name="meta_encerrada_em">Encerrada em %1$s</string>
+    <string name="meta_registrar_sondagem">Registrar sondagem</string>
+    <string name="meta_encerrar">Encerrar meta</string>
+    <string name="meta_reabrir">Reabrir meta</string>
+    <string name="meta_situacao_atingiu">Já chegaram</string>
+    <string name="meta_situacao_avancou">Avançaram</string>
+    <string name="meta_situacao_nao_avancou">Ainda não avançaram</string>
+    <string name="meta_situacao_sem_avaliacao">Sem avaliação</string>
+    <string name="meta_sem_alunos">Nenhum aluno desta meta está na turma.</string>
+
+    <!-- Formulário de meta -->
+    <string name="meta_formulario_titulo_nova">Nova meta</string>
+    <string name="meta_formulario_titulo_edicao">Editar meta</string>
+    <string name="meta_campo_descricao">Descrição</string>
+    <string name="meta_campo_descricao_exemplo">Ex.: silábicos com valor sonoro → alfabéticos</string>
+    <string name="meta_campo_metrica">Métrica</string>
+    <string name="meta_campo_nivel_alvo">Chegar ao nível</string>
+    <string name="meta_campo_prazo">Prazo</string>
+    <string name="meta_escolher">Escolher</string>
+    <string name="meta_escolher_data">Escolher data</string>
+    <plurals name="meta_alunos_escolhidos">
+        <item quantity="one">Alunos · %d escolhido</item>
+        <item quantity="other">Alunos · %d escolhidos</item>
+    </plurals>
+    <string name="meta_atalho_titulo">Escolher quem está hoje em:</string>
+    <string name="meta_atalho_nivel">%1$s (%2$d)</string>
+    <string name="meta_sem_nivel">Ainda não avaliado</string>
+    <string name="meta_excluir">Excluir meta</string>
+    <string name="meta_excluir_titulo">Excluir meta?</string>
+    <string name="meta_excluir_mensagem">A meta %1$s deixará de aparecer no app. As sondagens continuam registradas.</string>
+
     <!-- Mais: backup e exportação -->
     <string name="mais_seus_dados">Seus dados</string>
     <string name="mais_exportar">Exportar dados</string>
@@ -237,6 +362,10 @@ Tudo o que está no app agora será apagado e trocado pelo conteúdo do arquivo.
     <plurals name="importar_anotacoes">
         <item quantity="one">%d anotação</item>
         <item quantity="other">%d anotações</item>
+    </plurals>
+    <plurals name="importar_sondagens">
+        <item quantity="one">%d sondagem</item>
+        <item quantity="other">%d sondagens</item>
     </plurals>
     <string name="importar_lista_e">%1$s e %2$s</string>
 

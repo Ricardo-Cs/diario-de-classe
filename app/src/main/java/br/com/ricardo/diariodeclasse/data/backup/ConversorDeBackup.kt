@@ -1,12 +1,18 @@
 package br.com.ricardo.diariodeclasse.data.backup
 
 import br.com.ricardo.diariodeclasse.data.local.entity.Aluno
+import br.com.ricardo.diariodeclasse.data.local.entity.AlunoNaMeta
 import br.com.ricardo.diariodeclasse.data.local.entity.Anotacao
 import br.com.ricardo.diariodeclasse.data.local.entity.Chamada
 import br.com.ricardo.diariodeclasse.data.local.entity.DadosDoDiario
+import br.com.ricardo.diariodeclasse.data.local.entity.Meta
+import br.com.ricardo.diariodeclasse.data.local.entity.Metrica
+import br.com.ricardo.diariodeclasse.data.local.entity.NivelDaMetrica
 import br.com.ricardo.diariodeclasse.data.local.entity.Pendencia
 import br.com.ricardo.diariodeclasse.data.local.entity.Periodo
 import br.com.ricardo.diariodeclasse.data.local.entity.RegistroPresenca
+import br.com.ricardo.diariodeclasse.data.local.entity.ResultadoDaSondagem
+import br.com.ricardo.diariodeclasse.data.local.entity.Sondagem
 import br.com.ricardo.diariodeclasse.data.local.entity.StatusPendencia
 import br.com.ricardo.diariodeclasse.data.local.entity.Turma
 import kotlinx.serialization.SerializationException
@@ -62,6 +68,12 @@ object ConversorDeBackup {
             registrosPresenca = dados.registrosPresenca.map { registro -> registroParaArquivo(registro) },
             pendencias = dados.pendencias.map { pendencia -> pendenciaParaArquivo(pendencia) },
             anotacoes = dados.anotacoes.map { anotacao -> anotacaoParaArquivo(anotacao) },
+            metricas = dados.metricas.map { metrica -> metricaParaArquivo(metrica) },
+            niveisDaMetrica = dados.niveisDaMetrica.map { nivel -> nivelParaArquivo(nivel) },
+            sondagens = dados.sondagens.map { sondagem -> sondagemParaArquivo(sondagem) },
+            resultadosDaSondagem = dados.resultadosDaSondagem.map { resultado -> resultadoParaArquivo(resultado) },
+            metas = dados.metas.map { meta -> metaParaArquivo(meta) },
+            alunosNaMeta = dados.alunosNaMeta.map { linha -> alunoNaMetaParaArquivo(linha) },
         )
         return jsonDoArquivo.encodeToString(ArquivoDeBackup.serializer(), arquivo)
     }
@@ -114,6 +126,12 @@ object ConversorDeBackup {
             registrosPresenca = arquivo.registrosPresenca.map { registro -> registroDoArquivo(registro) },
             pendencias = arquivo.pendencias.map { pendencia -> pendenciaDoArquivo(pendencia) },
             anotacoes = arquivo.anotacoes.map { anotacao -> anotacaoDoArquivo(anotacao) },
+            metricas = arquivo.metricas.map { metrica -> metricaDoArquivo(metrica) },
+            niveisDaMetrica = arquivo.niveisDaMetrica.map { nivel -> nivelDoArquivo(nivel) },
+            sondagens = arquivo.sondagens.map { sondagem -> sondagemDoArquivo(sondagem) },
+            resultadosDaSondagem = arquivo.resultadosDaSondagem.map { resultado -> resultadoDoArquivo(resultado) },
+            metas = arquivo.metas.map { meta -> metaDoArquivo(meta) },
+            alunosNaMeta = arquivo.alunosNaMeta.map { linha -> alunoNaMetaDoArquivo(linha) },
         )
     }
 
@@ -194,6 +212,79 @@ object ConversorDeBackup {
         )
     }
 
+    private fun metricaParaArquivo(metrica: Metrica): MetricaNoArquivo {
+        return MetricaNoArquivo(
+            id = metrica.id,
+            turmaId = metrica.turmaId,
+            nome = metrica.nome,
+            createdAt = metrica.createdAt.toString(),
+            updatedAt = metrica.updatedAt.toString(),
+            deletedAt = textoOuNulo(metrica.deletedAt),
+        )
+    }
+
+    private fun nivelParaArquivo(nivel: NivelDaMetrica): NivelDaMetricaNoArquivo {
+        return NivelDaMetricaNoArquivo(
+            id = nivel.id,
+            metricaId = nivel.metricaId,
+            nome = nivel.nome,
+            ordem = nivel.ordem,
+            createdAt = nivel.createdAt.toString(),
+            updatedAt = nivel.updatedAt.toString(),
+            deletedAt = textoOuNulo(nivel.deletedAt),
+        )
+    }
+
+    private fun sondagemParaArquivo(sondagem: Sondagem): SondagemNoArquivo {
+        return SondagemNoArquivo(
+            id = sondagem.id,
+            metricaId = sondagem.metricaId,
+            data = sondagem.data.toString(),
+            createdAt = sondagem.createdAt.toString(),
+            updatedAt = sondagem.updatedAt.toString(),
+            deletedAt = textoOuNulo(sondagem.deletedAt),
+        )
+    }
+
+    private fun resultadoParaArquivo(resultado: ResultadoDaSondagem): ResultadoDaSondagemNoArquivo {
+        return ResultadoDaSondagemNoArquivo(
+            id = resultado.id,
+            sondagemId = resultado.sondagemId,
+            alunoId = resultado.alunoId,
+            nivelId = resultado.nivelId,
+            createdAt = resultado.createdAt.toString(),
+            updatedAt = resultado.updatedAt.toString(),
+            deletedAt = textoOuNulo(resultado.deletedAt),
+        )
+    }
+
+    private fun metaParaArquivo(meta: Meta): MetaNoArquivo {
+        return MetaNoArquivo(
+            id = meta.id,
+            turmaId = meta.turmaId,
+            descricao = meta.descricao,
+            metricaId = meta.metricaId,
+            nivelAlvoId = meta.nivelAlvoId,
+            prazo = meta.prazo.toString(),
+            encerradaEm = dataOuNulo(meta.encerradaEm),
+            createdAt = meta.createdAt.toString(),
+            updatedAt = meta.updatedAt.toString(),
+            deletedAt = textoOuNulo(meta.deletedAt),
+        )
+    }
+
+    private fun alunoNaMetaParaArquivo(linha: AlunoNaMeta): AlunoNaMetaNoArquivo {
+        return AlunoNaMetaNoArquivo(
+            id = linha.id,
+            metaId = linha.metaId,
+            alunoId = linha.alunoId,
+            nivelInicialId = linha.nivelInicialId,
+            createdAt = linha.createdAt.toString(),
+            updatedAt = linha.updatedAt.toString(),
+            deletedAt = textoOuNulo(linha.deletedAt),
+        )
+    }
+
     // --- Arquivo → entidade ---
 
     private fun turmaDoArquivo(turma: TurmaNoArquivo): Turma {
@@ -269,6 +360,93 @@ object ConversorDeBackup {
             updatedAt = Instant.parse(anotacao.updatedAt),
             deletedAt = instanteOuNulo(anotacao.deletedAt),
         )
+    }
+
+    private fun metricaDoArquivo(metrica: MetricaNoArquivo): Metrica {
+        return Metrica(
+            id = metrica.id,
+            turmaId = metrica.turmaId,
+            nome = metrica.nome,
+            createdAt = Instant.parse(metrica.createdAt),
+            updatedAt = Instant.parse(metrica.updatedAt),
+            deletedAt = instanteOuNulo(metrica.deletedAt),
+        )
+    }
+
+    private fun nivelDoArquivo(nivel: NivelDaMetricaNoArquivo): NivelDaMetrica {
+        return NivelDaMetrica(
+            id = nivel.id,
+            metricaId = nivel.metricaId,
+            nome = nivel.nome,
+            ordem = nivel.ordem,
+            createdAt = Instant.parse(nivel.createdAt),
+            updatedAt = Instant.parse(nivel.updatedAt),
+            deletedAt = instanteOuNulo(nivel.deletedAt),
+        )
+    }
+
+    private fun sondagemDoArquivo(sondagem: SondagemNoArquivo): Sondagem {
+        return Sondagem(
+            id = sondagem.id,
+            metricaId = sondagem.metricaId,
+            data = LocalDate.parse(sondagem.data),
+            createdAt = Instant.parse(sondagem.createdAt),
+            updatedAt = Instant.parse(sondagem.updatedAt),
+            deletedAt = instanteOuNulo(sondagem.deletedAt),
+        )
+    }
+
+    private fun resultadoDoArquivo(resultado: ResultadoDaSondagemNoArquivo): ResultadoDaSondagem {
+        return ResultadoDaSondagem(
+            id = resultado.id,
+            sondagemId = resultado.sondagemId,
+            alunoId = resultado.alunoId,
+            nivelId = resultado.nivelId,
+            createdAt = Instant.parse(resultado.createdAt),
+            updatedAt = Instant.parse(resultado.updatedAt),
+            deletedAt = instanteOuNulo(resultado.deletedAt),
+        )
+    }
+
+    private fun metaDoArquivo(meta: MetaNoArquivo): Meta {
+        return Meta(
+            id = meta.id,
+            turmaId = meta.turmaId,
+            descricao = meta.descricao,
+            metricaId = meta.metricaId,
+            nivelAlvoId = meta.nivelAlvoId,
+            prazo = LocalDate.parse(meta.prazo),
+            encerradaEm = dataLidaOuNulo(meta.encerradaEm),
+            createdAt = Instant.parse(meta.createdAt),
+            updatedAt = Instant.parse(meta.updatedAt),
+            deletedAt = instanteOuNulo(meta.deletedAt),
+        )
+    }
+
+    private fun alunoNaMetaDoArquivo(linha: AlunoNaMetaNoArquivo): AlunoNaMeta {
+        return AlunoNaMeta(
+            id = linha.id,
+            metaId = linha.metaId,
+            alunoId = linha.alunoId,
+            nivelInicialId = linha.nivelInicialId,
+            createdAt = Instant.parse(linha.createdAt),
+            updatedAt = Instant.parse(linha.updatedAt),
+            deletedAt = instanteOuNulo(linha.deletedAt),
+        )
+    }
+
+    private fun dataOuNulo(data: LocalDate?): String? {
+        if (data == null) {
+            return null
+        }
+        return data.toString()
+    }
+
+    private fun dataLidaOuNulo(texto: String?): LocalDate? {
+        if (texto == null) {
+            return null
+        }
+        return LocalDate.parse(texto)
     }
 
     private fun textoOuNulo(instante: Instant?): String? {

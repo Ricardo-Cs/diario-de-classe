@@ -148,6 +148,7 @@ private fun ConteudoAluno(
                 aoMarcarComoEntregue = { pendencia -> marcarComoEntregue(pendencia) },
             )
             secaoDeFaltas(resumo = estado.faltas, hoje = estado.hoje)
+            secaoDeAcompanhamento(evolucoes = estado.evolucoes, hoje = estado.hoje)
             secaoDeAnotacoes(
                 aluno = estado.aluno,
                 anotacoes = estado.anotacoes,

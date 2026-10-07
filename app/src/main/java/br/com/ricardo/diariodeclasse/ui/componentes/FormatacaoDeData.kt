@@ -40,6 +40,14 @@ fun nomeDoMes(data: LocalDate): String {
     return data.format(DateTimeFormatter.ofPattern("MMMM", PORTUGUES_DO_BRASIL))
 }
 
+/** "06/11" ou, se for de outro ano, "06/11/2027". Para prazos, onde "Hoje" e "Ontem" não cabem. */
+fun formatarDataCurta(data: LocalDate, hoje: LocalDate): String {
+    if (data.year == hoje.year) {
+        return data.format(DateTimeFormatter.ofPattern("dd/MM"))
+    }
+    return data.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+}
+
 /** "Hoje", "Ontem", "02/10" ou, se for de outro ano, "15/12/2025". */
 @Composable
 fun textoDeDataRelativa(data: LocalDate, hoje: LocalDate): String {
