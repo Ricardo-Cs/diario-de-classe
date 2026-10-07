@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Creme do fundo da arte original do ícone. -->
+    <color name="ic_launcher_background">#FDF5E3</color>
+</resources>
