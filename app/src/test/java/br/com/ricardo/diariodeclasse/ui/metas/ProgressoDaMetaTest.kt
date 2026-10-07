@@ -117,6 +117,40 @@ class ProgressoDaMetaTest {
     }
 
     @Test
+    fun metaAMao_usaAMarcacaoDaProfessoraEIgnoraAsSondagens() {
+        val metaAMao = meta.copy(metricaId = null, nivelAlvoId = null, prazo = null)
+        val alunosDaMeta = listOf(
+            naMeta("ana", null).copy(atingiuEm = hoje),
+            naMeta("bruno", null),
+        )
+        // Bruno é alfabético na métrica de escrita, mas esta meta não usa métrica.
+        val resultados = listOf(resultado("bruno", "alfabetico", hoje))
+
+        val progresso = calcularProgressoDaMeta(metaAMao, niveis, alunosDaMeta, turma, resultados, hoje)
+
+        assertEquals(
+            listOf(Pair("ana", SituacaoNaMeta.ATINGIU), Pair("bruno", SituacaoNaMeta.AINDA_NAO)),
+            situacoes(progresso),
+        )
+        assertEquals(null, progresso.nivelAlvo)
+    }
+
+    @Test
+    fun metaAMao_mantemOrdemAlfabeticaSemAgrupar() {
+        val metaAMao = meta.copy(metricaId = null, nivelAlvoId = null)
+        val alunosDaMeta = listOf(
+            naMeta("ana", null),
+            naMeta("bruno", null).copy(atingiuEm = hoje),
+            naMeta("carla", null),
+        )
+
+        val progresso = calcularProgressoDaMeta(metaAMao, emptyList(), alunosDaMeta, turma, emptyList(), hoje)
+
+        assertEquals(listOf("ana", "bruno", "carla"), progresso.alunos.map { item -> item.aluno.id })
+        assertEquals(1, progresso.quantidadeNaSituacao(SituacaoNaMeta.ATINGIU))
+    }
+
+    @Test
     fun agrupaPorSituacaoMantendoOrdemAlfabetica() {
         val alunosDaMeta = listOf(naMeta("eva", "com-valor"), naMeta("ana", "com-valor"), naMeta("carla", "com-valor"))
         val resultados = listOf(

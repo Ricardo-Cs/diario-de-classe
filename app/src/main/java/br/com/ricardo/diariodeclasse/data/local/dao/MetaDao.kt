@@ -11,23 +11,26 @@ import java.time.Instant
 
 /**
  * As consultas de metas também olham a métrica: excluir a métrica faz as metas
- * dela sumirem, como excluir a turma faz os alunos sumirem.
+ * dela sumirem, como excluir a turma faz os alunos sumirem. O `LEFT JOIN` mantém
+ * as metas sem métrica (acompanhadas à mão), que não têm com quem juntar.
  */
 @Dao
 interface MetaDao {
-    /** Em andamento primeiro, pelo prazo mais próximo; as encerradas por último. */
+    /** Em andamento primeiro, pelo prazo mais próximo e as sem prazo depois; as encerradas por último. */
     @Query(
         "SELECT metas.* FROM metas " +
-            "INNER JOIN metricas ON metricas.id = metas.metricaId " +
-            "WHERE metas.turmaId = :turmaId AND metas.deletedAt IS NULL AND metricas.deletedAt IS NULL " +
-            "ORDER BY metas.encerradaEm IS NOT NULL, metas.prazo"
+            "LEFT JOIN metricas ON metricas.id = metas.metricaId " +
+            "WHERE metas.turmaId = :turmaId AND metas.deletedAt IS NULL " +
+            "AND (metas.metricaId IS NULL OR metricas.deletedAt IS NULL) " +
+            "ORDER BY metas.encerradaEm IS NOT NULL, metas.prazo IS NULL, metas.prazo, metas.createdAt"
     )
     fun observarDaTurma(turmaId: String): Flow<List<Meta>>
 
     @Query(
         "SELECT metas.* FROM metas " +
-            "INNER JOIN metricas ON metricas.id = metas.metricaId " +
-            "WHERE metas.id = :id AND metas.deletedAt IS NULL AND metricas.deletedAt IS NULL"
+            "LEFT JOIN metricas ON metricas.id = metas.metricaId " +
+            "WHERE metas.id = :id AND metas.deletedAt IS NULL " +
+            "AND (metas.metricaId IS NULL OR metricas.deletedAt IS NULL)"
     )
     fun observarPorId(id: String): Flow<Meta?>
 

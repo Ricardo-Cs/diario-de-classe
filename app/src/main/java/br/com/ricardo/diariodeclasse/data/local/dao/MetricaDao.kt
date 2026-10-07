@@ -57,7 +57,8 @@ interface MetricaDao {
             "WHERE sondagens.metricaId = :metricaId " +
             "AND sondagens.deletedAt IS NULL AND resultados_da_sondagem.deletedAt IS NULL " +
             "UNION " +
-            "SELECT nivelAlvoId FROM metas WHERE metricaId = :metricaId AND deletedAt IS NULL " +
+            "SELECT nivelAlvoId FROM metas WHERE metricaId = :metricaId AND nivelAlvoId IS NOT NULL " +
+            "AND deletedAt IS NULL " +
             "UNION " +
             "SELECT alunos_na_meta.nivelInicialId FROM alunos_na_meta " +
             "INNER JOIN metas ON metas.id = alunos_na_meta.metaId " +

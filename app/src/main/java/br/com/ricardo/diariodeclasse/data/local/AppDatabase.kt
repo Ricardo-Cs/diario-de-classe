@@ -36,6 +36,7 @@ import br.com.ricardo.diariodeclasse.data.local.entity.Turma
  * 4 → pendências
  * 5 → anotações
  * 6 → métricas (com níveis e sondagens) e metas
+ * 7 → metas livres: métrica, nível-alvo e prazo opcionais; aluno na meta ganha "atingiu em"
  */
 @Database(
     entities = [
@@ -52,7 +53,7 @@ import br.com.ricardo.diariodeclasse.data.local.entity.Turma
         Meta::class,
         AlunoNaMeta::class,
     ],
-    version = 6,
+    version = 7,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
@@ -60,6 +61,9 @@ import br.com.ricardo.diariodeclasse.data.local.entity.Turma
         AutoMigration(from = 3, to = 4),
         AutoMigration(from = 4, to = 5),
         AutoMigration(from = 5, to = 6),
+        // Tornar colunas opcionais exige recriar a tabela no SQLite; o Room gera
+        // essa cópia sozinho (cria a tabela nova, copia as linhas e troca as duas).
+        AutoMigration(from = 6, to = 7),
     ],
 )
 @TypeConverters(Converters::class)

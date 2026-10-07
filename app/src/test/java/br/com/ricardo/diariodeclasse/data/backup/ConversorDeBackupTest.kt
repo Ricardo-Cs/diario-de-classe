@@ -73,6 +73,15 @@ class ConversorDeBackupTest {
             id = "ana-na-meta", metaId = "meta", alunoId = "ana", nivelInicialId = "silabico",
             createdAt = agora, updatedAt = agora,
         )
+        // Meta marcada à mão: sem métrica, sem prazo e com a Ana marcada como "atingiu".
+        val metaAMao = Meta(
+            id = "meta-a-mao", turmaId = "turma", descricao = "Família numérica do 10 ao 80",
+            metricaId = null, nivelAlvoId = null, prazo = null, createdAt = agora, updatedAt = agora,
+        )
+        val anaNaMetaAMao = AlunoNaMeta(
+            id = "ana-na-meta-a-mao", metaId = "meta-a-mao", alunoId = "ana", nivelInicialId = null,
+            atingiuEm = hoje, createdAt = agora, updatedAt = agora,
+        )
         return DadosDoDiario(
             turmas = listOf(turma),
             alunos = listOf(ana, brunoExcluido),
@@ -84,8 +93,8 @@ class ConversorDeBackupTest {
             niveisDaMetrica = listOf(silabico, alfabetico),
             sondagens = listOf(sondagem),
             resultadosDaSondagem = listOf(resultado),
-            metas = listOf(meta),
-            alunosNaMeta = listOf(anaNaMeta),
+            metas = listOf(meta, metaAMao),
+            alunosNaMeta = listOf(anaNaMeta, anaNaMetaAMao),
         )
     }
 

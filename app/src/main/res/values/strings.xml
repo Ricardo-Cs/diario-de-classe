@@ -197,7 +197,6 @@
     <string name="diario_metas">Metas</string>
     <string name="diario_nova_meta">Nova meta</string>
     <string name="diario_sem_metas">Nenhuma meta em andamento.</string>
-    <string name="diario_metas_precisam_de_metrica">Para criar uma meta, crie antes a métrica que ela vai usar (ex.: nível de escrita).</string>
     <string name="diario_metas_encerradas">Encerradas</string>
     <string name="diario_metricas">Métricas</string>
     <string name="diario_nova_metrica">Nova métrica</string>
@@ -273,6 +272,10 @@
     <string name="meta_editar">Editar meta</string>
     <!-- O verbo vem antes dos números para não depender de singular/plural ("1 de 11 chegaram"). -->
     <string name="meta_chegaram_a">Chegaram a %3$s: %1$d de %2$d</string>
+    <string name="meta_atingiram">Atingiram: %1$d de %2$d</string>
+    <string name="meta_sem_prazo">Sem prazo</string>
+    <string name="meta_instrucao_marcar">Toque nos alunos que já atingiram a meta.</string>
+    <string name="meta_abrir_aluno">Abrir %1$s</string>
     <plurals name="meta_prazo_faltam">
         <item quantity="one">Prazo: %1$s · falta %2$d dia</item>
         <item quantity="other">Prazo: %1$s · faltam %2$d dias</item>
@@ -289,6 +292,7 @@
     <string name="meta_situacao_atingiu">Já chegaram</string>
     <string name="meta_situacao_avancou">Avançaram</string>
     <string name="meta_situacao_nao_avancou">Ainda não avançaram</string>
+    <string name="meta_situacao_ainda_nao">Ainda não atingiram</string>
     <string name="meta_situacao_sem_avaliacao">Sem avaliação</string>
     <string name="meta_sem_alunos">Nenhum aluno desta meta está na turma.</string>
 
@@ -296,17 +300,25 @@
     <string name="meta_formulario_titulo_nova">Nova meta</string>
     <string name="meta_formulario_titulo_edicao">Editar meta</string>
     <string name="meta_campo_descricao">Descrição</string>
-    <string name="meta_campo_descricao_exemplo">Ex.: silábicos com valor sonoro → alfabéticos</string>
+    <string name="meta_campo_descricao_exemplo">Ex.: conhecer a família numérica do 10 ao 80</string>
+    <string name="meta_campo_forma">Como acompanhar</string>
+    <string name="meta_forma_a_mao">Marcando à mão quem atingiu</string>
+    <string name="meta_forma_metrica">Pelo nível de uma métrica</string>
+    <string name="meta_forma_metrica_sem_metricas">Crie uma métrica no Diário para usar esta opção.</string>
+    <string name="meta_forma_fixa_a_mao">Acompanhada marcando à mão quem atingiu.</string>
+    <string name="meta_forma_fixa_metrica">Acompanhada pela métrica %1$s.</string>
     <string name="meta_campo_metrica">Métrica</string>
     <string name="meta_campo_nivel_alvo">Chegar ao nível</string>
     <string name="meta_campo_prazo">Prazo</string>
     <string name="meta_escolher">Escolher</string>
     <string name="meta_escolher_data">Escolher data</string>
+    <string name="meta_remover_prazo">Sem prazo</string>
     <plurals name="meta_alunos_escolhidos">
         <item quantity="one">Alunos · %d escolhido</item>
         <item quantity="other">Alunos · %d escolhidos</item>
     </plurals>
     <string name="meta_atalho_titulo">Escolher quem está hoje em:</string>
+    <string name="meta_atalho_toda_turma">Toda a turma</string>
     <string name="meta_atalho_nivel">%1$s (%2$d)</string>
     <string name="meta_sem_nivel">Ainda não avaliado</string>
     <string name="meta_excluir">Excluir meta</string>

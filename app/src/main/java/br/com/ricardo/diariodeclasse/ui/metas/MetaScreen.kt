@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,10 +31,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import br.com.ricardo.diariodeclasse.R
+import br.com.ricardo.diariodeclasse.data.local.entity.Metrica
 import br.com.ricardo.diariodeclasse.data.local.entity.NivelDaMetrica
 import br.com.ricardo.diariodeclasse.ui.componentes.BarraSuperior
 import br.com.ricardo.diariodeclasse.ui.componentes.TelaCarregando
@@ -60,8 +64,9 @@ fun MetaScreen(
         is MetaUiState.Carregado -> ConteudoMeta(
             estado = estado,
             aoEditar = { aoEditarMeta(estado.meta.turmaId, estado.meta.id) },
-            aoRegistrarSondagem = { aoAbrirSondagem(estado.metrica.id, estado.hoje) },
+            aoRegistrarSondagem = { metricaId -> aoAbrirSondagem(metricaId, estado.hoje) },
             aoAbrirAluno = aoAbrirAluno,
+            aoAlternarAtingiu = { alunoId -> viewModel.alternarAtingiu(alunoId) },
             aoEncerrar = { viewModel.encerrar() },
             aoReabrir = { viewModel.reabrir() },
             aoVoltar = aoVoltar,
@@ -73,8 +78,9 @@ fun MetaScreen(
 private fun ConteudoMeta(
     estado: MetaUiState.Carregado,
     aoEditar: () -> Unit,
-    aoRegistrarSondagem: () -> Unit,
+    aoRegistrarSondagem: (metricaId: String) -> Unit,
     aoAbrirAluno: (alunoId: String) -> Unit,
+    aoAlternarAtingiu: (alunoId: String) -> Unit,
     aoEncerrar: () -> Unit,
     aoReabrir: () -> Unit,
     aoVoltar: () -> Unit,
@@ -122,17 +128,29 @@ private fun ConteudoMeta(
                 }
             }
 
-            // Um grupo por situação, na ordem do enum: quem já chegou primeiro.
-            for (situacao in SituacaoNaMeta.entries) {
-                val alunos: List<AlunoNoProgresso> = estado.progresso.alunosNaSituacao(situacao)
-                if (alunos.isEmpty()) {
-                    continue
+            if (estado.meta.acompanhadaPorMetrica()) {
+                // Um grupo por situação, na ordem do enum: quem já chegou primeiro.
+                for (situacao in SituacaoNaMeta.entries) {
+                    val alunos: List<AlunoNoProgresso> = estado.progresso.alunosNaSituacao(situacao)
+                    if (alunos.isEmpty()) {
+                        continue
+                    }
+                    item(key = "grupo_${situacao.name}") {
+                        CabecalhoDoGrupo(situacao = situacao, quantidade = alunos.size)
+                    }
+                    items(alunos, key = { item -> item.aluno.id }) { item ->
+                        LinhaDoAluno(item = item, aoTocar = { aoAbrirAluno(item.aluno.id) })
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                    }
                 }
-                item(key = "grupo_${situacao.name}") {
-                    CabecalhoDoGrupo(situacao = situacao, quantidade = alunos.size)
-                }
-                items(alunos, key = { item -> item.aluno.id }) { item ->
-                    LinhaDoAluno(item = item, aoTocar = { aoAbrirAluno(item.aluno.id) })
+            } else {
+                // Lista única em ordem alfabética: marcar um aluno não o tira do lugar.
+                items(estado.progresso.alunos, key = { item -> item.aluno.id }) { item ->
+                    LinhaParaMarcar(
+                        item = item,
+                        aoAlternar = { aoAlternarAtingiu(item.aluno.id) },
+                        aoAbrirAluno = { aoAbrirAluno(item.aluno.id) },
+                    )
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 }
             }
@@ -141,17 +159,19 @@ private fun ConteudoMeta(
 }
 
 /**
- * Descrição, métrica, "Chegaram a Alfabético: 4 de 11" com a barra, o prazo e as
- * ações. "Registrar sondagem" fica aqui porque é o que faz a meta andar.
+ * Descrição, métrica (se houver), progresso com a barra, o prazo e as ações.
+ * Na meta por métrica, "Registrar sondagem" fica aqui porque é o que faz a meta
+ * andar; na meta à mão, uma instrução lembra que é só tocar nos alunos.
  */
 @Composable
 private fun CabecalhoDaMeta(
     estado: MetaUiState.Carregado,
-    aoRegistrarSondagem: () -> Unit,
+    aoRegistrarSondagem: (metricaId: String) -> Unit,
     aoEncerrar: () -> Unit,
     aoReabrir: () -> Unit,
 ) {
     val encerrada: Boolean = estado.meta.encerradaEm != null
+    val metrica: Metrica? = estado.metrica
     val corDoPrazo: Color
     if (prazoVenceu(estado.meta, estado.hoje)) {
         corDoPrazo = MaterialTheme.colorScheme.error
@@ -164,11 +184,13 @@ private fun CabecalhoDaMeta(
         modifier = Modifier.padding(16.dp),
     ) {
         Text(text = estado.meta.descricao, style = MaterialTheme.typography.titleLarge)
-        Text(
-            text = estado.metrica.nome,
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        if (metrica != null) {
+            Text(
+                text = metrica.nome,
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
         Text(text = textoDoProgresso(estado.progresso), style = MaterialTheme.typography.titleMedium)
         LinearProgressIndicator(
             progress = { fracaoAtingida(estado.progresso) },
@@ -180,9 +202,17 @@ private fun CabecalhoDaMeta(
             color = corDoPrazo,
         )
 
+        if (metrica == null && !encerrada) {
+            Text(
+                text = stringResource(R.string.meta_instrucao_marcar),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 4.dp)) {
-            if (!encerrada) {
-                OutlinedButton(onClick = aoRegistrarSondagem) {
+            if (metrica != null && !encerrada) {
+                OutlinedButton(onClick = { aoRegistrarSondagem(metrica.id) }) {
                     Text(stringResource(R.string.meta_registrar_sondagem))
                 }
             }
@@ -206,6 +236,7 @@ private fun CabecalhoDoGrupo(situacao: SituacaoNaMeta, quantidade: Int) {
         SituacaoNaMeta.ATINGIU -> stringResource(R.string.meta_situacao_atingiu)
         SituacaoNaMeta.AVANCOU -> stringResource(R.string.meta_situacao_avancou)
         SituacaoNaMeta.NAO_AVANCOU -> stringResource(R.string.meta_situacao_nao_avancou)
+        SituacaoNaMeta.AINDA_NAO -> stringResource(R.string.meta_situacao_ainda_nao)
         SituacaoNaMeta.SEM_AVALIACAO -> stringResource(R.string.meta_situacao_sem_avaliacao)
     }
 
@@ -254,6 +285,38 @@ private fun LinhaDoAluno(item: AlunoNoProgresso, aoTocar: () -> Unit) {
                 text = nivel.nome,
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+/**
+ * Meta marcada à mão: a linha inteira marca e desmarca (`toggleable`, como na
+ * chamada) e o botão à direita abre a página do aluno.
+ */
+@Composable
+private fun LinhaParaMarcar(item: AlunoNoProgresso, aoAlternar: () -> Unit, aoAbrirAluno: () -> Unit) {
+    val atingiu: Boolean = item.situacao == SituacaoNaMeta.ATINGIU
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .toggleable(value = atingiu, role = Role.Checkbox, onValueChange = { aoAlternar() })
+            .padding(start = 16.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
+    ) {
+        Checkbox(checked = atingiu, onCheckedChange = null)
+        Spacer(Modifier.width(12.dp))
+        Text(
+            text = item.aluno.nome,
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.weight(1f),
+        )
+        IconButton(onClick = aoAbrirAluno) {
+            Icon(
+                painter = painterResource(R.drawable.ic_abrir),
+                contentDescription = stringResource(R.string.meta_abrir_aluno, item.aluno.nome),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }

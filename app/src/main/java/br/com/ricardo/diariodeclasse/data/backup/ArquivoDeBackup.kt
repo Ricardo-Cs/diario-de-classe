@@ -24,8 +24,10 @@ const val FORMATO_DO_ARQUIVO = "diario-de-classe"
  * 1 → turmas, alunos, chamadas, pendências e anotações
  * 2 → métricas (níveis, sondagens e resultados) e metas. Os campos novos têm
  *     lista vazia como padrão, então arquivos da versão 1 continuam sendo lidos.
+ * 3 → metas livres: métrica, nível-alvo e prazo opcionais; aluno na meta com "atingiu em".
+ *     Um app da versão 2 não leria uma meta sem métrica, por isso o número mudou.
  */
-const val VERSAO_DO_FORMATO = 2
+const val VERSAO_DO_FORMATO = 3
 
 /** Só o começo do arquivo: lido antes do resto para checar formato e versão. */
 @Serializable
@@ -169,9 +171,9 @@ data class MetaNoArquivo(
     val id: String,
     val turmaId: String,
     val descricao: String,
-    val metricaId: String,
-    val nivelAlvoId: String,
-    val prazo: String,
+    val metricaId: String? = null,
+    val nivelAlvoId: String? = null,
+    val prazo: String? = null,
     val encerradaEm: String? = null,
     val createdAt: String,
     val updatedAt: String,
@@ -184,6 +186,7 @@ data class AlunoNaMetaNoArquivo(
     val metaId: String,
     val alunoId: String,
     val nivelInicialId: String? = null,
+    val atingiuEm: String? = null,
     val createdAt: String,
     val updatedAt: String,
     val deletedAt: String? = null,

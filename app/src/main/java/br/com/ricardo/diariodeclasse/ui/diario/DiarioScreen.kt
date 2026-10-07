@@ -119,18 +119,13 @@ private fun SecaoDeMetas(
     aoCriarMeta: () -> Unit,
     aoAbrirMeta: (metaId: String) -> Unit,
 ) {
-    val podeCriarMeta: Boolean = estado.metricas.isNotEmpty()
-
     CabecalhoDaSecao(
         titulo = stringResource(R.string.diario_metas),
         descricaoDoBotao = stringResource(R.string.diario_nova_meta),
-        botaoHabilitado = podeCriarMeta,
         aoAdicionar = aoCriarMeta,
     )
 
-    if (!podeCriarMeta) {
-        TextoDeSecaoVazia(stringResource(R.string.diario_metas_precisam_de_metrica))
-    } else if (estado.metasEmAndamento.isEmpty()) {
+    if (estado.metasEmAndamento.isEmpty()) {
         TextoDeSecaoVazia(stringResource(R.string.diario_sem_metas))
     }
 
@@ -194,7 +189,6 @@ private fun SecaoDeMetricas(
     CabecalhoDaSecao(
         titulo = stringResource(R.string.diario_metricas),
         descricaoDoBotao = stringResource(R.string.diario_nova_metrica),
-        botaoHabilitado = true,
         aoAdicionar = aoCriarMetrica,
     )
 
@@ -260,7 +254,6 @@ private fun textoDoRetrato(distribuicao: DistribuicaoDaMetrica): String {
 private fun CabecalhoDaSecao(
     titulo: String,
     descricaoDoBotao: String,
-    botaoHabilitado: Boolean,
     aoAdicionar: () -> Unit,
 ) {
     Row(
@@ -275,7 +268,7 @@ private fun CabecalhoDaSecao(
             color = MaterialTheme.colorScheme.secondary,
             modifier = Modifier.weight(1f),
         )
-        IconButton(onClick = aoAdicionar, enabled = botaoHabilitado) {
+        IconButton(onClick = aoAdicionar) {
             Icon(
                 painter = painterResource(R.drawable.ic_adicionar),
                 contentDescription = descricaoDoBotao,

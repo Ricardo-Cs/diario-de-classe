@@ -34,7 +34,8 @@ sealed interface MetaUiState {
 
     data class Carregado(
         val meta: Meta,
-        val metrica: Metrica,
+        /** `null` nas metas marcadas à mão. */
+        val metrica: Metrica?,
         val progresso: ProgressoDaMeta,
         val hoje: LocalDate,
     ) : MetaUiState
@@ -68,18 +69,42 @@ class MetaViewModel @Inject constructor(
         )
 
     private fun observarMetaEncontrada(meta: Meta): Flow<MetaUiState> {
+        val metricaId: String? = meta.metricaId
+        if (metricaId == null) {
+            return observarMetaMarcadaAMao(meta)
+        }
+        return observarMetaPorMetrica(meta, metricaId)
+    }
+
+    /** Só precisa dos alunos: quem atingiu está gravado na própria meta. */
+    private fun observarMetaMarcadaAMao(meta: Meta): Flow<MetaUiState> {
         return combine(
-            metricaRepository.observarMetrica(meta.metricaId),
-            metricaRepository.observarNiveis(meta.metricaId),
             metaRepository.observarAlunosDaMeta(meta.id),
             alunoRepository.observarAlunosDaTurma(meta.turmaId),
-            metricaRepository.observarResultadosDaMetrica(meta.metricaId),
-        ) { metrica, niveis, alunosDaMeta, alunosDaTurma, resultados ->
-            criarEstado(meta, metrica, niveis, alunosDaMeta, alunosDaTurma, resultados)
+        ) { alunosDaMeta, alunosDaTurma ->
+            val hoje: LocalDate = LocalDate.now(clock)
+            MetaUiState.Carregado(
+                meta = meta,
+                metrica = null,
+                progresso = calcularProgressoDaMeta(meta, emptyList(), alunosDaMeta, alunosDaTurma, emptyList(), hoje),
+                hoje = hoje,
+            )
         }
     }
 
-    private fun criarEstado(
+    private fun observarMetaPorMetrica(meta: Meta, metricaId: String): Flow<MetaUiState> {
+        return combine(
+            metricaRepository.observarMetrica(metricaId),
+            metricaRepository.observarNiveis(metricaId),
+            metaRepository.observarAlunosDaMeta(meta.id),
+            alunoRepository.observarAlunosDaTurma(meta.turmaId),
+            metricaRepository.observarResultadosDaMetrica(metricaId),
+        ) { metrica, niveis, alunosDaMeta, alunosDaTurma, resultados ->
+            criarEstadoPorMetrica(meta, metrica, niveis, alunosDaMeta, alunosDaTurma, resultados)
+        }
+    }
+
+    private fun criarEstadoPorMetrica(
         meta: Meta,
         metrica: Metrica?,
         niveis: List<NivelDaMetrica>,
@@ -87,6 +112,7 @@ class MetaViewModel @Inject constructor(
         alunosDaTurma: List<Aluno>,
         resultados: List<ResultadoDatado>,
     ): MetaUiState {
+        // A métrica foi excluída: a meta deixa de existir junto com ela.
         if (metrica == null) {
             return MetaUiState.MetaNaoEncontrada
         }
@@ -97,6 +123,31 @@ class MetaViewModel @Inject constructor(
             progresso = calcularProgressoDaMeta(meta, niveis, alunosDaMeta, alunosDaTurma, resultados, hoje),
             hoje = hoje,
         )
+    }
+
+    /** Metas marcadas à mão: marca o aluno como "atingiu" (com a data de hoje) ou desmarca. */
+    fun alternarAtingiu(alunoId: String) {
+        val estado: MetaUiState = uiState.value
+        if (estado !is MetaUiState.Carregado || estado.meta.acompanhadaPorMetrica()) {
+            return
+        }
+
+        var jaAtingiu = false
+        for (item in estado.progresso.alunos) {
+            if (item.aluno.id == alunoId && item.situacao == SituacaoNaMeta.ATINGIU) {
+                jaAtingiu = true
+            }
+        }
+
+        val atingiuEm: LocalDate?
+        if (jaAtingiu) {
+            atingiuEm = null
+        } else {
+            atingiuEm = LocalDate.now(clock)
+        }
+        viewModelScope.launch {
+            metaRepository.marcarAtingiu(metaId, alunoId, atingiuEm)
+        }
     }
 
     fun encerrar() {

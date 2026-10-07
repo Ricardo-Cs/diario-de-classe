@@ -28,7 +28,16 @@ import java.time.Clock
 import java.time.LocalDate
 import javax.inject.Inject
 
-/** Um aluno da turma na lista de escolha, com o nível em que está hoje na métrica da meta. */
+/** Como a professora acompanha a meta. Escolhida na criação e fixa depois. */
+enum class FormaDeAcompanhar {
+    /** Ela marca na tela da meta quem atingiu. */
+    MARCANDO_A_MAO,
+
+    /** O progresso vem das sondagens de uma métrica de níveis. */
+    POR_METRICA,
+}
+
+/** Um aluno da turma na lista de escolha. [nivelAtual] só é preenchido nas metas por métrica. */
 data class AlunoParaEscolher(
     val aluno: Aluno,
     val nivelAtual: NivelDaMetrica?,
@@ -46,11 +55,13 @@ data class FormularioMetaUiState(
     val editando: Boolean,
     val hoje: LocalDate,
     val descricao: String = "",
+    val forma: FormaDeAcompanhar = FormaDeAcompanhar.MARCANDO_A_MAO,
     val metricas: List<Metrica> = emptyList(),
     val metricaId: String? = null,
-    /** Níveis da métrica escolhida, do mais inicial ao mais avançado. */
+    /** Níveis da métrica escolhida, do mais inicial ao mais avançado. Vazio na meta à mão. */
     val niveis: List<NivelDaMetrica> = emptyList(),
     val nivelAlvoId: String? = null,
+    /** Opcional. */
     val prazo: LocalDate? = null,
     val alunos: List<AlunoParaEscolher> = emptyList(),
     val salvando: Boolean = false,
@@ -67,7 +78,7 @@ data class FormularioMetaUiState(
         return quantidade
     }
 
-    /** Um atalho por nível que tem alguém hoje. */
+    /** Um atalho por nível que tem alguém hoje. Só existe nas metas por métrica. */
     fun atalhos(): List<AtalhoDeNivel> {
         val atalhos = mutableListOf<AtalhoDeNivel>()
         for (nivel in niveis) {
@@ -86,17 +97,22 @@ data class FormularioMetaUiState(
     }
 
     fun podeSalvar(): Boolean {
-        val camposPreenchidos: Boolean = descricao.isNotBlank() &&
-            metricaId != null &&
-            nivelAlvoId != null &&
-            prazo != null
-        return camposPreenchidos && quantidadeEscolhida() > 0 && !salvando && !carregando
+        if (salvando || carregando) {
+            return false
+        }
+        if (descricao.isBlank() || quantidadeEscolhida() == 0) {
+            return false
+        }
+        if (forma == FormaDeAcompanhar.POR_METRICA) {
+            return metricaId != null && nivelAlvoId != null
+        }
+        return true
     }
 }
 
 /**
- * Cria ou edita uma meta. Na criação, a professora escolhe a métrica; na edição a
- * métrica fica fixa (trocar de métrica seria outra meta).
+ * Cria ou edita uma meta. Na criação, a professora escolhe como acompanhar (à mão
+ * ou por métrica); na edição a forma e a métrica ficam fixas.
  */
 @HiltViewModel
 class FormularioMetaViewModel @Inject constructor(
@@ -110,7 +126,7 @@ class FormularioMetaViewModel @Inject constructor(
     private val rota: FormularioMetaRoute = savedStateHandle.toRoute<FormularioMetaRoute>()
     private val hoje: LocalDate = LocalDate.now(clock)
 
-    // Lidos uma vez ao abrir: servem para remontar a lista quando a métrica muda.
+    // Lidos uma vez ao abrir: servem para remontar a lista quando a forma ou a métrica mudam.
     private var alunosDaTurma: List<Aluno> = emptyList()
     private var niveisDaTurma: List<NivelDaMetrica> = emptyList()
     private var resultadosDaTurma: List<ResultadoDatado> = emptyList()
@@ -141,22 +157,21 @@ class FormularioMetaViewModel @Inject constructor(
         }
 
         val estadoInicial: FormularioMetaUiState = estadoMutavel.value.copy(carregando = false, metricas = metricas)
+
+        // Meta nova: começa marcada à mão, a forma mais simples.
         if (meta == null) {
-            val primeiraMetrica: Metrica? = metricas.firstOrNull()
-            if (primeiraMetrica == null) {
-                estadoMutavel.value = estadoInicial
-            } else {
-                estadoMutavel.value = montarParaMetrica(estadoInicial, primeiraMetrica.id, emptyList())
-            }
+            estadoMutavel.value = montarSemMetrica(estadoInicial, emptyList())
             return
         }
 
-        val comMetrica: FormularioMetaUiState = montarParaMetrica(estadoInicial, meta.metricaId, idsJaNaMeta)
-        estadoMutavel.value = comMetrica.copy(
-            descricao = meta.descricao,
-            nivelAlvoId = meta.nivelAlvoId,
-            prazo = meta.prazo,
-        )
+        val metricaDaMeta: String? = meta.metricaId
+        val montado: FormularioMetaUiState
+        if (metricaDaMeta == null) {
+            montado = montarSemMetrica(estadoInicial, idsJaNaMeta)
+        } else {
+            montado = montarParaMetrica(estadoInicial, metricaDaMeta, idsJaNaMeta).copy(nivelAlvoId = meta.nivelAlvoId)
+        }
+        estadoMutavel.value = montado.copy(descricao = meta.descricao, prazo = meta.prazo)
     }
 
     private fun idsDosAlunos(linhas: List<AlunoNaMeta>): List<String> {
@@ -165,6 +180,31 @@ class FormularioMetaViewModel @Inject constructor(
             ids.add(linha.alunoId)
         }
         return ids
+    }
+
+    private fun idsEscolhidos(alunos: List<AlunoParaEscolher>): List<String> {
+        val ids = mutableListOf<String>()
+        for (item in alunos) {
+            if (item.escolhido) {
+                ids.add(item.aluno.id)
+            }
+        }
+        return ids
+    }
+
+    /** Lista de alunos sem níveis, para a meta marcada à mão. */
+    private fun montarSemMetrica(estado: FormularioMetaUiState, idsEscolhidos: List<String>): FormularioMetaUiState {
+        val alunos = mutableListOf<AlunoParaEscolher>()
+        for (aluno in alunosDaTurma) {
+            alunos.add(AlunoParaEscolher(aluno, nivelAtual = null, escolhido = aluno.id in idsEscolhidos))
+        }
+        return estado.copy(
+            forma = FormaDeAcompanhar.MARCANDO_A_MAO,
+            metricaId = null,
+            niveis = emptyList(),
+            nivelAlvoId = null,
+            alunos = alunos,
+        )
     }
 
     /**
@@ -198,11 +238,36 @@ class FormularioMetaViewModel @Inject constructor(
             nivelAlvoId = maisAvancado.id
         }
 
-        return estado.copy(metricaId = metricaId, niveis = niveis, nivelAlvoId = nivelAlvoId, alunos = alunos)
+        return estado.copy(
+            forma = FormaDeAcompanhar.POR_METRICA,
+            metricaId = metricaId,
+            niveis = niveis,
+            nivelAlvoId = nivelAlvoId,
+            alunos = alunos,
+        )
     }
 
     fun alterarDescricao(descricao: String) {
         estadoMutavel.value = estadoMutavel.value.copy(descricao = descricao)
+    }
+
+    /**
+     * Só na criação. Os alunos já escolhidos continuam escolhidos; ao passar para
+     * "por métrica", a primeira métrica da turma vem selecionada.
+     */
+    fun escolherForma(forma: FormaDeAcompanhar) {
+        val estado: FormularioMetaUiState = estadoMutavel.value
+        if (estado.editando || estado.forma == forma) {
+            return
+        }
+        val escolhidos: List<String> = idsEscolhidos(estado.alunos)
+
+        if (forma == FormaDeAcompanhar.MARCANDO_A_MAO) {
+            estadoMutavel.value = montarSemMetrica(estado, escolhidos)
+            return
+        }
+        val primeiraMetrica: Metrica = estado.metricas.firstOrNull() ?: return
+        estadoMutavel.value = montarParaMetrica(estado, primeiraMetrica.id, escolhidos)
     }
 
     /** Trocar de métrica desfaz a escolha de alunos: os níveis de antes não valem para a nova. */
@@ -222,6 +287,10 @@ class FormularioMetaViewModel @Inject constructor(
         estadoMutavel.value = estadoMutavel.value.copy(prazo = prazo)
     }
 
+    fun removerPrazo() {
+        estadoMutavel.value = estadoMutavel.value.copy(prazo = null)
+    }
+
     fun alternarAluno(alunoId: String) {
         val novos = mutableListOf<AlunoParaEscolher>()
         for (item in estadoMutavel.value.alunos) {
@@ -230,6 +299,14 @@ class FormularioMetaViewModel @Inject constructor(
             } else {
                 novos.add(item)
             }
+        }
+        estadoMutavel.value = estadoMutavel.value.copy(alunos = novos)
+    }
+
+    fun escolherTodaATurma() {
+        val novos = mutableListOf<AlunoParaEscolher>()
+        for (item in estadoMutavel.value.alunos) {
+            novos.add(item.copy(escolhido = true))
         }
         estadoMutavel.value = estadoMutavel.value.copy(alunos = novos)
     }
@@ -250,10 +327,16 @@ class FormularioMetaViewModel @Inject constructor(
         if (!estado.podeSalvar()) {
             return
         }
-        val metricaId: String = estado.metricaId ?: return
-        val nivelAlvoId: String = estado.nivelAlvoId ?: return
-        val prazo: LocalDate = estado.prazo ?: return
         estadoMutavel.value = estado.copy(salvando = true)
+
+        // Na meta à mão, métrica e nível-alvo vão `null`; o nível inicial também.
+        val porMetrica: Boolean = estado.forma == FormaDeAcompanhar.POR_METRICA
+        var metricaId: String? = null
+        var nivelAlvoId: String? = null
+        if (porMetrica) {
+            metricaId = estado.metricaId
+            nivelAlvoId = estado.nivelAlvoId
+        }
 
         val escolhidos = mutableListOf<AlunoEscolhidoParaMeta>()
         for (item in estado.alunos) {
@@ -266,9 +349,9 @@ class FormularioMetaViewModel @Inject constructor(
             val descricao: String = estado.descricao.trim()
             val metaId: String? = rota.metaId
             if (metaId == null) {
-                metaRepository.criar(rota.turmaId, descricao, metricaId, nivelAlvoId, prazo, escolhidos)
+                metaRepository.criar(rota.turmaId, descricao, metricaId, nivelAlvoId, estado.prazo, escolhidos)
             } else {
-                metaRepository.editar(metaId, descricao, nivelAlvoId, prazo, escolhidos)
+                metaRepository.editar(metaId, descricao, nivelAlvoId, estado.prazo, escolhidos)
             }
             estadoMutavel.value = estadoMutavel.value.copy(salvando = false, salvo = true)
         }

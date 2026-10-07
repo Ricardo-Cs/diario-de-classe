@@ -76,8 +76,11 @@ Os níveis são os da psicogênese da língua escrita (pré-silábico, silábico
 
 **Metas**
 - A professora cria a meta **e escolhe como ela é medida**. O app não impõe critérios.
-- Caso principal: **meta ligada a uma métrica**. Exemplo: "estes alunos chegam ao nível Alfabético até 06/11". O progresso é **calculado** a partir das sondagens, sem lançamento manual.
-- Metas livres (sim/não, texto, valor manual) ficam para depois.
+- Metas são **livres** e sempre sobre um grupo de alunos: descrição, prazo opcional e alunos (com atalho "toda a turma"). As metas ainda são vagas até para a professora, então o app não deve engessá-las.
+- Duas formas de acompanhar, escolhidas na criação e fixas depois:
+  - **marcando à mão** (padrão): ela marca quem atingiu (sim/não). Ex.: "conhecer a família numérica do 10 ao 80";
+  - **pela métrica**: "estes alunos chegam ao nível Alfabético até 06/11", com progresso **calculado** a partir das sondagens.
+- O que é sobre a própria professora (entregar portfólio, plano de ação) **não é meta**: é lembrete (ainda não implementado).
 
 **Grupos**
 - Grupos são **marcadores sem ordem** criados pela professora (ex.: "precisa de atenção"). Um aluno pode estar em vários grupos.
@@ -135,8 +138,8 @@ Como o app substitui o caderno, perder o aparelho não pode significar perder o 
 - `NivelDaMetrica` — métrica + nome + ordem (os degraus da escala)
 - `Sondagem` — métrica + data (única por métrica/dia, como a `Chamada`)
 - `ResultadoDaSondagem` — sondagem + aluno + nível (único por sondagem/aluno)
-- `Meta` — turma + descrição + métrica + nível-alvo + prazo; progresso calculado, não armazenado
-- `AlunoNaMeta` — alunos que a meta acompanha (N:N)
+- `Meta` — turma + descrição + prazo opcional + métrica e nível-alvo opcionais (sem eles, a meta é marcada à mão); progresso não é armazenado
+- `AlunoNaMeta` — alunos que a meta acompanha (N:N), com nível inicial e "atingiu em" (metas à mão)
 - `Grupo` — turma + nome + descrição (ex.: "precisa de atenção")
 - `ParticipacaoNoGrupo` — aluno + grupo + entrou em + saiu em (uma linha por passagem pelo grupo)
 - `Anotacao` — aluno + texto + data (tags ainda não implementadas)

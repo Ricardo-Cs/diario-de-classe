@@ -25,26 +25,30 @@ interface MetaRepository {
     fun observarAlunosDaMeta(metaId: String): Flow<List<AlunoNaMeta>>
     fun observarAlunosDasMetasDaTurma(turmaId: String): Flow<List<AlunoNaMeta>>
 
+    /** `metricaId` e `nivelAlvoId` `null` = meta acompanhada marcando à mão. */
     suspend fun criar(
         turmaId: String,
         descricao: String,
-        metricaId: String,
-        nivelAlvoId: String,
-        prazo: LocalDate,
+        metricaId: String?,
+        nivelAlvoId: String?,
+        prazo: LocalDate?,
         alunos: List<AlunoEscolhidoParaMeta>,
     ): Meta
 
     /**
-     * A métrica não muda na edição: trocar de métrica seria outra meta.
-     * Quem continua na meta mantém o nível inicial original.
+     * A forma de acompanhar e a métrica não mudam na edição: trocar seria outra meta.
+     * Quem continua na meta mantém o nível inicial original e a marcação de "atingiu".
      */
     suspend fun editar(
         metaId: String,
         descricao: String,
-        nivelAlvoId: String,
-        prazo: LocalDate,
+        nivelAlvoId: String?,
+        prazo: LocalDate?,
         alunos: List<AlunoEscolhidoParaMeta>,
     )
+
+    /** Metas acompanhadas à mão: [atingiuEm] `null` desmarca o aluno. */
+    suspend fun marcarAtingiu(metaId: String, alunoId: String, atingiuEm: LocalDate?)
 
     suspend fun encerrar(metaId: String, data: LocalDate)
     suspend fun reabrir(metaId: String)
@@ -79,9 +83,9 @@ class MetaRepositoryImpl @Inject constructor(
     override suspend fun criar(
         turmaId: String,
         descricao: String,
-        metricaId: String,
-        nivelAlvoId: String,
-        prazo: LocalDate,
+        metricaId: String?,
+        nivelAlvoId: String?,
+        prazo: LocalDate?,
         alunos: List<AlunoEscolhidoParaMeta>,
     ): Meta {
         val agora: Instant = Instant.now(clock)
@@ -108,8 +112,8 @@ class MetaRepositoryImpl @Inject constructor(
     override suspend fun editar(
         metaId: String,
         descricao: String,
-        nivelAlvoId: String,
-        prazo: LocalDate,
+        nivelAlvoId: String?,
+        prazo: LocalDate?,
         alunos: List<AlunoEscolhidoParaMeta>,
     ) {
         val metaExistente: Meta = dao.buscarPorId(metaId) ?: return
@@ -167,6 +171,16 @@ class MetaRepositoryImpl @Inject constructor(
             }
         }
         return null
+    }
+
+    override suspend fun marcarAtingiu(metaId: String, alunoId: String, atingiuEm: LocalDate?) {
+        val linhas: List<AlunoNaMeta> = dao.buscarTodosOsAlunosDaMeta(metaId)
+        val linha: AlunoNaMeta = buscarLinhaDoAluno(linhas, alunoId) ?: return
+        if (linha.atingiuEm == atingiuEm) {
+            return
+        }
+        val marcada = linha.copy(atingiuEm = atingiuEm, updatedAt = Instant.now(clock))
+        dao.salvarAlunos(listOf(marcada))
     }
 
     override suspend fun encerrar(metaId: String, data: LocalDate) {

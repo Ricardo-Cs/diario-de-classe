@@ -6,6 +6,7 @@ import br.com.ricardo.diariodeclasse.data.local.entity.Meta
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Test
 import java.time.Clock
@@ -115,6 +116,46 @@ class MetaRepositoryImplTest {
         assertEquals(idOriginal, dao.linhaDoAluno("ana").id)
         assertNull(dao.linhaDoAluno("ana").deletedAt)
         assertEquals("silabico-alfabetico", dao.linhaDoAluno("ana").nivelInicialId)
+    }
+
+    @Test
+    fun criarMetaAMao_semMetricaESemPrazo() = runBlocking {
+        repositorioNoInstante(inicio).criar(
+            "turma", "Família numérica do 10 ao 80", null, null, null, listOf(AlunoEscolhidoParaMeta("ana", null)),
+        )
+
+        val meta: Meta = dao.metas.single()
+        assertNull(meta.metricaId)
+        assertNull(meta.prazo)
+        assertFalse(meta.acompanhadaPorMetrica())
+    }
+
+    @Test
+    fun marcarEDesmarcarAtingiu() = runBlocking {
+        val meta: Meta = criarMeta(listOf(AlunoEscolhidoParaMeta("ana", null)))
+        val hoje: LocalDate = LocalDate.of(2026, 10, 6)
+
+        repositorioNoInstante(umaHoraDepois).marcarAtingiu(meta.id, "ana", hoje)
+        assertEquals(hoje, dao.linhaDoAluno("ana").atingiuEm)
+        assertEquals(umaHoraDepois, dao.linhaDoAluno("ana").updatedAt)
+
+        repositorioNoInstante(umaHoraDepois).marcarAtingiu(meta.id, "ana", null)
+        assertNull(dao.linhaDoAluno("ana").atingiuEm)
+    }
+
+    @Test
+    fun editar_quemContinuaMantemAMarcacaoDeAtingiu() = runBlocking {
+        val meta: Meta = criarMeta(listOf(AlunoEscolhidoParaMeta("ana", null)))
+        val hoje: LocalDate = LocalDate.of(2026, 10, 6)
+        repositorioNoInstante(inicio).marcarAtingiu(meta.id, "ana", hoje)
+
+        repositorioNoInstante(umaHoraDepois).editar(
+            meta.id, "Outra descrição", null, null,
+            listOf(AlunoEscolhidoParaMeta("ana", null), AlunoEscolhidoParaMeta("bruno", null)),
+        )
+
+        assertEquals(hoje, dao.linhaDoAluno("ana").atingiuEm)
+        assertNull(dao.linhaDoAluno("bruno").atingiuEm)
     }
 
     @Test

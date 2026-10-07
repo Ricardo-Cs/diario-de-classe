@@ -10,9 +10,12 @@ import br.com.ricardo.diariodeclasse.ui.metricas.nivelAtualDeCadaAluno
 import br.com.ricardo.diariodeclasse.ui.metricas.resultadosDaMetrica
 import java.time.LocalDate
 
-/** A ordem das constantes é a ordem em que os grupos aparecem na tela da meta. */
+/**
+ * A ordem das constantes é a ordem em que os grupos aparecem na tela da meta.
+ * Metas marcadas à mão só usam [ATINGIU] e [AINDA_NAO]; as demais são das metas por métrica.
+ */
 enum class SituacaoNaMeta {
-    /** Está no nível-alvo ou acima. */
+    /** Por métrica: está no nível-alvo ou acima. À mão: a professora marcou que atingiu. */
     ATINGIU,
 
     /** Subiu em relação ao nível em que entrou na meta, mas ainda não chegou ao alvo. */
@@ -20,6 +23,9 @@ enum class SituacaoNaMeta {
 
     /** Avaliado, abaixo do alvo e sem avanço desde que entrou na meta (ou sem nível inicial para comparar). */
     NAO_AVANCOU,
+
+    /** Meta marcada à mão: a professora ainda não marcou o aluno. */
+    AINDA_NAO,
 
     /** Ainda não tem nenhum resultado nesta métrica. */
     SEM_AVALIACAO,
@@ -32,8 +38,12 @@ data class AlunoNoProgresso(
 )
 
 data class ProgressoDaMeta(
+    /** `null` nas metas marcadas à mão. */
     val nivelAlvo: NivelDaMetrica?,
-    /** Ordenados por situação e, dentro de cada uma, pelo nome. */
+    /**
+     * Por métrica: agrupados por situação e, dentro de cada uma, pelo nome.
+     * À mão: só pelo nome.
+     */
     val alunos: List<AlunoNoProgresso>,
 ) {
     fun total(): Int {
@@ -62,11 +72,12 @@ data class ProgressoDaMeta(
 }
 
 /**
- * Situação de cada aluno da meta a partir das sondagens até [hoje].
+ * Situação de cada aluno da meta.
  *
  * [alunosDaTurma] são os alunos visíveis, em ordem alfabética: quem foi excluído
  * da turma deixa de contar no total da meta.
- * [resultados] pode trazer todas as métricas da turma; os da meta são filtrados aqui.
+ * [niveis] e [resultados] só importam nas metas por métrica; [resultados] pode
+ * trazer todas as métricas da turma, e os da meta são filtrados aqui.
  */
 fun calcularProgressoDaMeta(
     meta: Meta,
@@ -76,9 +87,48 @@ fun calcularProgressoDaMeta(
     resultados: List<ResultadoDatado>,
     hoje: LocalDate,
 ): ProgressoDaMeta {
+    val metricaId: String? = meta.metricaId
+    if (metricaId == null) {
+        return calcularProgressoMarcadoAMao(alunosDaMeta, alunosDaTurma)
+    }
+    return calcularProgressoPorMetrica(meta, metricaId, niveis, alunosDaMeta, alunosDaTurma, resultados, hoje)
+}
+
+/**
+ * Cada aluno atingiu ou não, conforme a professora marcou. Fica em ordem
+ * alfabética, sem agrupar: ao marcar um aluno, a linha não pula de lugar.
+ */
+private fun calcularProgressoMarcadoAMao(
+    alunosDaMeta: List<AlunoNaMeta>,
+    alunosDaTurma: List<Aluno>,
+): ProgressoDaMeta {
+    val alunos = mutableListOf<AlunoNoProgresso>()
+    for (aluno in alunosDaTurma) {
+        val naMeta: AlunoNaMeta = buscarAlunoNaMeta(alunosDaMeta, aluno.id) ?: continue
+        val situacao: SituacaoNaMeta
+        if (naMeta.atingiuEm == null) {
+            situacao = SituacaoNaMeta.AINDA_NAO
+        } else {
+            situacao = SituacaoNaMeta.ATINGIU
+        }
+        alunos.add(AlunoNoProgresso(aluno, situacao, nivelAtual = null))
+    }
+    return ProgressoDaMeta(nivelAlvo = null, alunos = alunos)
+}
+
+/** Situação de cada aluno a partir das sondagens até [hoje], agrupada por situação. */
+private fun calcularProgressoPorMetrica(
+    meta: Meta,
+    metricaId: String,
+    niveis: List<NivelDaMetrica>,
+    alunosDaMeta: List<AlunoNaMeta>,
+    alunosDaTurma: List<Aluno>,
+    resultados: List<ResultadoDatado>,
+    hoje: LocalDate,
+): ProgressoDaMeta {
     val nivelAlvo: NivelDaMetrica? = buscarNivel(niveis, meta.nivelAlvoId)
     val nivelAtual: Map<String, ResultadoDatado> = nivelAtualDeCadaAluno(
-        resultadosDaMetrica(resultados, meta.metricaId),
+        resultadosDaMetrica(resultados, metricaId),
         hoje,
     )
 

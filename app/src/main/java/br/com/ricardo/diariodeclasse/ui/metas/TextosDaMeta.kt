@@ -15,22 +15,15 @@ import java.time.temporal.ChronoUnit
  * falarem do mesmo jeito.
  */
 
-/** "Chegaram a Alfabético: 4 de 11". */
+/** "Chegaram a Alfabético: 4 de 11" (por métrica) ou "Atingiram: 12 de 25" (à mão). */
 @Composable
 fun textoDoProgresso(progresso: ProgressoDaMeta): String {
+    val atingiram: Int = progresso.quantidadeNaSituacao(SituacaoNaMeta.ATINGIU)
     val nivelAlvo: NivelDaMetrica? = progresso.nivelAlvo
-    val nomeDoAlvo: String
     if (nivelAlvo == null) {
-        nomeDoAlvo = ""
-    } else {
-        nomeDoAlvo = nivelAlvo.nome
+        return stringResource(R.string.meta_atingiram, atingiram, progresso.total())
     }
-    return stringResource(
-        R.string.meta_chegaram_a,
-        progresso.quantidadeNaSituacao(SituacaoNaMeta.ATINGIU),
-        progresso.total(),
-        nomeDoAlvo,
-    )
+    return stringResource(R.string.meta_chegaram_a, atingiram, progresso.total(), nivelAlvo.nome)
 }
 
 /** Fração para a barra de progresso (0 a 1). Meta sem alunos fica vazia. */
@@ -43,16 +36,23 @@ fun fracaoAtingida(progresso: ProgressoDaMeta): Float {
     return atingiram.toFloat() / total.toFloat()
 }
 
-/** "Prazo: 06/11 · faltam 31 dias", "Prazo: hoje", "Prazo: 06/11 · venceu há 2 dias" ou "Encerrada em 06/11". */
+/**
+ * "Prazo: 06/11 · faltam 31 dias", "Prazo: hoje", "Prazo: 06/11 · venceu há 2 dias",
+ * "Sem prazo" ou "Encerrada em 06/11".
+ */
 @Composable
 fun textoDoPrazo(meta: Meta, hoje: LocalDate): String {
     val encerradaEm: LocalDate? = meta.encerradaEm
     if (encerradaEm != null) {
         return stringResource(R.string.meta_encerrada_em, formatarDataCurta(encerradaEm, hoje))
     }
+    val dataDoPrazo: LocalDate? = meta.prazo
+    if (dataDoPrazo == null) {
+        return stringResource(R.string.meta_sem_prazo)
+    }
 
-    val prazo: String = formatarDataCurta(meta.prazo, hoje)
-    val diasAtePrazo: Int = ChronoUnit.DAYS.between(hoje, meta.prazo).toInt()
+    val prazo: String = formatarDataCurta(dataDoPrazo, hoje)
+    val diasAtePrazo: Int = ChronoUnit.DAYS.between(hoje, dataDoPrazo).toInt()
     if (diasAtePrazo == 0) {
         return stringResource(R.string.meta_prazo_hoje)
     }
@@ -65,5 +65,9 @@ fun textoDoPrazo(meta: Meta, hoje: LocalDate): String {
 
 /** Prazo vencido e meta ainda aberta: o texto ganha destaque. */
 fun prazoVenceu(meta: Meta, hoje: LocalDate): Boolean {
-    return meta.encerradaEm == null && meta.prazo.isBefore(hoje)
+    val prazo: LocalDate? = meta.prazo
+    if (prazo == null || meta.encerradaEm != null) {
+        return false
+    }
+    return prazo.isBefore(hoje)
 }

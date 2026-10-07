@@ -177,9 +177,15 @@ class DiarioViewModel @Inject constructor(
                 alunosDestaMeta.add(linha)
             }
         }
+        // Meta marcada à mão não tem métrica: os níveis não são usados no cálculo.
+        val metricaId: String? = meta.metricaId
+        var niveis: List<NivelDaMetrica> = emptyList()
+        if (metricaId != null) {
+            niveis = niveisDaMetrica(dados.metricas.niveis, metricaId)
+        }
         val progresso: ProgressoDaMeta = calcularProgressoDaMeta(
             meta = meta,
-            niveis = niveisDaMetrica(dados.metricas.niveis, meta.metricaId),
+            niveis = niveis,
             alunosDaMeta = alunosDestaMeta,
             alunosDaTurma = dados.alunos,
             resultados = dados.metricas.resultados,

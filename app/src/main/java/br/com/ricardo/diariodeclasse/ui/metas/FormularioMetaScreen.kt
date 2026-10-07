@@ -8,11 +8,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AssistChip
@@ -23,6 +25,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -122,7 +125,11 @@ private fun ConteudoFormularioMeta(
             }
 
             items(estado.alunos, key = { item -> item.aluno.id }) { item ->
-                LinhaDoAluno(item = item, aoAlternar = { viewModel.alternarAluno(item.aluno.id) })
+                LinhaDoAluno(
+                    item = item,
+                    mostrarNivel = estado.forma == FormaDeAcompanhar.POR_METRICA,
+                    aoAlternar = { viewModel.alternarAluno(item.aluno.id) },
+                )
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             }
 
@@ -192,32 +199,138 @@ private fun CamposDaMeta(
             modifier = Modifier.fillMaxWidth(),
         )
 
-        // Na edição a métrica não muda; com uma métrica só, não há o que escolher.
-        val podeTrocarMetrica: Boolean = !estado.editando && estado.metricas.size > 1
-        if (podeTrocarMetrica) {
-            SeletorEmMenu(
-                rotulo = stringResource(R.string.meta_campo_metrica),
-                opcoes = opcoesDeMetrica(estado.metricas),
-                idEscolhido = estado.metricaId,
-                textoSemEscolha = stringResource(R.string.meta_escolher),
-                aoEscolher = { metricaId -> viewModel.escolherMetrica(metricaId) },
+        if (estado.editando) {
+            TextoDaFormaFixa(estado)
+        } else {
+            SeletorDaForma(
+                formaEscolhida = estado.forma,
+                temMetricas = estado.metricas.isNotEmpty(),
+                aoEscolher = { forma -> viewModel.escolherForma(forma) },
             )
         }
 
-        SeletorEmMenu(
-            rotulo = stringResource(R.string.meta_campo_nivel_alvo),
-            opcoes = opcoesDeNivel(estado.niveis),
-            idEscolhido = estado.nivelAlvoId,
-            textoSemEscolha = stringResource(R.string.meta_escolher),
-            aoEscolher = { nivelId -> viewModel.escolherNivelAlvo(nivelId) },
-        )
+        if (estado.forma == FormaDeAcompanhar.POR_METRICA) {
+            // Na edição a métrica não muda; com uma métrica só, não há o que escolher.
+            val podeTrocarMetrica: Boolean = !estado.editando && estado.metricas.size > 1
+            if (podeTrocarMetrica) {
+                SeletorEmMenu(
+                    rotulo = stringResource(R.string.meta_campo_metrica),
+                    opcoes = opcoesDeMetrica(estado.metricas),
+                    idEscolhido = estado.metricaId,
+                    textoSemEscolha = stringResource(R.string.meta_escolher),
+                    aoEscolher = { metricaId -> viewModel.escolherMetrica(metricaId) },
+                )
+            }
 
-        CampoDoPrazo(estado = estado, aoTocar = aoEscolherPrazo)
+            SeletorEmMenu(
+                rotulo = stringResource(R.string.meta_campo_nivel_alvo),
+                opcoes = opcoesDeNivel(estado.niveis),
+                idEscolhido = estado.nivelAlvoId,
+                textoSemEscolha = stringResource(R.string.meta_escolher),
+                aoEscolher = { nivelId -> viewModel.escolherNivelAlvo(nivelId) },
+            )
+        }
+
+        CampoDoPrazo(estado = estado, aoTocar = aoEscolherPrazo, aoRemover = { viewModel.removerPrazo() })
     }
 }
 
+/**
+ * As duas formas de acompanhar, como opções de rádio. Sem nenhuma métrica criada,
+ * a opção "por métrica" aparece desabilitada, com a explicação de onde criar uma.
+ */
 @Composable
-private fun CampoDoPrazo(estado: FormularioMetaUiState, aoTocar: () -> Unit) {
+private fun SeletorDaForma(
+    formaEscolhida: FormaDeAcompanhar,
+    temMetricas: Boolean,
+    aoEscolher: (forma: FormaDeAcompanhar) -> Unit,
+) {
+    Column {
+        Text(
+            text = stringResource(R.string.meta_campo_forma),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        OpcaoDaForma(
+            texto = stringResource(R.string.meta_forma_a_mao),
+            detalhe = null,
+            selecionada = formaEscolhida == FormaDeAcompanhar.MARCANDO_A_MAO,
+            habilitada = true,
+            aoTocar = { aoEscolher(FormaDeAcompanhar.MARCANDO_A_MAO) },
+        )
+        var detalheDaMetrica: String? = null
+        if (!temMetricas) {
+            detalheDaMetrica = stringResource(R.string.meta_forma_metrica_sem_metricas)
+        }
+        OpcaoDaForma(
+            texto = stringResource(R.string.meta_forma_metrica),
+            detalhe = detalheDaMetrica,
+            selecionada = formaEscolhida == FormaDeAcompanhar.POR_METRICA,
+            habilitada = temMetricas,
+            aoTocar = { aoEscolher(FormaDeAcompanhar.POR_METRICA) },
+        )
+    }
+}
+
+/** `selectable` com `Role.RadioButton`: a linha toda é tocável; o RadioButton é só o desenho. */
+@Composable
+private fun OpcaoDaForma(
+    texto: String,
+    detalhe: String?,
+    selecionada: Boolean,
+    habilitada: Boolean,
+    aoTocar: () -> Unit,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 48.dp)
+            .selectable(selected = selecionada, enabled = habilitada, role = Role.RadioButton, onClick = aoTocar),
+    ) {
+        RadioButton(selected = selecionada, onClick = null, enabled = habilitada)
+        Spacer(Modifier.width(12.dp))
+        Column {
+            Text(text = texto, style = MaterialTheme.typography.bodyLarge)
+            if (detalhe != null) {
+                Text(
+                    text = detalhe,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+    }
+}
+
+/** Na edição a forma não muda; só informamos qual é. */
+@Composable
+private fun TextoDaFormaFixa(estado: FormularioMetaUiState) {
+    val texto: String
+    if (estado.forma == FormaDeAcompanhar.MARCANDO_A_MAO) {
+        texto = stringResource(R.string.meta_forma_fixa_a_mao)
+    } else {
+        texto = stringResource(R.string.meta_forma_fixa_metrica, nomeDaMetrica(estado.metricas, estado.metricaId))
+    }
+    Text(
+        text = texto,
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+}
+
+private fun nomeDaMetrica(metricas: List<Metrica>, metricaId: String?): String {
+    for (metrica in metricas) {
+        if (metrica.id == metricaId) {
+            return metrica.nome
+        }
+    }
+    return ""
+}
+
+/** O prazo é opcional: com data escolhida, aparece "Sem prazo" para tirá-la. */
+@Composable
+private fun CampoDoPrazo(estado: FormularioMetaUiState, aoTocar: () -> Unit, aoRemover: () -> Unit) {
     val prazo: LocalDate? = estado.prazo
     val texto: String
     if (prazo == null) {
@@ -232,8 +345,15 @@ private fun CampoDoPrazo(estado: FormularioMetaUiState, aoTocar: () -> Unit) {
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        OutlinedButton(onClick = aoTocar, modifier = Modifier.fillMaxWidth()) {
-            Text(text = texto, modifier = Modifier.weight(1f))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            OutlinedButton(onClick = aoTocar, modifier = Modifier.weight(1f)) {
+                Text(text = texto, modifier = Modifier.weight(1f))
+            }
+            if (prazo != null) {
+                TextButton(onClick = aoRemover) {
+                    Text(stringResource(R.string.meta_remover_prazo))
+                }
+            }
         }
     }
 }
@@ -255,8 +375,9 @@ private fun opcoesDeNivel(niveis: List<NivelDaMetrica>): List<OpcaoDoMenu> {
 }
 
 /**
- * "Alunos · 11 escolhidos" e os atalhos por nível. No exemplo da professora, um
- * toque em "Silábico com valor sonoro (11)" monta a lista da meta inteira.
+ * "Alunos · 11 escolhidos" e os atalhos: "Toda a turma" sempre e, nas metas por
+ * métrica, um por nível. No exemplo da professora, um toque em
+ * "Silábico com valor sonoro (11)" monta a lista da meta inteira.
  */
 @Composable
 private fun CabecalhoDosAlunos(estado: FormularioMetaUiState, viewModel: FormularioMetaViewModel) {
@@ -278,21 +399,28 @@ private fun CabecalhoDosAlunos(estado: FormularioMetaUiState, viewModel: Formula
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                for (atalho in atalhos) {
-                    AssistChip(
-                        onClick = { viewModel.escolherQuemEstaNoNivel(atalho.nivel.id) },
-                        label = { Text(stringResource(R.string.meta_atalho_nivel, atalho.nivel.nome, atalho.quantidade)) },
-                    )
-                }
+        }
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            AssistChip(
+                onClick = { viewModel.escolherTodaATurma() },
+                label = { Text(stringResource(R.string.meta_atalho_toda_turma)) },
+            )
+            for (atalho in atalhos) {
+                AssistChip(
+                    onClick = { viewModel.escolherQuemEstaNoNivel(atalho.nivel.id) },
+                    label = { Text(stringResource(R.string.meta_atalho_nivel, atalho.nivel.nome, atalho.quantidade)) },
+                )
             }
         }
     }
 }
 
-/** Linha inteira marcável (`toggleable`), como na chamada; o Checkbox é só o desenho. */
+/**
+ * Linha inteira marcável (`toggleable`), como na chamada; o Checkbox é só o desenho.
+ * O nível do aluno aparece só nas metas por métrica.
+ */
 @Composable
-private fun LinhaDoAluno(item: AlunoParaEscolher, aoAlternar: () -> Unit) {
+private fun LinhaDoAluno(item: AlunoParaEscolher, mostrarNivel: Boolean, aoAlternar: () -> Unit) {
     val nivel: NivelDaMetrica? = item.nivelAtual
     val textoDoNivel: String
     if (nivel == null) {
@@ -305,6 +433,7 @@ private fun LinhaDoAluno(item: AlunoParaEscolher, aoAlternar: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
+            .heightIn(min = 56.dp)
             .toggleable(value = item.escolhido, role = Role.Checkbox, onValueChange = { aoAlternar() })
             .padding(horizontal = 16.dp, vertical = 8.dp),
     ) {
@@ -312,11 +441,13 @@ private fun LinhaDoAluno(item: AlunoParaEscolher, aoAlternar: () -> Unit) {
         Spacer(Modifier.width(12.dp))
         Column {
             Text(text = item.aluno.nome, style = MaterialTheme.typography.bodyLarge)
-            Text(
-                text = textoDoNivel,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            if (mostrarNivel) {
+                Text(
+                    text = textoDoNivel,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }
