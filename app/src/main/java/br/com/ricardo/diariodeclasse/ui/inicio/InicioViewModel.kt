@@ -2,9 +2,11 @@ package br.com.ricardo.diariodeclasse.ui.inicio
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import br.com.ricardo.diariodeclasse.data.local.entity.Aluno
 import br.com.ricardo.diariodeclasse.data.local.entity.Lembrete
 import br.com.ricardo.diariodeclasse.data.local.entity.Turma
 import br.com.ricardo.diariodeclasse.data.repository.AlunoRepository
+import br.com.ricardo.diariodeclasse.data.repository.AnotacaoRepository
 import br.com.ricardo.diariodeclasse.data.repository.ChamadaRepository
 import br.com.ricardo.diariodeclasse.data.repository.LembreteRepository
 import br.com.ricardo.diariodeclasse.data.repository.PendenciaRepository
@@ -48,6 +50,8 @@ sealed interface TurmasDoInicio {
     data class Carregadas(
         val turmaAtiva: Turma,
         val todas: List<Turma>,
+        /** Para o atalho "Anotar", que pergunta sobre qual aluno é a anotação. */
+        val alunos: List<Aluno>,
         val chamadaDeHoje: SituacaoDaChamada,
         val pendencias: ResumoDePendencias,
     ) : TurmasDoInicio
@@ -56,6 +60,7 @@ sealed interface TurmasDoInicio {
 /** Turma ativa e a situação dela no dia (chamada e pendências), sempre calculadas juntas. */
 private data class DadosDoDia(
     val turmaAtiva: Turma,
+    val alunos: List<Aluno>,
     val chamadaDeHoje: SituacaoDaChamada,
     val pendencias: ResumoDePendencias,
 )
@@ -73,6 +78,7 @@ class InicioViewModel @Inject constructor(
     private val chamadaRepository: ChamadaRepository,
     private val pendenciaRepository: PendenciaRepository,
     private val lembreteRepository: LembreteRepository,
+    private val anotacaoRepository: AnotacaoRepository,
     private val clock: Clock,
 ) : ViewModel() {
 
@@ -128,6 +134,7 @@ class InicioViewModel @Inject constructor(
         ) { alunos, chamada, pendencias ->
             DadosDoDia(
                 turmaAtiva = turma,
+                alunos = alunos,
                 chamadaDeHoje = calcularSituacaoDaChamada(alunos, chamada, clock.zone),
                 pendencias = calcularResumoDePendencias(alunos, pendencias, turmaNoDia.data),
             )
@@ -147,6 +154,7 @@ class InicioViewModel @Inject constructor(
             turmas = TurmasDoInicio.Carregadas(
                 turmaAtiva = dados.turmaAtiva,
                 todas = todasAsTurmas,
+                alunos = dados.alunos,
                 chamadaDeHoje = dados.chamadaDeHoje,
                 pendencias = dados.pendencias,
             )
@@ -169,6 +177,17 @@ class InicioViewModel @Inject constructor(
             turmas = TurmasDoInicio.Carregando,
             lembretes = emptyList(),
         )
+    }
+
+    /** Anotação feita pelo atalho do Início; fica com a data de hoje, como na tela do aluno. */
+    fun criarAnotacao(alunoId: String, texto: String) {
+        val textoLimpo: String = texto.trim()
+        if (textoLimpo.isEmpty()) {
+            return
+        }
+        viewModelScope.launch {
+            anotacaoRepository.criar(alunoId, textoLimpo, LocalDate.now(clock))
+        }
     }
 
     fun marcarLembreteComoConcluido(lembreteId: String) {

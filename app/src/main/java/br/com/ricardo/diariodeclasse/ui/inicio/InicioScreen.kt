@@ -18,6 +18,8 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -29,12 +31,22 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import br.com.ricardo.diariodeclasse.R
+import br.com.ricardo.diariodeclasse.data.local.entity.Aluno
 import br.com.ricardo.diariodeclasse.data.local.entity.Lembrete
+import br.com.ricardo.diariodeclasse.ui.alunos.FolhaAnotacao
+import br.com.ricardo.diariodeclasse.ui.componentes.BotaoFlutuante
 import br.com.ricardo.diariodeclasse.ui.componentes.SeletorDeTurma
 import br.com.ricardo.diariodeclasse.ui.componentes.formatarDataPorExtenso
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+
+/** Os passos do atalho "Anotar": fechado, escolhendo o aluno ou escrevendo sobre ele. */
+private sealed interface AtalhoDeAnotacao {
+    data object Fechado : AtalhoDeAnotacao
+    data object EscolhendoAluno : AtalhoDeAnotacao
+    data class Escrevendo(val aluno: Aluno) : AtalhoDeAnotacao
+}
 
 @Composable
 fun InicioScreen(
@@ -51,6 +63,8 @@ fun InicioScreen(
     val escopo: CoroutineScope = rememberCoroutineScope()
     val textoConcluido: String = stringResource(R.string.lembrete_concluido_aviso)
     val textoDesfazer: String = stringResource(R.string.pendencia_desfazer)
+    val textoAnotacaoSalva: String = stringResource(R.string.inicio_anotacao_salva)
+    val atalhoDeAnotacao: MutableState<AtalhoDeAnotacao> = remember { mutableStateOf(AtalhoDeAnotacao.Fechado) }
 
     // Roda toda vez que a tela volta ao primeiro plano (como o `onResume` de uma Activity).
     LifecycleResumeEffect(Unit) {
@@ -74,13 +88,38 @@ fun InicioScreen(
         }
     }
 
-    Scaffold(snackbarHost = { SnackbarHost(avisos) }) { espacamentoDasBarras ->
+    /** Salva e confirma no rodapé com o nome do aluno, já que a anotação não aparece no Início. */
+    fun salvarAnotacao(aluno: Aluno, texto: String) {
+        viewModel.criarAnotacao(aluno.id, texto)
+        atalhoDeAnotacao.value = AtalhoDeAnotacao.Fechado
+        escopo.launch {
+            avisos.currentSnackbarData?.dismiss()
+            avisos.showSnackbar(message = String.format(textoAnotacaoSalva, aluno.nome))
+        }
+    }
+
+    // O atalho só faz sentido com alunos cadastrados na turma ativa.
+    val turmasDoInicio: TurmasDoInicio = estado.turmas
+    val podeAnotar: Boolean = turmasDoInicio is TurmasDoInicio.Carregadas && turmasDoInicio.alunos.isNotEmpty()
+
+    Scaffold(
+        snackbarHost = { SnackbarHost(avisos) },
+        floatingActionButton = {
+            if (podeAnotar) {
+                BotaoFlutuante(
+                    texto = stringResource(R.string.inicio_anotar),
+                    aoClicar = { atalhoDeAnotacao.value = AtalhoDeAnotacao.EscolhendoAluno },
+                )
+            }
+        },
+    ) { espacamentoDasBarras ->
         Column(
             modifier = Modifier
                 .padding(espacamentoDasBarras)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 24.dp),
+                // Embaixo, espaço para o botão "Anotar" não cobrir o último card.
+                .padding(start = 16.dp, end = 16.dp, top = 24.dp, bottom = 88.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Cabecalho(
@@ -128,6 +167,28 @@ fun InicioScreen(
                 )
             }
         }
+    }
+
+    when (val atalho: AtalhoDeAnotacao = atalhoDeAnotacao.value) {
+        is AtalhoDeAnotacao.Fechado -> {}
+
+        is AtalhoDeAnotacao.EscolhendoAluno -> {
+            if (turmasDoInicio is TurmasDoInicio.Carregadas) {
+                FolhaEscolhaDeAluno(
+                    alunos = turmasDoInicio.alunos,
+                    aoEscolher = { aluno -> atalhoDeAnotacao.value = AtalhoDeAnotacao.Escrevendo(aluno) },
+                    aoFechar = { atalhoDeAnotacao.value = AtalhoDeAnotacao.Fechado },
+                )
+            }
+        }
+
+        is AtalhoDeAnotacao.Escrevendo -> FolhaAnotacao(
+            titulo = stringResource(R.string.inicio_anotacao_sobre, atalho.aluno.nome),
+            textoInicial = "",
+            aoSalvar = { texto -> salvarAnotacao(atalho.aluno, texto) },
+            aoExcluir = null,
+            aoFechar = { atalhoDeAnotacao.value = AtalhoDeAnotacao.Fechado },
+        )
     }
 }
 

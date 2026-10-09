@@ -31,6 +31,10 @@
     <string name="inicio_sem_turmas">Cadastre sua primeira turma para começar a usar o diário.</string>
     <string name="inicio_cadastrar_turma">Cadastrar turma</string>
     <string name="inicio_fazer_chamada">Fazer chamada</string>
+    <string name="inicio_anotar">Anotar</string>
+    <string name="inicio_anotar_sobre_quem">Anotar sobre quem?</string>
+    <string name="inicio_anotacao_sobre">Anotação sobre %1$s</string>
+    <string name="inicio_anotacao_salva">Anotação salva para %1$s</string>
     <string name="inicio_ver_pendencias">Ver pendências</string>
     <string name="inicio_pendencias_titulo">Pendências de hoje</string>
     <plurals name="inicio_pendencias_para_hoje">

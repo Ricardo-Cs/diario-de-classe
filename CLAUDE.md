@@ -55,6 +55,7 @@ O desenvolvedor **nunca trabalhou com Kotlin** e precisa **entender e apresentar
 - **A fazer**: pendências dos alunos e lembretes da professora, em duas seções. As notificações e os links do Início abrem direto aqui.
 - **Turma**: alunos da turma ativa; "Nova turma" e editar ficam na própria tela (não há lista de turmas).
 - **Acompanhar** (título "Acompanhamento"): fotos do dia, metas e métricas. O nome longo não cabe na barra.
+- Botão "Anotar" no Início: escolhe o aluno numa lista e já abre o campo de texto (2 toques até escrever; antes eram 3 telas).
 - Backup fica em Configurações (engrenagem no Início): é raro e não merece aba.
 
 **Registro de faltas (chamada)**
