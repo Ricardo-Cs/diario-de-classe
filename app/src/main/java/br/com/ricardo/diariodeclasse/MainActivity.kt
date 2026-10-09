@@ -13,15 +13,27 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import br.com.ricardo.diariodeclasse.data.repository.TurmaAtivaRepository
 import br.com.ricardo.diariodeclasse.notificacao.DestinoDaNotificacao
 import br.com.ricardo.diariodeclasse.notificacao.lerDestinoDoIntent
 import br.com.ricardo.diariodeclasse.ui.navigation.AppNavHost
 import br.com.ricardo.diariodeclasse.ui.theme.DiarioDeClasseTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /** `@AndroidEntryPoint` permite ao Hilt injetar dependências (e ViewModels) nesta Activity. */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    /**
+     * Activities não têm construtor próprio (quem cria é o Android), então o Hilt
+     * injeta em campos marcados com `@Inject`; `lateinit` diz ao Kotlin que o
+     * valor chega depois da criação, antes do `onCreate`.
+     */
+    @Inject
+    lateinit var turmaAtivaRepository: TurmaAtivaRepository
 
     /**
      * Abre a janela do sistema "Permitir notificações?". Precisa ser registrado
@@ -45,7 +57,7 @@ class MainActivity : ComponentActivity() {
         // celular girando a tela), para não pedir de novo a cada recriação.
         if (savedInstanceState == null) {
             pedirPermissaoDeNotificacaoSeNecessario()
-            destinoDaNotificacao.value = lerDestinoDoIntent(intent)
+            receberDestinoDaNotificacao(intent)
         }
 
         setContent {
@@ -61,7 +73,24 @@ class MainActivity : ComponentActivity() {
     /** Chamado no lugar do `onCreate` quando ela toca na notificação com o app já aberto. */
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        destinoDaNotificacao.value = lerDestinoDoIntent(intent)
+        receberDestinoDaNotificacao(intent)
+    }
+
+    /**
+     * A lista de pendências mostra a turma ativa. Na notificação de uma turma,
+     * ela vira a turma ativa antes de a aba abrir, para não aparecer outra turma
+     * por um instante.
+     */
+    private fun receberDestinoDaNotificacao(intent: Intent) {
+        val destino: DestinoDaNotificacao? = lerDestinoDoIntent(intent)
+        if (destino is DestinoDaNotificacao.PendenciasDaTurma) {
+            lifecycleScope.launch {
+                turmaAtivaRepository.selecionar(destino.turmaId)
+                destinoDaNotificacao.value = destino
+            }
+        } else {
+            destinoDaNotificacao.value = destino
+        }
     }
 
     /**

@@ -27,7 +27,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import br.com.ricardo.diariodeclasse.R
 import br.com.ricardo.diariodeclasse.data.local.entity.Lembrete
-import br.com.ricardo.diariodeclasse.ui.componentes.BarraSuperior
 import br.com.ricardo.diariodeclasse.ui.componentes.BotaoFlutuante
 import br.com.ricardo.diariodeclasse.ui.componentes.TelaCarregando
 import kotlinx.coroutines.CoroutineScope
@@ -40,16 +39,17 @@ private sealed interface PainelDeLembrete {
     data class Editando(val lembrete: Lembrete) : PainelDeLembrete
 }
 
+/**
+ * Seção "Meus lembretes" da aba "A fazer". A barra do topo é da aba; aqui ficam
+ * a lista, o botão de novo lembrete e os avisos.
+ */
 @Composable
-fun LembretesScreen(
-    aoVoltar: () -> Unit,
-    viewModel: LembretesViewModel = hiltViewModel(),
-) {
+fun ListaDeLembretes(viewModel: LembretesViewModel = hiltViewModel()) {
     val estado: LembretesUiState = viewModel.uiState.collectAsStateWithLifecycle().value
 
     when (estado) {
         is LembretesUiState.Carregando -> TelaCarregando()
-        is LembretesUiState.Carregado -> ConteudoLembretes(estado, viewModel, aoVoltar)
+        is LembretesUiState.Carregado -> ConteudoLembretes(estado, viewModel)
     }
 }
 
@@ -57,7 +57,6 @@ fun LembretesScreen(
 private fun ConteudoLembretes(
     estado: LembretesUiState.Carregado,
     viewModel: LembretesViewModel,
-    aoVoltar: () -> Unit,
 ) {
     val painel: MutableState<PainelDeLembrete> = remember { mutableStateOf(PainelDeLembrete.Fechado) }
     val avisos: SnackbarHostState = remember { SnackbarHostState() }
@@ -92,7 +91,6 @@ private fun ConteudoLembretes(
     }
 
     Scaffold(
-        topBar = { BarraSuperior(titulo = stringResource(R.string.lembretes_titulo), aoVoltar = aoVoltar) },
         snackbarHost = { SnackbarHost(avisos) },
         floatingActionButton = {
             BotaoFlutuante(

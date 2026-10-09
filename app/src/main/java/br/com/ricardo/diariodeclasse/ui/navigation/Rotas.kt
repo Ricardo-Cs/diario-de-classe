@@ -13,13 +13,13 @@ import kotlinx.serialization.Serializable
 object InicioGrafo
 
 @Serializable
+object AFazerGrafo
+
+@Serializable
 object TurmaGrafo
 
 @Serializable
 object DiarioGrafo
-
-@Serializable
-object MaisGrafo
 
 // Telas
 
@@ -39,8 +39,13 @@ data class DetalheTurmaRoute(val turmaId: String)
 @Serializable
 object DiarioRoute
 
+/** Configurações (backup dos dados); fica na pilha do Início, de onde é aberta. */
 @Serializable
-object MaisRoute
+object ConfiguracoesRoute
+
+/** Pendências dos alunos e lembretes da professora, numa aba só. */
+@Serializable
+object AFazerRoute
 
 /**
  * A data vai como texto ("2026-10-06") porque a rota precisa ser serializável
@@ -50,23 +55,16 @@ object MaisRoute
 data class ChamadaRoute(val turmaId: String, val data: String)
 
 @Serializable
-data class PendenciasRoute(val turmaId: String)
-
-@Serializable
 data class AlunoRoute(val alunoId: String)
 
 /**
- * A mesma tela do aluno, aberta a partir da aba Início (pela tela de pendências).
- * Cada aba tem a própria pilha de telas: com uma rota própria do Início, o aluno
+ * A mesma tela do aluno, aberta a partir da aba "A fazer" (pela lista de pendências).
+ * Cada aba tem a própria pilha de telas: com uma rota própria da aba, o aluno
  * abre nessa pilha, "voltar" retorna às pendências e a barra inferior continua
- * destacando o Início.
+ * destacando "A fazer".
  */
 @Serializable
-data class AlunoNoInicioRoute(val alunoId: String)
-
-/** Lembretes da professora; fica na pilha do Início, onde fica o card deles. */
-@Serializable
-object LembretesRoute
+data class AlunoNoAFazerRoute(val alunoId: String)
 
 /** A mesma tela do aluno, aberta a partir da aba Diário (pela tela da meta). */
 @Serializable

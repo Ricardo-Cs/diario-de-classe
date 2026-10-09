@@ -15,9 +15,13 @@
 
     <!-- Navegação principal -->
     <string name="aba_inicio">Início</string>
+    <string name="aba_a_fazer">A fazer</string>
     <string name="aba_turma">Turmas</string>
     <string name="aba_diario">Diário</string>
-    <string name="aba_mais">Mais</string>
+
+    <!-- A fazer -->
+    <string name="a_fazer_secao_alunos">Alunos</string>
+    <string name="a_fazer_secao_lembretes">Meus lembretes</string>
 
     <!-- Início -->
     <string name="saudacao_bom_dia">Bom dia!</string>
@@ -92,10 +96,10 @@
     <string name="chamada_sem_alunos">Cadastre os alunos desta turma para fazer a chamada.</string>
 
     <!-- Pendências -->
-    <string name="pendencias_titulo">Pendências</string>
     <string name="pendencias_nova">Nova pendência</string>
     <string name="pendencia_editar">Editar pendência</string>
     <string name="pendencias_vazio">Nenhuma pendência em aberto nesta turma.</string>
+    <string name="pendencias_sem_turma">Cadastre uma turma para registrar pendências.</string>
     <string name="pendencias_sem_alunos">Cadastre os alunos desta turma para registrar pendências.</string>
     <plurals name="pendencias_total">
         <item quantity="one">%d pendência</item>
@@ -136,7 +140,6 @@
     <string name="inicio_nenhum_lembrete">Nenhum lembrete para os próximos dias</string>
     <string name="inicio_ver_lembretes">Ver lembretes</string>
     <string name="inicio_ver_todos_lembretes">Ver todos</string>
-    <string name="lembretes_titulo">Lembretes</string>
     <string name="lembretes_vazio">Nenhum lembrete em aberto. Use para entregas e prazos seus, como portfólios e plano de ação.</string>
     <string name="lembretes_concluidos">Concluídos</string>
     <string name="lembrete_novo">Novo lembrete</string>
@@ -404,7 +407,8 @@
     <string name="meta_excluir_titulo">Excluir meta?</string>
     <string name="meta_excluir_mensagem">A meta %1$s deixará de aparecer no app. As sondagens continuam registradas.</string>
 
-    <!-- Mais: backup e exportação -->
+    <!-- Configurações: backup e exportação -->
+    <string name="configuracoes_titulo">Configurações</string>
     <string name="mais_seus_dados">Seus dados</string>
     <string name="mais_exportar">Exportar dados</string>
     <string name="mais_exportar_descricao">Salva o diário inteiro, com as fotos, num arquivo que você guarda onde quiser.</string>

@@ -1,20 +1,22 @@
 package br.com.ricardo.diariodeclasse.ui.pendencias
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.toRoute
 import br.com.ricardo.diariodeclasse.data.local.entity.Aluno
 import br.com.ricardo.diariodeclasse.data.local.entity.PendenciaComOrigem
 import br.com.ricardo.diariodeclasse.data.local.entity.Turma
 import br.com.ricardo.diariodeclasse.data.repository.AlunoRepository
 import br.com.ricardo.diariodeclasse.data.repository.PendenciaRepository
+import br.com.ricardo.diariodeclasse.data.repository.TurmaAtivaRepository
 import br.com.ricardo.diariodeclasse.data.repository.TurmaRepository
-import br.com.ricardo.diariodeclasse.ui.navigation.PendenciasRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.Clock
@@ -29,10 +31,12 @@ data class GrupoDePendencias(
 
 sealed interface PendenciasUiState {
     data object Carregando : PendenciasUiState
-    data object TurmaNaoEncontrada : PendenciasUiState
+    data object NenhumaTurma : PendenciasUiState
 
     data class Carregado(
         val turma: Turma,
+        /** Para o seletor de turma no topo da lista. */
+        val todasAsTurmas: List<Turma>,
         val hoje: LocalDate,
         val grupos: List<GrupoDePendencias>,
         /** Todos os alunos da turma, para escolher ao criar uma pendência. */
@@ -61,39 +65,73 @@ sealed interface PendenciasUiState {
     }
 }
 
+/** As pendências e os alunos de uma turma, lidos juntos. */
+private data class DadosDaTurma(
+    val turma: Turma,
+    val alunos: List<Aluno>,
+    val pendencias: List<PendenciaComOrigem>,
+)
+
+/**
+ * Pendências da turma ativa, na aba "A fazer". Mesma turma ativa do Início e
+ * do Diário; trocar aqui troca lá também.
+ */
 @HiltViewModel
 class PendenciasViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
     turmaRepository: TurmaRepository,
-    alunoRepository: AlunoRepository,
+    private val turmaAtivaRepository: TurmaAtivaRepository,
+    private val alunoRepository: AlunoRepository,
     private val pendenciaRepository: PendenciaRepository,
-    clock: Clock,
+    private val clock: Clock,
 ) : ViewModel() {
 
-    private val turmaId: String = savedStateHandle.toRoute<PendenciasRoute>().turmaId
-    private val hoje: LocalDate = LocalDate.now(clock)
-
     val uiState: StateFlow<PendenciasUiState> = combine(
-        turmaRepository.observarTurma(turmaId),
-        alunoRepository.observarAlunosDaTurma(turmaId),
-        pendenciaRepository.observarPendentesDaTurma(turmaId),
-    ) { turma, alunos, pendencias ->
-        criarEstado(turma, alunos, pendencias)
+        observarDadosDaTurmaAtiva(),
+        turmaRepository.observarTurmas(),
+    ) { dados, todasAsTurmas ->
+        criarEstado(dados, todasAsTurmas)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = PendenciasUiState.Carregando,
     )
 
-    private fun criarEstado(turma: Turma?, alunos: List<Aluno>, pendencias: List<PendenciaComOrigem>): PendenciasUiState {
-        if (turma == null) {
-            return PendenciasUiState.TurmaNaoEncontrada
+    /**
+     * `flatMapLatest` troca as consultas quando a turma ativa muda: a consulta da
+     * turma anterior é cancelada e a da nova começa (como o `switchMap` do RxJS).
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun observarDadosDaTurmaAtiva(): Flow<DadosDaTurma?> {
+        return turmaAtivaRepository.observarTurmaAtiva().flatMapLatest { turma ->
+            if (turma == null) {
+                flowOf(null)
+            } else {
+                observarDadosDaTurma(turma)
+            }
         }
+    }
+
+    private fun observarDadosDaTurma(turma: Turma): Flow<DadosDaTurma> {
+        return combine(
+            alunoRepository.observarAlunosDaTurma(turma.id),
+            pendenciaRepository.observarPendentesDaTurma(turma.id),
+        ) { alunos, pendencias ->
+            DadosDaTurma(turma, alunos, pendencias)
+        }
+    }
+
+    private fun criarEstado(dados: DadosDaTurma?, todasAsTurmas: List<Turma>): PendenciasUiState {
+        if (dados == null) {
+            return PendenciasUiState.NenhumaTurma
+        }
+        // Lido a cada atualização, e não uma vez só: a aba pode ficar aberta de um dia para o outro.
+        val hoje: LocalDate = LocalDate.now(clock)
         return PendenciasUiState.Carregado(
-            turma = turma,
+            turma = dados.turma,
+            todasAsTurmas = todasAsTurmas,
             hoje = hoje,
-            grupos = agruparPorAluno(alunos, pendencias),
-            alunos = alunos,
+            grupos = agruparPorAluno(dados.alunos, dados.pendencias),
+            alunos = dados.alunos,
         )
     }
 
@@ -115,6 +153,12 @@ class PendenciasViewModel @Inject constructor(
             }
         }
         return grupos
+    }
+
+    fun selecionarTurma(turmaId: String) {
+        viewModelScope.launch {
+            turmaAtivaRepository.selecionar(turmaId)
+        }
     }
 
     fun criarPendencia(alunoId: String, descricao: String, dataLembrete: LocalDate) {

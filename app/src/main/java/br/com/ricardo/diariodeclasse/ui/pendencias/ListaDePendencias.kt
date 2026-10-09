@@ -1,9 +1,11 @@
 package br.com.ricardo.diariodeclasse.ui.pendencias
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -20,7 +22,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,9 +37,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import br.com.ricardo.diariodeclasse.R
 import br.com.ricardo.diariodeclasse.data.local.entity.Aluno
 import br.com.ricardo.diariodeclasse.data.local.entity.Pendencia
-import br.com.ricardo.diariodeclasse.ui.componentes.BarraSuperior
 import br.com.ricardo.diariodeclasse.ui.componentes.BotaoFlutuante
 import br.com.ricardo.diariodeclasse.ui.componentes.MensagemCentralizada
+import br.com.ricardo.diariodeclasse.ui.componentes.SeletorDeTurma
 import br.com.ricardo.diariodeclasse.ui.componentes.TelaCarregando
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -50,24 +51,21 @@ private sealed interface PainelDePendencia {
     data class Editando(val pendencia: Pendencia, val aluno: Aluno) : PainelDePendencia
 }
 
+/**
+ * Seção "Alunos" da aba "A fazer": as pendências da turma ativa, agrupadas por aluno.
+ * A barra do topo é da aba; aqui ficam a lista, o botão de nova pendência e os avisos.
+ */
 @Composable
-fun PendenciasScreen(
+fun ListaDePendencias(
     aoAbrirAluno: (alunoId: String) -> Unit,
-    aoVoltar: () -> Unit,
     viewModel: PendenciasViewModel = hiltViewModel(),
 ) {
     val estado: PendenciasUiState = viewModel.uiState.collectAsStateWithLifecycle().value
 
     when (estado) {
         is PendenciasUiState.Carregando -> TelaCarregando()
-
-        is PendenciasUiState.TurmaNaoEncontrada -> {
-            LaunchedEffect(Unit) {
-                aoVoltar()
-            }
-        }
-
-        is PendenciasUiState.Carregado -> ConteudoPendencias(estado, viewModel, aoAbrirAluno, aoVoltar)
+        is PendenciasUiState.NenhumaTurma -> MensagemCentralizada(stringResource(R.string.pendencias_sem_turma))
+        is PendenciasUiState.Carregado -> ConteudoPendencias(estado, viewModel, aoAbrirAluno)
     }
 }
 
@@ -76,7 +74,6 @@ private fun ConteudoPendencias(
     estado: PendenciasUiState.Carregado,
     viewModel: PendenciasViewModel,
     aoAbrirAluno: (alunoId: String) -> Unit,
-    aoVoltar: () -> Unit,
 ) {
     val painel: MutableState<PainelDePendencia> = remember { mutableStateOf(PainelDePendencia.Fechado) }
     val avisos: SnackbarHostState = remember { SnackbarHostState() }
@@ -113,7 +110,6 @@ private fun ConteudoPendencias(
     }
 
     Scaffold(
-        topBar = { BarraSuperior(titulo = stringResource(R.string.pendencias_titulo), aoVoltar = aoVoltar) },
         snackbarHost = { SnackbarHost(avisos) },
         floatingActionButton = {
             if (temAlunos) {
@@ -124,36 +120,48 @@ private fun ConteudoPendencias(
             }
         },
     ) { espacamentoDasBarras ->
-        val modifier = Modifier.padding(espacamentoDasBarras)
+        // O cabeçalho (com o seletor de turma) aparece também nos estados vazios:
+        // é por ele que a professora troca para uma turma que tenha pendências.
+        Column(
+            modifier = Modifier
+                .padding(espacamentoDasBarras)
+                .fillMaxSize(),
+        ) {
+            CabecalhoDasPendencias(
+                estado = estado,
+                aoSelecionarTurma = { turmaId -> viewModel.selecionarTurma(turmaId) },
+            )
+            HorizontalDivider()
 
-        if (!temAlunos) {
-            MensagemCentralizada(stringResource(R.string.pendencias_sem_alunos), modifier)
-        } else if (estado.grupos.isEmpty()) {
-            MensagemCentralizada(stringResource(R.string.pendencias_vazio), modifier)
-        } else {
-            LazyColumn(modifier = modifier.fillMaxSize()) {
-                item {
-                    CabecalhoDasPendencias(estado)
-                    HorizontalDivider()
-                }
-                for (grupo in estado.grupos) {
-                    item(key = grupo.aluno.id) {
-                        CabecalhoDoAluno(
-                            grupo = grupo,
-                            aoAbrirAluno = { aoAbrirAluno(grupo.aluno.id) },
-                            aoAdicionar = { painel.value = PainelDePendencia.Criando(alunoInicial = grupo.aluno) },
-                        )
-                    }
-                    items(grupo.pendencias, key = { item -> item.pendencia.id }) { item ->
-                        LinhaDaPendencia(
-                            item = item,
-                            hoje = estado.hoje,
-                            aoEditar = { painel.value = PainelDePendencia.Editando(item.pendencia, grupo.aluno) },
-                            aoMarcarComoEntregue = { marcarComoEntregue(item.pendencia) },
-                        )
-                    }
-                    item {
-                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            if (!temAlunos) {
+                MensagemCentralizada(stringResource(R.string.pendencias_sem_alunos))
+            } else if (estado.grupos.isEmpty()) {
+                MensagemCentralizada(stringResource(R.string.pendencias_vazio))
+            } else {
+                // O espaço extra no fim evita que o botão flutuante cubra a última pendência.
+                LazyColumn(
+                    contentPadding = PaddingValues(bottom = 88.dp),
+                    modifier = Modifier.fillMaxSize(),
+                ) {
+                    for (grupo in estado.grupos) {
+                        item(key = grupo.aluno.id) {
+                            CabecalhoDoAluno(
+                                grupo = grupo,
+                                aoAbrirAluno = { aoAbrirAluno(grupo.aluno.id) },
+                                aoAdicionar = { painel.value = PainelDePendencia.Criando(alunoInicial = grupo.aluno) },
+                            )
+                        }
+                        items(grupo.pendencias, key = { item -> item.pendencia.id }) { item ->
+                            LinhaDaPendencia(
+                                item = item,
+                                hoje = estado.hoje,
+                                aoEditar = { painel.value = PainelDePendencia.Editando(item.pendencia, grupo.aluno) },
+                                aoMarcarComoEntregue = { marcarComoEntregue(item.pendencia) },
+                            )
+                        }
+                        item {
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                        }
                     }
                 }
             }
@@ -202,21 +210,34 @@ private fun ConteudoPendencias(
     }
 }
 
-/** Turma e resumo: "5 pendências · 3 para hoje". */
+/** Seletor da turma e, havendo pendências, o resumo: "5 pendências · 3 para hoje". */
 @Composable
-private fun CabecalhoDasPendencias(estado: PendenciasUiState.Carregado) {
+private fun CabecalhoDasPendencias(
+    estado: PendenciasUiState.Carregado,
+    aoSelecionarTurma: (turmaId: String) -> Unit,
+) {
     val total: Int = estado.quantidadeTotal()
     val paraHoje: Int = estado.quantidadeParaHoje()
     val resumo = pluralStringResource(R.plurals.pendencias_total, total, total) +
         " · " + stringResource(R.string.pendencias_para_hoje, paraHoje)
 
-    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
-        Text(text = estado.turma.nome, style = MaterialTheme.typography.titleMedium)
-        Text(
-            text = resumo,
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+    ) {
+        SeletorDeTurma(
+            turmaAtiva = estado.turma,
+            todasAsTurmas = estado.todasAsTurmas,
+            aoSelecionarTurma = aoSelecionarTurma,
         )
+        // Sem pendências, a mensagem abaixo já diz isso; "0 pendências" só repetiria.
+        if (total > 0) {
+            Text(
+                text = resumo,
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 

@@ -13,7 +13,7 @@ import br.com.ricardo.diariodeclasse.data.repository.AnotacaoRepository
 import br.com.ricardo.diariodeclasse.data.repository.ChamadaRepository
 import br.com.ricardo.diariodeclasse.data.repository.MetricaRepository
 import br.com.ricardo.diariodeclasse.data.repository.PendenciaRepository
-import br.com.ricardo.diariodeclasse.ui.navigation.AlunoNoInicioRoute
+import br.com.ricardo.diariodeclasse.ui.navigation.AlunoNoAFazerRoute
 import br.com.ricardo.diariodeclasse.ui.navigation.AlunoRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -58,8 +58,8 @@ class AlunoViewModel @Inject constructor(
 ) : ViewModel() {
 
     /**
-     * A tela tem três rotas ([AlunoRoute] na aba Turmas, [AlunoNoInicioRoute] no
-     * Início e `AlunoNoDiarioRoute` no Diário), e todas guardam o id com o mesmo
+     * A tela tem três rotas ([AlunoRoute] na aba Turmas, [AlunoNoAFazerRoute] em
+     * "A fazer" e `AlunoNoDiarioRoute` no Diário), e todas guardam o id com o mesmo
      * nome, "alunoId". Lemos direto pela chave para servir a qualquer uma delas.
      */
     private val alunoId: String = lerAlunoIdDaRota(savedStateHandle)

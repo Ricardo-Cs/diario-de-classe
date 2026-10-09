@@ -1,4 +1,4 @@
-package br.com.ricardo.diariodeclasse.ui.mais
+package br.com.ricardo.diariodeclasse.ui.configuracoes
 
 import android.net.Uri
 import androidx.activity.compose.ManagedActivityResultLauncher
@@ -51,8 +51,11 @@ private val TIPOS_ACEITOS_NA_IMPORTACAO: Array<String> = arrayOf(
 )
 
 @Composable
-fun MaisScreen(viewModel: MaisViewModel = hiltViewModel()) {
-    val estado: MaisUiState = viewModel.uiState.collectAsStateWithLifecycle().value
+fun ConfiguracoesScreen(
+    aoVoltar: () -> Unit,
+    viewModel: ConfiguracoesViewModel = hiltViewModel(),
+) {
+    val estado: ConfiguracoesUiState = viewModel.uiState.collectAsStateWithLifecycle().value
     val avisos: SnackbarHostState = remember { SnackbarHostState() }
 
     /*
@@ -81,7 +84,7 @@ fun MaisScreen(viewModel: MaisViewModel = hiltViewModel()) {
     MostrarMensagem(mensagem = estado.mensagem, avisos = avisos, aoExibir = { viewModel.mensagemExibida() })
 
     Scaffold(
-        topBar = { BarraSuperior(titulo = stringResource(R.string.aba_mais)) },
+        topBar = { BarraSuperior(titulo = stringResource(R.string.configuracoes_titulo), aoVoltar = aoVoltar) },
         snackbarHost = { SnackbarHost(avisos) },
     ) { espacamentoDasBarras ->
         Column(
@@ -214,7 +217,7 @@ private fun Avisos() {
 
 /** "Última exportação: hoje", "há 12 dias" ou "Ainda não exportado neste celular". */
 @Composable
-private fun textoDaUltimaExportacao(estado: MaisUiState): String? {
+private fun textoDaUltimaExportacao(estado: ConfiguracoesUiState): String? {
     val ultima: UltimaExportacao = estado.ultimaExportacao
     when (ultima) {
         is UltimaExportacao.Carregando -> return null

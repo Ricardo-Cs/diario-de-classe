@@ -2,11 +2,14 @@ package br.com.ricardo.diariodeclasse.ui.inicio
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
@@ -17,7 +20,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -36,8 +41,9 @@ fun InicioScreen(
     aoCadastrarTurma: () -> Unit,
     aoAbrirChamada: (turmaId: String, data: LocalDate) -> Unit,
     aoAbrirTurma: (turmaId: String) -> Unit,
-    aoAbrirPendencias: (turmaId: String) -> Unit,
+    aoAbrirPendencias: () -> Unit,
     aoAbrirLembretes: () -> Unit,
+    aoAbrirConfiguracoes: () -> Unit,
     viewModel: InicioViewModel = hiltViewModel(),
 ) {
     val estado: InicioUiState = viewModel.uiState.collectAsStateWithLifecycle().value
@@ -77,7 +83,11 @@ fun InicioScreen(
                 .padding(horizontal = 16.dp, vertical = 24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Cabecalho(saudacao = estado.saudacao, hoje = estado.hoje)
+            Cabecalho(
+                saudacao = estado.saudacao,
+                hoje = estado.hoje,
+                aoAbrirConfiguracoes = aoAbrirConfiguracoes,
+            )
 
             when (val turmas: TurmasDoInicio = estado.turmas) {
                 is TurmasDoInicio.Carregando -> {
@@ -103,7 +113,7 @@ fun InicioScreen(
                     )
                     CardPendencias(
                         resumo = turmas.pendencias,
-                        aoAbrirPendencias = { aoAbrirPendencias(turmas.turmaAtiva.id) },
+                        aoAbrirPendencias = aoAbrirPendencias,
                     )
                 }
             }
@@ -121,18 +131,28 @@ fun InicioScreen(
     }
 }
 
+/** Saudação e data; à direita, a engrenagem das configurações (backup dos dados). */
 @Composable
-private fun Cabecalho(saudacao: Saudacao, hoje: LocalDate) {
-    Column {
-        Text(
-            text = textoDaSaudacao(saudacao),
-            style = MaterialTheme.typography.headlineMedium,
-        )
-        Text(
-            text = formatarDataPorExtenso(hoje),
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+private fun Cabecalho(saudacao: Saudacao, hoje: LocalDate, aoAbrirConfiguracoes: () -> Unit) {
+    Row(verticalAlignment = Alignment.Top) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = textoDaSaudacao(saudacao),
+                style = MaterialTheme.typography.headlineMedium,
+            )
+            Text(
+                text = formatarDataPorExtenso(hoje),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        IconButton(onClick = aoAbrirConfiguracoes) {
+            Icon(
+                painter = painterResource(R.drawable.ic_configuracoes),
+                contentDescription = stringResource(R.string.configuracoes_titulo),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 

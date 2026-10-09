@@ -91,7 +91,7 @@ Os níveis são os da psicogênese da língua escrita (pré-silábico, silábico
 
 **Lembretes da professora**
 - Descrição + data; gerais (não pertencem a uma turma).
-- Aparecem no Início quando atrasados ou nos próximos 7 dias; a lista completa fica na tela "Lembretes".
+- Aparecem no Início quando atrasados ou nos próximos 7 dias; a lista completa fica na aba "A fazer" (seção "Meus lembretes"), ao lado das pendências dos alunos.
 - Notificação diária própria (canal separado das pendências) com os do dia e os atrasados, até serem concluídos.
 
 **Grupos (fora do escopo por enquanto)**

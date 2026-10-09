@@ -1,4 +1,4 @@
-package br.com.ricardo.diariodeclasse.ui.mais
+package br.com.ricardo.diariodeclasse.ui.configuracoes
 
 import android.database.SQLException
 import android.net.Uri
@@ -59,7 +59,7 @@ enum class MensagemDaTela {
     FOTOS_NAO_IMPORTADAS,
 }
 
-data class MaisUiState(
+data class ConfiguracoesUiState(
     val hoje: LocalDate,
     val ultimaExportacao: UltimaExportacao,
     /** Exportando ou importando: os botões ficam desabilitados. */
@@ -76,7 +76,7 @@ private data class EstadoDasOperacoes(
 )
 
 @HiltViewModel
-class MaisViewModel @Inject constructor(
+class ConfiguracoesViewModel @Inject constructor(
     private val backupRepository: BackupRepository,
     private val arquivos: ArquivosDeBackup,
     private val clock: Clock,
@@ -85,11 +85,11 @@ class MaisViewModel @Inject constructor(
     private val hoje: LocalDate = LocalDate.now(clock)
     private val operacoes = MutableStateFlow(EstadoDasOperacoes())
 
-    val uiState: StateFlow<MaisUiState> = combine(
+    val uiState: StateFlow<ConfiguracoesUiState> = combine(
         backupRepository.observarUltimaExportacao(),
         operacoes,
     ) { instante, estadoDasOperacoes ->
-        MaisUiState(
+        ConfiguracoesUiState(
             hoje = hoje,
             ultimaExportacao = ultimaExportacaoDe(instante),
             ocupado = estadoDasOperacoes.ocupado,
@@ -99,7 +99,7 @@ class MaisViewModel @Inject constructor(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = MaisUiState(
+        initialValue = ConfiguracoesUiState(
             hoje = hoje,
             ultimaExportacao = UltimaExportacao.Carregando,
             ocupado = false,

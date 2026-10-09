@@ -7,6 +7,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination
@@ -19,20 +22,20 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import br.com.ricardo.diariodeclasse.notificacao.DestinoDaNotificacao
+import br.com.ricardo.diariodeclasse.ui.afazer.AFazerScreen
+import br.com.ricardo.diariodeclasse.ui.afazer.SecaoDoAFazer
 import br.com.ricardo.diariodeclasse.ui.alunos.AlunoScreen
 import br.com.ricardo.diariodeclasse.ui.chamada.ChamadaScreen
+import br.com.ricardo.diariodeclasse.ui.configuracoes.ConfiguracoesScreen
 import br.com.ricardo.diariodeclasse.ui.diario.DiarioScreen
 import br.com.ricardo.diariodeclasse.ui.fotos.FotoScreen
 import br.com.ricardo.diariodeclasse.ui.fotos.FotosScreen
 import br.com.ricardo.diariodeclasse.ui.inicio.InicioScreen
-import br.com.ricardo.diariodeclasse.ui.lembretes.LembretesScreen
-import br.com.ricardo.diariodeclasse.ui.mais.MaisScreen
 import br.com.ricardo.diariodeclasse.ui.metas.FormularioMetaScreen
 import br.com.ricardo.diariodeclasse.ui.metas.MetaScreen
 import br.com.ricardo.diariodeclasse.ui.metricas.FormularioMetricaScreen
 import br.com.ricardo.diariodeclasse.ui.metricas.MetricaScreen
 import br.com.ricardo.diariodeclasse.ui.metricas.SondagemScreen
-import br.com.ricardo.diariodeclasse.ui.pendencias.PendenciasScreen
 import br.com.ricardo.diariodeclasse.ui.turmas.DetalheTurmaScreen
 import br.com.ricardo.diariodeclasse.ui.turmas.FormularioTurmaScreen
 import br.com.ricardo.diariodeclasse.ui.turmas.ListaTurmasScreen
@@ -52,6 +55,17 @@ fun AppNavHost(
     val navController: NavHostController = rememberNavController()
     val entradaAtual: NavBackStackEntry? = navController.currentBackStackEntryAsState().value
     val destinoAtual: NavDestination? = entradaAtual?.destination
+
+    // Qual lista a aba "A fazer" mostra. Fica aqui, e não na tela, porque o Início
+    // e as notificações também escolhem. `rememberSaveable` sobrevive a girar a tela.
+    val secaoDoAFazer: MutableState<SecaoDoAFazer> = rememberSaveable {
+        mutableStateOf(SecaoDoAFazer.PENDENCIAS_DOS_ALUNOS)
+    }
+
+    fun abrirAFazer(secao: SecaoDoAFazer) {
+        secaoDoAFazer.value = secao
+        abrirRaizDaAba(navController, AbaPrincipal.A_FAZER, AFazerRoute)
+    }
 
     // As telas internas já têm o próprio Scaffold e tratam as bordas do sistema
     // (barra de status etc.). Por isso este Scaffold externo não aplica nenhuma
@@ -88,8 +102,9 @@ fun AppNavHost(
                         aoAbrirChamada = { turmaId, data ->
                             navController.navigate(ChamadaRoute(turmaId, data.toString()))
                         },
-                        aoAbrirPendencias = { turmaId -> navController.navigate(PendenciasRoute(turmaId)) },
-                        aoAbrirLembretes = { navController.navigate(LembretesRoute) },
+                        aoAbrirPendencias = { abrirAFazer(SecaoDoAFazer.PENDENCIAS_DOS_ALUNOS) },
+                        aoAbrirLembretes = { abrirAFazer(SecaoDoAFazer.MEUS_LEMBRETES) },
+                        aoAbrirConfiguracoes = { navController.navigate(ConfiguracoesRoute) },
                         aoAbrirTurma = { turmaId ->
                             // Vai para a aba Turma e abre a turma lá, para a barra
                             // inferior destacar a aba certa.
@@ -99,27 +114,30 @@ fun AppNavHost(
                     )
                 }
 
-                composable<PendenciasRoute> {
-                    PendenciasScreen(
-                        aoAbrirAluno = { alunoId -> navController.navigate(AlunoNoInicioRoute(alunoId)) },
-                        aoVoltar = { navController.popBackStack() },
-                    )
-                }
-
-                composable<LembretesRoute> {
-                    LembretesScreen(
-                        aoVoltar = { navController.popBackStack() },
-                    )
-                }
-
-                composable<AlunoNoInicioRoute> {
-                    AlunoScreen(
-                        aoVoltar = { navController.popBackStack() },
-                    )
-                }
-
                 composable<ChamadaRoute> {
                     ChamadaScreen(
+                        aoVoltar = { navController.popBackStack() },
+                    )
+                }
+
+                composable<ConfiguracoesRoute> {
+                    ConfiguracoesScreen(
+                        aoVoltar = { navController.popBackStack() },
+                    )
+                }
+            }
+
+            navigation<AFazerGrafo>(startDestination = AFazerRoute) {
+                composable<AFazerRoute> {
+                    AFazerScreen(
+                        secao = secaoDoAFazer.value,
+                        aoTrocarSecao = { secao -> secaoDoAFazer.value = secao },
+                        aoAbrirAluno = { alunoId -> navController.navigate(AlunoNoAFazerRoute(alunoId)) },
+                    )
+                }
+
+                composable<AlunoNoAFazerRoute> {
+                    AlunoScreen(
                         aoVoltar = { navController.popBackStack() },
                     )
                 }
@@ -240,37 +258,34 @@ fun AppNavHost(
                     )
                 }
             }
-
-            navigation<MaisGrafo>(startDestination = MaisRoute) {
-                composable<MaisRoute> {
-                    MaisScreen()
-                }
-            }
         }
     }
 
     // Roda depois de o NavHost montar o mapa de telas, e de novo a cada destino novo.
+    // A turma da notificação já foi escolhida como turma ativa pela MainActivity.
     LaunchedEffect(destinoDaNotificacao) {
         if (destinoDaNotificacao != null) {
-            abrirDestinoDaNotificacao(navController, destinoDaNotificacao)
+            abrirAFazer(secaoDaNotificacao(destinoDaNotificacao))
             aoAbrirDestinoDaNotificacao()
         }
     }
 }
 
-/**
- * Pendências e lembretes ficam na pilha do Início. Troca para essa aba (guardando
- * a pilha da aba atual), fecha o que estava aberto nela e abre a tela pedida;
- * assim "voltar" leva ao Início, e não a uma tela antiga.
- */
-private fun abrirDestinoDaNotificacao(navController: NavHostController, destino: DestinoDaNotificacao) {
-    navegarParaAba(navController, AbaPrincipal.INICIO)
-    navController.popBackStack(route = InicioRoute, inclusive = false)
-
-    when (destino) {
-        is DestinoDaNotificacao.PendenciasDaTurma -> navController.navigate(PendenciasRoute(destino.turmaId))
-        is DestinoDaNotificacao.Lembretes -> navController.navigate(LembretesRoute)
+private fun secaoDaNotificacao(destino: DestinoDaNotificacao): SecaoDoAFazer {
+    return when (destino) {
+        is DestinoDaNotificacao.PendenciasDaTurma -> SecaoDoAFazer.PENDENCIAS_DOS_ALUNOS
+        is DestinoDaNotificacao.Lembretes -> SecaoDoAFazer.MEUS_LEMBRETES
     }
+}
+
+/**
+ * Troca para a [aba] e fecha o que estava aberto nela, mostrando a tela [raiz].
+ * Usado quando o pedido vem de fora da aba (Início, notificação): sem isso, ela
+ * poderia reabrir numa tela antiga, como a de um aluno visto horas antes.
+ */
+private fun abrirRaizDaAba(navController: NavHostController, aba: AbaPrincipal, raiz: Any) {
+    navegarParaAba(navController, aba)
+    navController.popBackStack(route = raiz, inclusive = false)
 }
 
 /**
