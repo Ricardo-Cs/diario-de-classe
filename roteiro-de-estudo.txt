@@ -1,0 +1,176 @@
+ROTEIRO DE ESTUDO DO CÓDIGO — Diário de Aula Virtual
+=====================================================
+
+O projeto tem cerca de 22 mil linhas em ~190 arquivos. A ideia é seguir uma
+funcionalidade inteira de ponta a ponta (do banco até a tela) e só depois
+partir para as mais complexas, que repetem o mesmo padrão.
+
+Caminhos relativos a: app/src/main/java/br/com/ricardo/diariodeclasse/
+Tempo total estimado: 20 a 25 horas.
+
+
+ETAPA 0 — O mapa geral (30 min)
+-------------------------------
+Objetivo: saber para que serve cada pasta antes de abrir qualquer código.
+
+  data/local/entity  -> tabelas do banco (como @Entity do JPA)
+  data/local/dao     -> consultas SQL (como Repository do Spring Data)
+  data/repository    -> regras de negócio sobre os DAOs (como @Service)
+  di/                -> configuração do Hilt (como @Configuration/@Bean)
+  ui/<tela>/         -> *ViewModel (estado) + *Screen (Compose, desenho da tela)
+  ui/navigation      -> rotas e barra inferior (como o Router do Angular)
+  notificacao/       -> WorkManager e notificações
+  data/backup, fotos -> exportação .zip e tratamento de imagens
+
+Para ler: CLAUDE.md, seções 1, 4 e 5.
+Você entendeu se: conseguir explicar por que um ViewModel nunca acessa um DAO
+diretamente.
+
+[ ] concluída
+
+
+ETAPA 1 — Como o app liga (1 h)
+-------------------------------
+- AndroidManifest.xml (em app/src/main/)
+- DiarioApplication.kt: o @HiltAndroidApp e a criação dos canais de notificação
+- MainActivity.kt
+- app/build.gradle.kts e gradle/libs.versions.toml
+
+Conceitos: Application x Activity, ciclo de vida, KSP (gera código em tempo de
+compilação, como os annotation processors do Java).
+Você entendeu se: souber dizer o que roda primeiro quando ela toca no ícone do app.
+
+[ ] concluída
+
+
+ETAPA 2 — A camada de dados, só com Turma (2 h)
+-----------------------------------------------
+Leia nesta ordem:
+  1. data/local/entity/EntidadeBase.kt e Turma.kt
+  2. data/local/dao/TurmaDao.kt
+  3. data/local/AppDatabase.kt e Converters.kt
+  4. data/repository/TurmaRepository.kt
+  5. di/DatabaseModule.kt e di/RepositoryModule.kt
+
+Conceitos: data class (o copy() substitui o spread do TS), suspend (parecido
+com async), Flow (parecido com um Observable que o Room reemite a cada mudança
+na tabela), soft delete, UUID, Clock injetado.
+Para fixar: abra app/src/test/.../TurmaRepositoryImplTest.kt. Os testes mostram
+o comportamento esperado de cada função.
+
+[ ] concluída
+
+
+ETAPA 3 — A tela, ainda com Turma (2-3 h)
+-----------------------------------------
+  1. ui/turmas/TurmaViewModel.kt
+  2. ui/turmas/TurmaScreen.kt
+  3. ui/turmas/FormularioTurmaViewModel.kt e FormularioTurmaScreen.kt
+  4. ui/componentes/ (peças reutilizadas em várias telas)
+
+Conceitos:
+  - sealed interface UiState (Carregando/Carregado), como uma união
+    discriminada do TS;
+  - StateFlow + stateIn + combine + flatMapLatest (equivalentes do RxJS:
+    BehaviorSubject, combineLatest, switchMap);
+  - @Composable e recomposição (lembra o render do React);
+  - collectAsStateWithLifecycle, remember;
+  - viewModelScope.launch.
+
+Você entendeu se: conseguir descrever o caminho completo de um toque em
+"Adicionar aluno" até o nome aparecer na lista. Esta é a etapa mais importante:
+daqui em diante todas as funcionalidades repetem o mesmo padrão.
+
+[ ] concluída
+
+
+ETAPA 4 — Navegação (1 h)
+-------------------------
+- ui/navigation/Rotas.kt, AbaPrincipal.kt, BarraInferior.kt, AppNavHost.kt
+- data/repository/TurmaAtivaRepository.kt e di/PreferenciasModule.kt
+  (DataStore, que é a turma ativa compartilhada entre as abas)
+
+Você entendeu se: souber como a aba Turma e o Início ficam sabendo que a turma
+ativa mudou.
+
+[ ] concluída
+
+
+ETAPA 5 — Alunos e Anotações (1-2 h)
+------------------------------------
+Este é o mesmo padrão da Turma, com relação 1:N e folhas (bottom sheets).
+Aluno, Anotacao, os DAOs e repositórios deles, ui/alunos/*,
+ui/inicio/FolhaEscolhaDeAluno.kt (o atalho Anotar).
+
+[ ] concluída
+
+
+ETAPA 6 — Chamada e Pendências, o núcleo do app (3 h)
+-----------------------------------------------------
+- Chamada, RegistroPresenca, Pendencia, PendenciaComOrigem (repare nas classes
+  que não são tabelas: são resultados de JOIN)
+- ChamadaRepository.kt, PendenciaRepository.kt
+- ui/chamada/*, ui/pendencias/*, ui/afazer/*
+
+Conceitos: @Transaction, consultas com JOIN, estado de tela mais complexo
+(ChamadaViewModel tem 355 linhas).
+
+[ ] concluída
+
+
+ETAPA 7 — Início e Lembretes (1-2 h)
+------------------------------------
+ui/inicio/* (a tela que junta tudo) e ui/lembretes/*.
+Repare em SituacaoDaChamada.kt, ResumoDePendencias.kt e Saudacao.kt: são
+funções puras, separadas da tela justamente para dar para testar, e têm testes
+próprios.
+
+[ ] concluída
+
+
+ETAPA 8 — Métricas e Metas, a parte mais densa (3-4 h)
+------------------------------------------------------
+- Entidades: Metrica, NivelDaMetrica, Sondagem, ResultadoDaSondagem, Meta,
+  AlunoNaMeta
+- MetricaRepository.kt (338 linhas) e MetaRepository.kt
+- ui/metricas/* e ui/metas/*. Comece por ProgressoDaMeta.kt e NiveisAtuais.kt
+  junto com os testes deles: ali está a lógica de cálculo.
+
+[ ] concluída
+
+
+ETAPA 9 — Segundo plano, arquivos e backup (2-3 h)
+--------------------------------------------------
+- notificacao/*: o LembreteDePendenciasWorker (WorkManager + @HiltWorker) e a
+  permissão POST_NOTIFICATIONS
+- data/fotos/* e ui/fotos/*: câmera, Photo Picker, redução de imagem,
+  FileProvider (res/xml/caminhos_compartilhados.xml)
+- data/backup/* e BackupDao.kt: kotlinx.serialization e o .zip.
+  Leia ConversorDeBackupTest.kt primeiro.
+- res/xml/backup_rules.xml e data_extraction_rules.xml (Auto Backup)
+
+[ ] concluída
+
+
+ETAPA 10 — Perfil e Configurações (1 h)
+---------------------------------------
+ui/perfil/* e ui/configuracoes/*. Aqui você revisa tudo, porque essa parte
+junta fotos, backup e navegação.
+
+[ ] concluída
+
+
+COMO ESTUDAR CADA ETAPA
+=======================
+1. Leia o teste antes da implementação, quando houver um. Ele diz o QUE o
+   código faz antes de você ver o COMO.
+2. Mude algo e veja o efeito. Por exemplo: troque a ordenação no TurmaDao e
+   rode o app, ou quebre um teste de propósito.
+3. Explique em voz alta, como se estivesse apresentando para alguém. Se travar
+   num trecho, é ele que precisa de revisão.
+4. Anote suas dúvidas abaixo.
+
+
+DÚVIDAS
+=======
+
