@@ -40,12 +40,11 @@ O desenvolvedor **nunca trabalhou com Kotlin** e precisa **entender e apresentar
 | Funcionalidade | Descrição | Dificuldade |
 |---|---|---|
 | Turmas e alunos | Cadastro da turma e dos alunos | Baixa |
-| Anotações por aluno | Texto com data, possivelmente com tags (as "anotações específicas" do caderno) | Baixa |
+| Anotações por aluno | Texto com data (as "anotações específicas" do caderno) | Baixa |
 | Registro de faltas | Quem faltou no dia, com observação; base para as pendências | Média |
 | Pendências ("colocar na pasta") | Aluno faltou → atividades ficam pendentes para ele fazer depois | Média |
 | Notificação | Se o aluno X não fez a atividade Y, notificar no dia seguinte | Média |
 | Metas da turma | Meta **e forma de medição** definidas pela própria professora | Média |
-| Grupos de acompanhamento | Ex.: "em alfabetização", "precisa de atenção"; criados pela professora | Média |
 | Métricas personalizáveis | Métricas definidas pela professora, com histórico | Média/alta |
 
 ### Diretrizes de design
@@ -87,10 +86,13 @@ Os níveis são os da psicogênese da língua escrita (pré-silábico, silábico
 - Aparecem no Início quando atrasados ou nos próximos 7 dias; a lista completa fica na tela "Lembretes".
 - Notificação diária própria (canal separado das pendências) com os do dia e os atrasados, até serem concluídos.
 
-**Grupos**
-- Grupos são **marcadores sem ordem** criados pela professora (ex.: "precisa de atenção"). Um aluno pode estar em vários grupos.
-- **Níveis de uma escala não são grupos**: são exclusivos, têm ordem e alimentam metas. Por isso ficam nas Métricas.
-- A participação no grupo tem **datas de entrada e saída**, para mostrar a evolução.
+**Grupos (fora do escopo por enquanto)**
+- Estavam no pedido original como "grupos de acompanhamento", mas foram retirados em out/2026: métricas (níveis) e metas (conjunto de alunos com objetivo) já cobrem o que se esperava deles.
+- Só voltam se a professora mostrar marcações reais que não sejam nível nem meta (ex.: "precisa de atenção").
+
+**Tags nas anotações (fora do escopo por enquanto)**
+- Retiradas em out/2026: escolher tags é um passo a mais no registro, que precisa ser mais rápido que o caderno. O histórico do aluno em ordem de data basta.
+- Só voltam se a professora sentir falta de procurar anotações por tema (família, comportamento etc.).
 
 **Notificações**
 - Agendar com WorkManager (ou AlarmManager se precisar de horário exato).
@@ -145,9 +147,7 @@ Como o app substitui o caderno, perder o aparelho não pode significar perder o 
 - `ResultadoDaSondagem` — sondagem + aluno + nível (único por sondagem/aluno)
 - `Meta` — turma + descrição + prazo opcional + métrica e nível-alvo opcionais (sem eles, a meta é marcada à mão); progresso não é armazenado
 - `AlunoNaMeta` — alunos que a meta acompanha (N:N), com nível inicial e "atingiu em" (metas à mão)
-- `Grupo` — turma + nome + descrição (ex.: "precisa de atenção")
-- `ParticipacaoNoGrupo` — aluno + grupo + entrou em + saiu em (uma linha por passagem pelo grupo)
-- `Anotacao` — aluno + texto + data (tags ainda não implementadas)
+- `Anotacao` — aluno + texto + data
 - `Lembrete` — descrição + data + concluído em (da professora, sem turma)
 
 Todas as entidades seguem as regras da seção 4 (UUID, timestamps, soft delete).
@@ -166,7 +166,7 @@ Todas as entidades seguem as regras da seção 4 (UUID, timestamps, soft delete)
 
 Já existem vários "diários de classe digitais" (apps de secretarias estaduais, MSTECH, Tecsystem, Diário Fácil etc.), mas focados na parte **burocrática/oficial** (frequência, notas, conteúdos). ClassDojo e Google Classroom cobrem comunicação e entrega de atividades.
 
-**Diferencial deste app:** substituir o **caderno pessoal da professora** — o acompanhamento pedagógico cotidiano que os sistemas oficiais não cobrem: faltas com observações, pendências por aluno, lembretes, anotações, grupos por necessidade, metas e registros de evolução, adequados a etapas em que não há avaliação por nota.
+**Diferencial deste app:** substituir o **caderno pessoal da professora** — o acompanhamento pedagógico cotidiano que os sistemas oficiais não cobrem: faltas com observações, pendências por aluno, lembretes, anotações, metas e registros de evolução, adequados a etapas em que não há avaliação por nota.
 
 ---
 
@@ -188,5 +188,5 @@ Já existem vários "diários de classe digitais" (apps de secretarias estaduais
 2. ~~Estrutura de pacotes MVVM.~~
 3. ~~Turmas e Alunos.~~
 4. ~~Registro de faltas → Pendências → Notificações.~~
-5. ~~Anotações~~ → ~~Métricas (escala de níveis) e Metas ligadas a métricas~~ (aba Diário) → Grupos → tags nas anotações. Métricas vieram antes porque a meta real da professora tem prazo no início de novembro de 2026.
+5. ~~Anotações~~ → ~~Métricas (escala de níveis) e Metas ligadas a métricas~~ (aba Diário). Grupos e tags nas anotações foram retirados do plano em out/2026 (ver seção 2); próximos passos saem do uso real da professora. Métricas vieram antes porque a meta real da professora tem prazo no início de novembro de 2026.
 6. ~~Backup/exportação JSON~~ (estender a cada entidade nova); relatório em PDF em aberto.
