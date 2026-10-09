@@ -1,6 +1,7 @@
 package br.com.ricardo.diariodeclasse
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -9,7 +10,11 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.ContextCompat
+import br.com.ricardo.diariodeclasse.notificacao.DestinoDaNotificacao
+import br.com.ricardo.diariodeclasse.notificacao.lerDestinoDoIntent
 import br.com.ricardo.diariodeclasse.ui.navigation.AppNavHost
 import br.com.ricardo.diariodeclasse.ui.theme.DiarioDeClasseTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -26,6 +31,12 @@ class MainActivity : ComponentActivity() {
     private val pedidoDePermissaoDeNotificacao: ActivityResultLauncher<String> =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { _: Boolean -> }
 
+    /**
+     * Tela pedida pela notificação tocada, à espera de o `AppNavHost` navegar até ela.
+     * É um estado do Compose: quando muda, a interface reage, como um `useState`.
+     */
+    private val destinoDaNotificacao: MutableState<DestinoDaNotificacao?> = mutableStateOf(null)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -34,13 +45,23 @@ class MainActivity : ComponentActivity() {
         // celular girando a tela), para não pedir de novo a cada recriação.
         if (savedInstanceState == null) {
             pedirPermissaoDeNotificacaoSeNecessario()
+            destinoDaNotificacao.value = lerDestinoDoIntent(intent)
         }
 
         setContent {
             DiarioDeClasseTheme {
-                AppNavHost()
+                AppNavHost(
+                    destinoDaNotificacao = destinoDaNotificacao.value,
+                    aoAbrirDestinoDaNotificacao = { destinoDaNotificacao.value = null },
+                )
             }
         }
+    }
+
+    /** Chamado no lugar do `onCreate` quando ela toca na notificação com o app já aberto. */
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        destinoDaNotificacao.value = lerDestinoDoIntent(intent)
     }
 
     /**

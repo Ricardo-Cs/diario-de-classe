@@ -23,18 +23,28 @@ fun temPermissaoParaNotificar(context: Context): Boolean {
 }
 
 /**
- * Abre o app como se fosse pelo ícone: se ele já estiver aberto, volta para
- * onde a professora estava em vez de recomeçar do zero.
+ * Abre o app direto na tela de [destino], ou no Início quando ele é `null`.
  *
  * `PendingIntent` é uma "intenção guardada" que o sistema executa depois em
  * nome do app (quando ela tocar na notificação). `FLAG_IMMUTABLE` é exigido
  * desde o Android 12 e impede que outros apps alterem essa intenção.
+ *
+ * - `CLEAR_TOP` + `SINGLE_TOP`: com o app já aberto, o Android reaproveita a
+ *   Activity existente e entrega o Intent em `onNewIntent`, em vez de só trazer
+ *   o app para a frente e ignorar o destino.
+ * - [codigo] diferente por notificação: o Android considera iguais dois
+ *   `PendingIntent` que só diferem nos extras, e um tomaria o lugar do outro.
+ * - `FLAG_UPDATE_CURRENT`: a turma do aviso de hoje substitui a de ontem.
  */
-fun criarAcaoDeAbrirApp(context: Context): PendingIntent {
+fun criarAcaoDeAbrirApp(context: Context, codigo: Int, destino: DestinoDaNotificacao?): PendingIntent {
     val abrirApp = Intent(context, MainActivity::class.java)
-    abrirApp.action = Intent.ACTION_MAIN
-    abrirApp.addCategory(Intent.CATEGORY_LAUNCHER)
-    abrirApp.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+    abrirApp.flags = Intent.FLAG_ACTIVITY_NEW_TASK or
+        Intent.FLAG_ACTIVITY_CLEAR_TOP or
+        Intent.FLAG_ACTIVITY_SINGLE_TOP
+    if (destino != null) {
+        guardarDestinoNoIntent(abrirApp, destino)
+    }
 
-    return PendingIntent.getActivity(context, 0, abrirApp, PendingIntent.FLAG_IMMUTABLE)
+    val opcoes: Int = PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+    return PendingIntent.getActivity(context, codigo, abrirApp, opcoes)
 }

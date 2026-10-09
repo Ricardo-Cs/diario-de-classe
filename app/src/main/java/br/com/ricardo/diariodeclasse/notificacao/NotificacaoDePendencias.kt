@@ -55,11 +55,26 @@ class NotificacaoDePendencias @Inject constructor(
             .setContentTitle(titulo)
             .setContentText(textoDaLinha(pendencias.first()))
             .setStyle(montarListaExpandida(pendencias))
-            .setContentIntent(criarAcaoDeAbrirApp(context))
+            .setContentIntent(criarAcaoDeAbrirApp(context, ID_DA_NOTIFICACAO, escolherDestino(pendencias)))
             .setAutoCancel(true)
             .build()
 
         NotificationManagerCompat.from(context).notify(ID_DA_NOTIFICACAO, notificacao)
+    }
+
+    /**
+     * A tela de pendências mostra uma turma por vez. Se o aviso junta turmas
+     * diferentes, abrir uma delas esconderia as outras: nesse caso o toque leva
+     * ao Início, onde ela troca de turma.
+     */
+    private fun escolherDestino(pendencias: List<PendenciaParaLembrete>): DestinoDaNotificacao? {
+        val turmaDaPrimeira: String = pendencias.first().turmaId
+        for (pendencia in pendencias) {
+            if (pendencia.turmaId != turmaDaPrimeira) {
+                return null
+            }
+        }
+        return DestinoDaNotificacao.PendenciasDaTurma(turmaDaPrimeira)
     }
 
     /** Ao expandir a notificação, aparece uma linha por pendência (até um limite). */

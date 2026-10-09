@@ -37,12 +37,12 @@ private class FakePendenciaDao : PendenciaDao {
         }
     }
 
-    /** Sem a tabela de alunos aqui, o "nome" devolvido é o próprio alunoId. */
+    /** Sem as tabelas de alunos e turmas aqui, o "nome" é o próprio alunoId e a turma fica vazia. */
     override suspend fun buscarParaLembrete(data: LocalDate, status: StatusPendencia): List<PendenciaParaLembrete> {
         val encontradas = mutableListOf<PendenciaParaLembrete>()
         for (pendencia in linhas.value) {
             if (pendencia.status == status && !pendencia.dataLembrete.isAfter(data) && pendencia.deletedAt == null) {
-                encontradas.add(PendenciaParaLembrete(nomeDoAluno = pendencia.alunoId, descricao = pendencia.descricao))
+                encontradas.add(PendenciaParaLembrete(turmaId = "", nomeDoAluno = pendencia.alunoId, descricao = pendencia.descricao))
             }
         }
         return encontradas

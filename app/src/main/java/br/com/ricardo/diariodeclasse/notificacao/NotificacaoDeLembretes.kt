@@ -59,7 +59,7 @@ class NotificacaoDeLembretes @Inject constructor(
             .setContentTitle(titulo)
             .setContentText(textoDaLinha(lembretes.first(), hoje))
             .setStyle(lista)
-            .setContentIntent(criarAcaoDeAbrirApp(context))
+            .setContentIntent(criarAcaoDeAbrirApp(context, ID_DA_NOTIFICACAO, DestinoDaNotificacao.Lembretes))
             .setAutoCancel(true)
             .build()
 

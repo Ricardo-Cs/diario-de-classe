@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination
@@ -17,6 +18,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import br.com.ricardo.diariodeclasse.notificacao.DestinoDaNotificacao
 import br.com.ricardo.diariodeclasse.ui.alunos.AlunoScreen
 import br.com.ricardo.diariodeclasse.ui.chamada.ChamadaScreen
 import br.com.ricardo.diariodeclasse.ui.diario.DiarioScreen
@@ -38,9 +40,15 @@ import br.com.ricardo.diariodeclasse.ui.turmas.ListaTurmasScreen
 /**
  * Mapa de navegação do app. As telas não conhecem o `navController`:
  * recebem funções ("ao abrir turma", "ao voltar") e é aqui que se decide para onde ir.
+ *
+ * [destinoDaNotificacao] chega preenchido quando a professora toca numa notificação;
+ * depois de navegar até ele, [aoAbrirDestinoDaNotificacao] o limpa.
  */
 @Composable
-fun AppNavHost() {
+fun AppNavHost(
+    destinoDaNotificacao: DestinoDaNotificacao?,
+    aoAbrirDestinoDaNotificacao: () -> Unit,
+) {
     val navController: NavHostController = rememberNavController()
     val entradaAtual: NavBackStackEntry? = navController.currentBackStackEntryAsState().value
     val destinoAtual: NavDestination? = entradaAtual?.destination
@@ -239,6 +247,29 @@ fun AppNavHost() {
                 }
             }
         }
+    }
+
+    // Roda depois de o NavHost montar o mapa de telas, e de novo a cada destino novo.
+    LaunchedEffect(destinoDaNotificacao) {
+        if (destinoDaNotificacao != null) {
+            abrirDestinoDaNotificacao(navController, destinoDaNotificacao)
+            aoAbrirDestinoDaNotificacao()
+        }
+    }
+}
+
+/**
+ * Pendências e lembretes ficam na pilha do Início. Troca para essa aba (guardando
+ * a pilha da aba atual), fecha o que estava aberto nela e abre a tela pedida;
+ * assim "voltar" leva ao Início, e não a uma tela antiga.
+ */
+private fun abrirDestinoDaNotificacao(navController: NavHostController, destino: DestinoDaNotificacao) {
+    navegarParaAba(navController, AbaPrincipal.INICIO)
+    navController.popBackStack(route = InicioRoute, inclusive = false)
+
+    when (destino) {
+        is DestinoDaNotificacao.PendenciasDaTurma -> navController.navigate(PendenciasRoute(destino.turmaId))
+        is DestinoDaNotificacao.Lembretes -> navController.navigate(LembretesRoute)
     }
 }
 

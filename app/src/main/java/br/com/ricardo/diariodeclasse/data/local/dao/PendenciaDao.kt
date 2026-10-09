@@ -50,7 +50,8 @@ interface PendenciaDao {
      * como texto "2026-10-06", que ordena igual à data.
      */
     @Query(
-        "SELECT alunos.nome AS nomeDoAluno, pendencias.descricao AS descricao FROM pendencias " +
+        "SELECT alunos.turmaId AS turmaId, alunos.nome AS nomeDoAluno, pendencias.descricao AS descricao " +
+            "FROM pendencias " +
             "INNER JOIN alunos ON alunos.id = pendencias.alunoId " +
             "INNER JOIN turmas ON turmas.id = alunos.turmaId " +
             "WHERE pendencias.status = :status AND pendencias.dataLembrete <= :data " +
