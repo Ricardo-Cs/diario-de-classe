@@ -10,7 +10,8 @@ import br.com.ricardo.diariodeclasse.R
 
 /*
  * Duas fontes, empacotadas em `res/font` (nada é baixado da internet):
- * - Fraunces: serifa suave, com cara de caderno, só nos títulos.
+ * - Literata: serifa desenhada para leitura em tela (é a do Google Play Livros), só nos títulos.
+ *   Substituiu a Fraunces, cujo "f" e "j" pareciam quebrados em telas de menor resolução.
  * - Atkinson Hyperlegible Next: criada para máxima legibilidade, no resto do texto.
  * Licenças (SIL OFL) em `assets/licencas/`.
  *
@@ -20,19 +21,17 @@ import br.com.ricardo.diariodeclasse.R
  */
 
 /**
- * Eixos próprios da Fraunces:
- * - "opsz" (tamanho óptico): desenho pensado para títulos médios;
- * - "SOFT" (0 a 100): arredonda as serifas, deixando a letra mais amigável.
+ * "opsz" (tamanho óptico, 7 a 72): a Literata ajusta o desenho ao tamanho da letra.
+ * 24 corresponde aos títulos do app, que vão de 22 a 32sp.
  */
 @OptIn(ExperimentalTextApi::class)
-private fun fonteFraunces(peso: FontWeight): Font {
+private fun fonteLiterata(peso: FontWeight): Font {
     return Font(
-        resId = R.font.fraunces,
+        resId = R.font.literata,
         weight = peso,
         variationSettings = FontVariation.Settings(
             FontVariation.weight(peso.weight),
-            FontVariation.Setting("opsz", 48f),
-            FontVariation.Setting("SOFT", 50f),
+            FontVariation.Setting("opsz", 24f),
         ),
     )
 }
@@ -49,9 +48,9 @@ private fun fonteAtkinson(peso: FontWeight): Font {
 }
 
 /** Cada `Font` da família responde por um peso; o Compose escolhe pelo `fontWeight` do texto. */
-private val Fraunces: FontFamily = FontFamily(
-    fonteFraunces(FontWeight.Normal),
-    fonteFraunces(FontWeight.SemiBold),
+private val Literata: FontFamily = FontFamily(
+    fonteLiterata(FontWeight.Normal),
+    fonteLiterata(FontWeight.SemiBold),
 )
 
 private val AtkinsonHyperlegible: FontFamily = FontFamily(
@@ -66,17 +65,17 @@ private val PadraoDoMaterial: Typography = Typography()
 
 /**
  * Títulos grandes (display, headline e titleLarge, que é o título da barra do topo)
- * usam a Fraunces. Títulos menores, corpo e rótulos usam a Atkinson, porque
+ * usam a Literata. Títulos menores, corpo e rótulos usam a Atkinson, porque
  * aparecem em tamanhos pequenos, onde a legibilidade pesa mais que o estilo.
  */
 val Typography: Typography = Typography(
-    displayLarge = PadraoDoMaterial.displayLarge.copy(fontFamily = Fraunces),
-    displayMedium = PadraoDoMaterial.displayMedium.copy(fontFamily = Fraunces),
-    displaySmall = PadraoDoMaterial.displaySmall.copy(fontFamily = Fraunces),
-    headlineLarge = PadraoDoMaterial.headlineLarge.copy(fontFamily = Fraunces, fontWeight = FontWeight.SemiBold),
-    headlineMedium = PadraoDoMaterial.headlineMedium.copy(fontFamily = Fraunces, fontWeight = FontWeight.SemiBold),
-    headlineSmall = PadraoDoMaterial.headlineSmall.copy(fontFamily = Fraunces, fontWeight = FontWeight.SemiBold),
-    titleLarge = PadraoDoMaterial.titleLarge.copy(fontFamily = Fraunces, fontWeight = FontWeight.SemiBold),
+    displayLarge = PadraoDoMaterial.displayLarge.copy(fontFamily = Literata),
+    displayMedium = PadraoDoMaterial.displayMedium.copy(fontFamily = Literata),
+    displaySmall = PadraoDoMaterial.displaySmall.copy(fontFamily = Literata),
+    headlineLarge = PadraoDoMaterial.headlineLarge.copy(fontFamily = Literata, fontWeight = FontWeight.SemiBold),
+    headlineMedium = PadraoDoMaterial.headlineMedium.copy(fontFamily = Literata, fontWeight = FontWeight.SemiBold),
+    headlineSmall = PadraoDoMaterial.headlineSmall.copy(fontFamily = Literata, fontWeight = FontWeight.SemiBold),
+    titleLarge = PadraoDoMaterial.titleLarge.copy(fontFamily = Literata, fontWeight = FontWeight.SemiBold),
 
     titleMedium = PadraoDoMaterial.titleMedium.copy(fontFamily = AtkinsonHyperlegible, fontWeight = FontWeight.SemiBold),
     titleSmall = PadraoDoMaterial.titleSmall.copy(fontFamily = AtkinsonHyperlegible, fontWeight = FontWeight.SemiBold),
