@@ -20,6 +20,8 @@ import androidx.navigation.compose.rememberNavController
 import br.com.ricardo.diariodeclasse.ui.alunos.AlunoScreen
 import br.com.ricardo.diariodeclasse.ui.chamada.ChamadaScreen
 import br.com.ricardo.diariodeclasse.ui.diario.DiarioScreen
+import br.com.ricardo.diariodeclasse.ui.fotos.FotoScreen
+import br.com.ricardo.diariodeclasse.ui.fotos.FotosScreen
 import br.com.ricardo.diariodeclasse.ui.inicio.InicioScreen
 import br.com.ricardo.diariodeclasse.ui.lembretes.LembretesScreen
 import br.com.ricardo.diariodeclasse.ui.mais.MaisScreen
@@ -156,6 +158,21 @@ fun AppNavHost() {
                         aoAbrirMetrica = { metricaId -> navController.navigate(MetricaRoute(metricaId)) },
                         aoCriarMeta = { turmaId -> navController.navigate(FormularioMetaRoute(turmaId)) },
                         aoAbrirMeta = { metaId -> navController.navigate(MetaRoute(metaId)) },
+                        aoAbrirFotos = { turmaId -> navController.navigate(FotosRoute(turmaId)) },
+                        aoAbrirFoto = { turmaId, fotoId -> navController.navigate(FotoRoute(turmaId, fotoId)) },
+                    )
+                }
+
+                composable<FotosRoute> {
+                    FotosScreen(
+                        aoAbrirFoto = { turmaId, fotoId -> navController.navigate(FotoRoute(turmaId, fotoId)) },
+                        aoVoltar = { navController.popBackStack() },
+                    )
+                }
+
+                composable<FotoRoute> {
+                    FotoScreen(
+                        aoVoltar = { navController.popBackStack() },
                     )
                 }
 
@@ -227,7 +244,8 @@ fun AppNavHost() {
 
 /**
  * Em formulários (cadastro de turma, chamada, sondagem...) a barra some, para dar
- * espaço ao teclado e evitar sair no meio do preenchimento.
+ * espaço ao teclado e evitar sair no meio do preenchimento. Na foto em tela
+ * cheia, some para a imagem ocupar mais espaço.
  */
 private fun mostraBarraInferior(destinoAtual: NavDestination?): Boolean {
     // Antes de o NavHost montar a primeira tela, o destino ainda é nulo; o app sempre
@@ -240,7 +258,8 @@ private fun mostraBarraInferior(destinoAtual: NavDestination?): Boolean {
         destinoAtual.hasRoute(FormularioMetaRoute::class)
     val estaMarcandoAlunos: Boolean = destinoAtual.hasRoute(ChamadaRoute::class) ||
         destinoAtual.hasRoute(SondagemRoute::class)
-    if (estaNumFormulario || estaMarcandoAlunos) {
+    val estaVendoFoto: Boolean = destinoAtual.hasRoute(FotoRoute::class)
+    if (estaNumFormulario || estaMarcandoAlunos || estaVendoFoto) {
         return false
     }
     return true

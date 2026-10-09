@@ -16,8 +16,11 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,6 +35,11 @@ import br.com.ricardo.diariodeclasse.ui.componentes.MensagemCentralizada
 import br.com.ricardo.diariodeclasse.ui.componentes.SeletorDeTurma
 import br.com.ricardo.diariodeclasse.ui.componentes.TelaCarregando
 import br.com.ricardo.diariodeclasse.ui.componentes.formatarDataCurta
+import br.com.ricardo.diariodeclasse.ui.fotos.AdicionarFotos
+import br.com.ricardo.diariodeclasse.ui.fotos.AdicionarFotosUiState
+import br.com.ricardo.diariodeclasse.ui.fotos.AdicionarFotosViewModel
+import br.com.ricardo.diariodeclasse.ui.fotos.MostrarMensagemDasFotos
+import br.com.ricardo.diariodeclasse.ui.fotos.lembrarAdicionarFotos
 import br.com.ricardo.diariodeclasse.ui.metas.fracaoAtingida
 import br.com.ricardo.diariodeclasse.ui.metas.prazoVenceu
 import br.com.ricardo.diariodeclasse.ui.metas.textoDoPrazo
@@ -46,12 +54,25 @@ fun DiarioScreen(
     aoAbrirMetrica: (metricaId: String) -> Unit,
     aoCriarMeta: (turmaId: String) -> Unit,
     aoAbrirMeta: (metaId: String) -> Unit,
+    aoAbrirFotos: (turmaId: String) -> Unit,
+    aoAbrirFoto: (turmaId: String, fotoId: String) -> Unit,
     viewModel: DiarioViewModel = hiltViewModel(),
+    adicionarFotosViewModel: AdicionarFotosViewModel = hiltViewModel(),
 ) {
     val estado: DiarioUiState = viewModel.uiState.collectAsStateWithLifecycle().value
+    val estadoDaAdicao: AdicionarFotosUiState = adicionarFotosViewModel.uiState.collectAsStateWithLifecycle().value
+    val adicionarFotos: AdicionarFotos = lembrarAdicionarFotos(adicionarFotosViewModel)
+    val avisos: SnackbarHostState = remember { SnackbarHostState() }
+
+    MostrarMensagemDasFotos(
+        mensagem = estadoDaAdicao.mensagem,
+        avisos = avisos,
+        aoExibir = { adicionarFotosViewModel.mensagemExibida() },
+    )
 
     Scaffold(
         topBar = { BarraSuperior(titulo = stringResource(R.string.aba_diario)) },
+        snackbarHost = { SnackbarHost(avisos) },
     ) { espacamentoDasBarras ->
         val modifier = Modifier.padding(espacamentoDasBarras)
 
@@ -64,6 +85,13 @@ fun DiarioScreen(
 
             is DiarioUiState.Carregado -> ConteudoDiario(
                 estado = estado,
+                fotos = AcoesDeFotos(
+                    salvando = estadoDaAdicao.salvando,
+                    aoTirarFoto = { adicionarFotos.tirarFoto(estado.turmaAtiva.id, estado.hoje) },
+                    aoEscolherDaGaleria = { adicionarFotos.escolherDaGaleria(estado.turmaAtiva.id, estado.hoje) },
+                    aoAbrirFoto = { fotoId -> aoAbrirFoto(estado.turmaAtiva.id, fotoId) },
+                    aoVerTodas = { aoAbrirFotos(estado.turmaAtiva.id) },
+                ),
                 aoSelecionarTurma = { turmaId -> viewModel.selecionarTurma(turmaId) },
                 aoCriarMetrica = { aoCriarMetrica(estado.turmaAtiva.id) },
                 aoAbrirMetrica = aoAbrirMetrica,
@@ -75,10 +103,23 @@ fun DiarioScreen(
     }
 }
 
-/** Metas primeiro: são o que tem prazo e pede ação. Depois as métricas que as alimentam. */
+/** O que o card de fotos precisa da tela: o estado do salvamento e as ações. */
+private class AcoesDeFotos(
+    val salvando: Boolean,
+    val aoTirarFoto: () -> Unit,
+    val aoEscolherDaGaleria: () -> Unit,
+    val aoAbrirFoto: (fotoId: String) -> Unit,
+    val aoVerTodas: () -> Unit,
+)
+
+/**
+ * As fotos do dia primeiro: é o registro mais frequente, feito durante a aula.
+ * Depois as metas, que têm prazo e pedem ação, e as métricas que as alimentam.
+ */
 @Composable
 private fun ConteudoDiario(
     estado: DiarioUiState.Carregado,
+    fotos: AcoesDeFotos,
     aoSelecionarTurma: (turmaId: String) -> Unit,
     aoCriarMetrica: () -> Unit,
     aoAbrirMetrica: (metricaId: String) -> Unit,
@@ -97,6 +138,15 @@ private fun ConteudoDiario(
             turmaAtiva = estado.turmaAtiva,
             todasAsTurmas = estado.todasAsTurmas,
             aoSelecionarTurma = aoSelecionarTurma,
+        )
+
+        SecaoDeFotos(
+            estado = estado,
+            salvando = fotos.salvando,
+            aoTirarFoto = fotos.aoTirarFoto,
+            aoEscolherDaGaleria = fotos.aoEscolherDaGaleria,
+            aoAbrirFoto = fotos.aoAbrirFoto,
+            aoVerTodas = fotos.aoVerTodas,
         )
 
         SecaoDeMetas(

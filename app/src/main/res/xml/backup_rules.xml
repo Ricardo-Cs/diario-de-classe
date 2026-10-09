@@ -6,6 +6,9 @@
     O que vai para a conta Google da professora:
     - o banco do diário (turmas, alunos, chamadas, pendências, anotações);
     - as preferências do DataStore (ex.: turma ativa).
+
+    As fotos (files/fotos) ficam de fora: o Auto Backup tem limite de 25 MB por
+    app, e poucas dezenas de fotos já passariam disso. Elas vão na exportação (.zip).
 -->
 <full-backup-content>
     <include domain="database" path="diario.db" />

@@ -38,10 +38,13 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
 /**
- * Tipos de arquivo aceitos na importação. Além do JSON, alguns gerenciadores de
- * arquivos e o Google Drive marcam o arquivo como texto ou "binário genérico".
+ * Tipos de arquivo aceitos na importação: o .zip atual e o .json das versões
+ * anteriores. Alguns gerenciadores de arquivos e o Google Drive marcam o arquivo
+ * com outro tipo (zip "do Windows", texto ou "binário genérico").
  */
 private val TIPOS_ACEITOS_NA_IMPORTACAO: Array<String> = arrayOf(
+    "application/zip",
+    "application/x-zip-compressed",
     "application/json",
     "text/plain",
     "application/octet-stream",
@@ -60,7 +63,7 @@ fun MaisScreen(viewModel: MaisViewModel = hiltViewModel()) {
      * Se a professora cancelar, o resultado é `null`.
      */
     val seletorParaExportar: ManagedActivityResultLauncher<String, Uri?> = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.CreateDocument("application/json"),
+        contract = ActivityResultContracts.CreateDocument("application/zip"),
     ) { destino: Uri? ->
         if (destino != null) {
             viewModel.exportarPara(destino)
@@ -229,7 +232,7 @@ private fun textoDaUltimaExportacao(estado: MaisUiState): String? {
     }
 }
 
-/** "3 turmas, 74 alunos, 120 chamadas, 5 pendências em aberto, 52 anotações e 4 sondagens". */
+/** "3 turmas, 74 alunos, 120 chamadas, 5 pendências em aberto, 52 anotações, 4 sondagens e 30 fotos". */
 @Composable
 private fun textoDoResumo(resumo: ResumoDoBackup): String {
     val turmas: String = pluralStringResource(R.plurals.importar_turmas, resumo.turmas, resumo.turmas)
@@ -242,9 +245,10 @@ private fun textoDoResumo(resumo: ResumoDoBackup): String {
     )
     val anotacoes: String = pluralStringResource(R.plurals.importar_anotacoes, resumo.anotacoes, resumo.anotacoes)
     val sondagens: String = pluralStringResource(R.plurals.importar_sondagens, resumo.sondagens, resumo.sondagens)
+    val fotos: String = pluralStringResource(R.plurals.importar_fotos, resumo.fotos, resumo.fotos)
 
-    val inicio = "$turmas, $alunos, $chamadas, $pendencias, $anotacoes"
-    return stringResource(R.string.importar_lista_e, inicio, sondagens)
+    val inicio = "$turmas, $alunos, $chamadas, $pendencias, $anotacoes, $sondagens"
+    return stringResource(R.string.importar_lista_e, inicio, fotos)
 }
 
 @Composable
@@ -261,6 +265,7 @@ private fun textoDaMensagem(mensagem: MensagemDaTela?): String? {
         MensagemDaTela.VERSAO_MAIS_NOVA -> R.string.mensagem_versao_mais_nova
         MensagemDaTela.ARQUIVO_DANIFICADO -> R.string.mensagem_arquivo_danificado
         MensagemDaTela.ERRO_AO_IMPORTAR -> R.string.mensagem_erro_ao_importar
+        MensagemDaTela.FOTOS_NAO_IMPORTADAS -> R.string.mensagem_fotos_nao_importadas
     }
     return stringResource(idDoTexto)
 }

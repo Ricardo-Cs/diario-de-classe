@@ -89,3 +89,11 @@ data class FormularioMetaRoute(val turmaId: String, val metaId: String? = null)
 
 @Serializable
 data class MetaRoute(val metaId: String)
+
+/** Linha do tempo das fotos da turma; fica na pilha do Diário, onde fica o card de fotos. */
+@Serializable
+data class FotosRoute(val turmaId: String)
+
+/** Foto em tela cheia; [turmaId] permite deslizar para as outras fotos da turma. */
+@Serializable
+data class FotoRoute(val turmaId: String, val fotoId: String)

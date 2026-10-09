@@ -11,6 +11,7 @@ import br.com.ricardo.diariodeclasse.data.backup.ResumoDoBackup
 import br.com.ricardo.diariodeclasse.data.backup.resumirBackup
 import br.com.ricardo.diariodeclasse.data.local.entity.DadosDoDiario
 import br.com.ricardo.diariodeclasse.data.repository.BackupRepository
+import br.com.ricardo.diariodeclasse.data.repository.Exportacao
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.io.File
 import java.io.IOException
 import java.time.Clock
 import java.time.Instant
@@ -31,11 +33,15 @@ sealed interface UltimaExportacao {
     data class Em(val data: LocalDate) : UltimaExportacao
 }
 
-/** Arquivo já lido e validado, esperando a professora confirmar a substituição. */
+/**
+ * Arquivo já lido e validado, esperando a professora confirmar a substituição.
+ * As fotos do arquivo já foram copiadas para [pastaDasFotos], à parte das atuais.
+ */
 data class ImportacaoPendente(
     val dados: DadosDoDiario,
     val resumo: ResumoDoBackup,
     val exportadoEm: LocalDate,
+    val pastaDasFotos: File,
 )
 
 /** Avisos de resultado, mostrados uma vez no rodapé da tela. */
@@ -48,6 +54,9 @@ enum class MensagemDaTela {
     VERSAO_MAIS_NOVA,
     ARQUIVO_DANIFICADO,
     ERRO_AO_IMPORTAR,
+
+    /** Os dados entraram, mas as fotos não puderam ser movidas para o lugar. */
+    FOTOS_NAO_IMPORTADAS,
 }
 
 data class MaisUiState(
@@ -106,7 +115,7 @@ class MaisViewModel @Inject constructor(
         return UltimaExportacao.Em(instante.atZone(clock.zone).toLocalDate())
     }
 
-    /** Ex.: "diario-2026-10-06.json". A tela usa como nome sugerido no "Salvar como". */
+    /** Ex.: "diario-2026-10-06.zip". A tela usa como nome sugerido no "Salvar como". */
     fun dataParaNomeDoArquivo(): String {
         return hoje.toString()
     }
@@ -126,8 +135,8 @@ class MaisViewModel @Inject constructor(
     /** `SecurityException`: o Android pode revogar o acesso ao local escolhido. */
     private suspend fun exportar(destino: Uri): MensagemDaTela {
         try {
-            val conteudo: String = backupRepository.gerarExportacao()
-            arquivos.gravar(destino, conteudo)
+            val exportacao: Exportacao = backupRepository.gerarExportacao()
+            arquivos.gravar(destino, exportacao.json, exportacao.fotos)
             backupRepository.registrarExportacao()
             return MensagemDaTela.EXPORTADO
         } catch (erro: IOException) {
@@ -150,30 +159,36 @@ class MaisViewModel @Inject constructor(
     }
 
     private suspend fun prepararImportacao(origem: Uri) {
-        val conteudo: String? = lerConteudo(origem)
+        val pastaDasFotos: File = backupRepository.prepararPastaDeImportacao()
+        val conteudo: String? = lerConteudo(origem, pastaDasFotos)
         if (conteudo == null) {
+            backupRepository.descartarImportacao(pastaDasFotos)
             terminarComMensagem(MensagemDaTela.ERRO_AO_LER)
             return
         }
 
         val leitura: LeituraDoBackup = backupRepository.lerArquivo(conteudo)
         when (leitura) {
-            is LeituraDoBackup.Invalida -> terminarComMensagem(mensagemDoMotivo(leitura.motivo))
+            is LeituraDoBackup.Invalida -> {
+                backupRepository.descartarImportacao(pastaDasFotos)
+                terminarComMensagem(mensagemDoMotivo(leitura.motivo))
+            }
             is LeituraDoBackup.Valida -> {
                 val pendente = ImportacaoPendente(
                     dados = leitura.dados,
                     resumo = resumirBackup(leitura.dados),
                     exportadoEm = leitura.exportadoEm.atZone(clock.zone).toLocalDate(),
+                    pastaDasFotos = pastaDasFotos,
                 )
                 operacoes.value = operacoes.value.copy(ocupado = false, importacaoPendente = pendente)
             }
         }
     }
 
-    /** `null` quando o arquivo não pôde ser aberto. */
-    private suspend fun lerConteudo(origem: Uri): String? {
+    /** `null` quando o arquivo não pôde ser aberto (ou é um .zip danificado). */
+    private suspend fun lerConteudo(origem: Uri, pastaDasFotos: File): String? {
         try {
-            return arquivos.ler(origem)
+            return arquivos.ler(origem, pastaDasFotos)
         } catch (erro: IOException) {
             return null
         } catch (erro: SecurityException) {
@@ -190,22 +205,28 @@ class MaisViewModel @Inject constructor(
         operacoes.value = operacoes.value.copy(ocupado = true, importacaoPendente = null)
 
         viewModelScope.launch {
-            val resultado: MensagemDaTela = importar(pendente.dados)
+            val resultado: MensagemDaTela = importar(pendente)
             terminarComMensagem(resultado)
         }
     }
 
-    private suspend fun importar(dados: DadosDoDiario): MensagemDaTela {
+    private suspend fun importar(pendente: ImportacaoPendente): MensagemDaTela {
         try {
-            backupRepository.substituirTudo(dados)
+            backupRepository.substituirTudo(pendente.dados, pendente.pastaDasFotos)
             return MensagemDaTela.IMPORTADO
         } catch (erro: SQLException) {
             return MensagemDaTela.ERRO_AO_IMPORTAR
+        } catch (erro: IOException) {
+            return MensagemDaTela.FOTOS_NAO_IMPORTADAS
         }
     }
 
     fun cancelarImportacao() {
+        val pendente: ImportacaoPendente = operacoes.value.importacaoPendente ?: return
         operacoes.value = operacoes.value.copy(importacaoPendente = null)
+        viewModelScope.launch {
+            backupRepository.descartarImportacao(pendente.pastaDasFotos)
+        }
     }
 
     /** A tela avisa que já mostrou a mensagem, para ela não aparecer de novo. */

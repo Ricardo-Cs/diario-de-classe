@@ -5,6 +5,10 @@
 
     - cloud-backup: cópia automática na conta Google (Auto Backup).
     - device-transfer: cópia direta ao configurar um celular novo a partir do antigo.
+
+    As fotos (files/fotos) não vão para a nuvem: o Auto Backup tem limite de 25 MB
+    por app. Na transferência direta entre celulares não há esse limite, então
+    elas vão junto.
 -->
 <data-extraction-rules>
     <cloud-backup>
@@ -14,5 +18,6 @@
     <device-transfer>
         <include domain="database" path="diario.db" />
         <include domain="file" path="datastore/" />
+        <include domain="file" path="fotos/" />
     </device-transfer>
 </data-extraction-rules>

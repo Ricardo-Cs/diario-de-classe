@@ -15,4 +15,5 @@ data class DadosDoDiario(
     val metas: List<Meta>,
     val alunosNaMeta: List<AlunoNaMeta>,
     val lembretes: List<Lembrete>,
+    val fotos: List<Foto>,
 )

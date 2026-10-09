@@ -232,7 +232,47 @@
     <string name="aluno_nivel_anterior">%1$s · desde %2$s</string>
 
     <!-- Diário: métricas e metas da turma -->
-    <string name="diario_sem_turma">Cadastre uma turma para acompanhar métricas e metas.</string>
+    <string name="diario_sem_turma">Cadastre uma turma para registrar fotos e acompanhar métricas e metas.</string>
+    <string name="diario_fotos">Fotos do dia</string>
+    <string name="diario_ver_fotos">Ver todas as fotos</string>
+    <string name="diario_sem_fotos_hoje">Nenhuma foto hoje. Registre o dia da turma com a câmera ou com fotos da galeria.</string>
+    <plurals name="diario_fotos_hoje">
+        <item quantity="one">%d foto hoje</item>
+        <item quantity="other">%d fotos hoje</item>
+    </plurals>
+
+    <string name="fotos_titulo">Fotos · %1$s</string>
+    <string name="fotos_vazio">Nenhuma foto desta turma ainda.</string>
+    <string name="fotos_adicionar">Adicionar fotos</string>
+    <string name="fotos_tirar_foto">Tirar foto</string>
+    <string name="fotos_da_galeria">Da galeria</string>
+    <string name="fotos_campo_dia">Dia das fotos</string>
+    <plurals name="fotos_quantidade">
+        <item quantity="one">%d foto</item>
+        <item quantity="other">%d fotos</item>
+    </plurals>
+    <string name="fotos_salvando">Salvando fotos…</string>
+    <plurals name="fotos_mensagem_adicionadas">
+        <item quantity="one">Foto salva</item>
+        <item quantity="other">%d fotos salvas</item>
+    </plurals>
+    <plurals name="fotos_mensagem_falharam">
+        <item quantity="one">Não foi possível salvar 1 foto.</item>
+        <item quantity="other">Não foi possível salvar %d fotos.</item>
+    </plurals>
+    <string name="fotos_mensagem_sem_camera">Nenhum app de câmera encontrado neste celular.</string>
+
+    <string name="foto_descricao">Foto de %1$s</string>
+    <string name="foto_nao_encontrada">Esta foto não está neste celular. Ela volta ao importar um arquivo exportado que a contenha.</string>
+    <string name="foto_legenda">Legenda</string>
+    <string name="foto_legenda_exemplo">Ex.: pintura com guache</string>
+    <string name="foto_adicionar_legenda">Adicionar legenda</string>
+    <string name="foto_editar_legenda">Editar legenda</string>
+    <string name="foto_excluir">Excluir foto</string>
+    <string name="foto_excluir_confirmar_titulo">Excluir esta foto?</string>
+    <string name="foto_excluir_confirmar_mensagem">A foto sai do diário e não poderá ser recuperada.</string>
+    <string name="foto_posicao">%1$d de %2$d</string>
+
     <string name="diario_metas">Metas</string>
     <string name="diario_nova_meta">Nova meta</string>
     <string name="diario_sem_metas">Nenhuma meta em andamento.</string>
@@ -367,7 +407,7 @@
     <!-- Mais: backup e exportação -->
     <string name="mais_seus_dados">Seus dados</string>
     <string name="mais_exportar">Exportar dados</string>
-    <string name="mais_exportar_descricao">Salva o diário inteiro num arquivo que você guarda onde quiser.</string>
+    <string name="mais_exportar_descricao">Salva o diário inteiro, com as fotos, num arquivo que você guarda onde quiser.</string>
     <string name="mais_importar">Importar dados</string>
     <string name="mais_importar_descricao">Troca tudo o que está no app pelo conteúdo de um arquivo exportado.</string>
     <string name="mais_ultima_exportacao_nunca">Ainda não exportado neste celular</string>
@@ -377,9 +417,9 @@
         <item quantity="one">Última exportação: há %d dia</item>
         <item quantity="other">Última exportação: há %d dias</item>
     </plurals>
-    <string name="mais_aviso_privacidade">O arquivo contém os dados dos seus alunos. Guarde em local seguro e não compartilhe.</string>
-    <string name="mais_aviso_backup_automatico">Além do arquivo, o Android guarda uma cópia automática na sua conta Google, se o backup estiver ativado nas configurações do celular.</string>
-    <string name="mais_nome_do_arquivo">diario-%1$s.json</string>
+    <string name="mais_aviso_privacidade">O arquivo contém os dados e as fotos dos seus alunos. Guarde em local seguro e não compartilhe.</string>
+    <string name="mais_aviso_backup_automatico">Além do arquivo, o Android guarda uma cópia automática na sua conta Google, se o backup estiver ativado nas configurações do celular. Essa cópia não inclui as fotos: para guardá-las, exporte os dados.</string>
+    <string name="mais_nome_do_arquivo">diario-%1$s.zip</string>
 
     <string name="importar_confirmar_titulo">Substituir todos os dados?</string>
     <string name="importar_confirmar_mensagem">O arquivo foi exportado em %1$s e contém %2$s.
@@ -410,6 +450,10 @@ Tudo o que está no app agora será apagado e trocado pelo conteúdo do arquivo.
         <item quantity="one">%d sondagem</item>
         <item quantity="other">%d sondagens</item>
     </plurals>
+    <plurals name="importar_fotos">
+        <item quantity="one">%d foto</item>
+        <item quantity="other">%d fotos</item>
+    </plurals>
     <string name="importar_lista_e">%1$s e %2$s</string>
 
     <string name="mensagem_exportado">Dados exportados</string>
@@ -420,4 +464,5 @@ Tudo o que está no app agora será apagado e trocado pelo conteúdo do arquivo.
     <string name="mensagem_versao_mais_nova">Este arquivo foi exportado por uma versão mais nova do app. Atualize o app para importá-lo.</string>
     <string name="mensagem_arquivo_danificado">O arquivo está incompleto ou danificado.</string>
     <string name="mensagem_erro_ao_importar">Não foi possível importar. Nada foi alterado.</string>
+    <string name="mensagem_fotos_nao_importadas">Os dados foram importados, mas não foi possível copiar as fotos.</string>
 </resources>

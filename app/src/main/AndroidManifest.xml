@@ -29,6 +29,20 @@
         </activity>
 
         <!--
+            Dá à câmera (outro app) permissão de gravar a foto num arquivo do
+            cache deste app. Ver ArquivosDeFotos.criarArquivoDaCamera.
+        -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.arquivos"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/caminhos_compartilhados" />
+        </provider>
+
+        <!--
             Desliga a inicialização automática do WorkManager: ele é inicializado
             pela DiarioApplication, que fornece a fábrica de workers do Hilt.
         -->

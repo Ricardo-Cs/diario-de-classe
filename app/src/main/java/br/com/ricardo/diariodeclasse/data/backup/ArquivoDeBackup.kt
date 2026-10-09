@@ -3,7 +3,7 @@ package br.com.ricardo.diariodeclasse.data.backup
 import kotlinx.serialization.Serializable
 
 /*
- * Formato do arquivo de exportação (JSON). São classes separadas das entidades do
+ * Formato do JSON da exportação (vai dentro do .zip, ver PacoteDeBackup). São classes separadas das entidades do
  * Room de propósito: o banco pode mudar (colunas novas, nomes diferentes) e o
  * arquivo exportado hoje precisa continuar sendo lido pelas versões futuras do app.
  * Quando o formato mudar, incremente [VERSAO_DO_FORMATO] e trate a leitura das
@@ -27,8 +27,10 @@ const val FORMATO_DO_ARQUIVO = "diario-de-classe"
  * 3 → metas livres: métrica, nível-alvo e prazo opcionais; aluno na meta com "atingiu em".
  *     Um app da versão 2 não leria uma meta sem métrica, por isso o número mudou.
  * 4 → lembretes da professora (lista vazia como padrão para arquivos antigos).
+ * 5 → fotos do registro do dia. O JSON passa a ir dentro de um .zip, junto com as
+ *     imagens; um .json avulso (versões 1 a 4) continua sendo importado.
  */
-const val VERSAO_DO_FORMATO = 4
+const val VERSAO_DO_FORMATO = 5
 
 /** Só o começo do arquivo: lido antes do resto para checar formato e versão. */
 @Serializable
@@ -55,6 +57,7 @@ data class ArquivoDeBackup(
     val metas: List<MetaNoArquivo> = emptyList(),
     val alunosNaMeta: List<AlunoNaMetaNoArquivo> = emptyList(),
     val lembretes: List<LembreteNoArquivo> = emptyList(),
+    val fotos: List<FotoNoArquivo> = emptyList(),
 )
 
 @Serializable
@@ -200,6 +203,19 @@ data class LembreteNoArquivo(
     val descricao: String,
     val data: String,
     val concluidoEm: String? = null,
+    val createdAt: String,
+    val updatedAt: String,
+    val deletedAt: String? = null,
+)
+
+/** Os dados da foto; a imagem vai no .zip como "fotos/[nomeDoArquivo]". */
+@Serializable
+data class FotoNoArquivo(
+    val id: String,
+    val turmaId: String,
+    val data: String,
+    val nomeDoArquivo: String,
+    val legenda: String? = null,
     val createdAt: String,
     val updatedAt: String,
     val deletedAt: String? = null,

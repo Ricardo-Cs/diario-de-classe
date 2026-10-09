@@ -5,6 +5,7 @@ import br.com.ricardo.diariodeclasse.data.local.entity.AlunoNaMeta
 import br.com.ricardo.diariodeclasse.data.local.entity.Anotacao
 import br.com.ricardo.diariodeclasse.data.local.entity.Chamada
 import br.com.ricardo.diariodeclasse.data.local.entity.DadosDoDiario
+import br.com.ricardo.diariodeclasse.data.local.entity.Foto
 import br.com.ricardo.diariodeclasse.data.local.entity.Lembrete
 import br.com.ricardo.diariodeclasse.data.local.entity.Meta
 import br.com.ricardo.diariodeclasse.data.local.entity.Metrica
@@ -102,6 +103,16 @@ class ConversorDeBackupTest {
                     concluidoEm = agora, createdAt = agora, updatedAt = agora,
                 ),
             ),
+            fotos = listOf(
+                Foto(
+                    id = "foto", turmaId = "turma", data = hoje, nomeDoArquivo = "foto.jpg",
+                    legenda = "Pintura com guache", createdAt = agora, updatedAt = agora,
+                ),
+                Foto(
+                    id = "foto-excluida", turmaId = "turma", data = hoje, nomeDoArquivo = "foto-excluida.jpg",
+                    createdAt = agora, updatedAt = agora, deletedAt = agora,
+                ),
+            ),
         )
     }
 
@@ -143,6 +154,7 @@ class ConversorDeBackupTest {
         assertEquals(1, dados.turmas.size)
         assertEquals(emptyList<Metrica>(), dados.metricas)
         assertEquals(emptyList<Meta>(), dados.metas)
+        assertEquals(emptyList<Foto>(), dados.fotos)
     }
 
     @Test
@@ -201,9 +213,11 @@ class ConversorDeBackupTest {
     fun resumo_contaSoOQueApareceNoApp() {
         val resumo: ResumoDoBackup = resumirBackup(diarioDeExemplo())
 
-        // Bruno está excluído; a única pendência já foi entregue.
+        // Bruno e uma das fotos estão excluídos; a única pendência já foi entregue.
         assertEquals(
-            ResumoDoBackup(turmas = 1, alunos = 1, chamadas = 1, pendenciasEmAberto = 0, anotacoes = 1, sondagens = 1),
+            ResumoDoBackup(
+                turmas = 1, alunos = 1, chamadas = 1, pendenciasEmAberto = 0, anotacoes = 1, sondagens = 1, fotos = 1,
+            ),
             resumo,
         )
     }
@@ -227,7 +241,9 @@ class ConversorDeBackupTest {
         val resumo: ResumoDoBackup = resumirBackup(semTurma)
 
         assertEquals(
-            ResumoDoBackup(turmas = 0, alunos = 0, chamadas = 0, pendenciasEmAberto = 0, anotacoes = 0, sondagens = 0),
+            ResumoDoBackup(
+                turmas = 0, alunos = 0, chamadas = 0, pendenciasEmAberto = 0, anotacoes = 0, sondagens = 0, fotos = 0,
+            ),
             resumo,
         )
     }

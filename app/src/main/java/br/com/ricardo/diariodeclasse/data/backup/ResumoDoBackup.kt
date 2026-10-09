@@ -4,6 +4,7 @@ import br.com.ricardo.diariodeclasse.data.local.entity.Aluno
 import br.com.ricardo.diariodeclasse.data.local.entity.Anotacao
 import br.com.ricardo.diariodeclasse.data.local.entity.Chamada
 import br.com.ricardo.diariodeclasse.data.local.entity.DadosDoDiario
+import br.com.ricardo.diariodeclasse.data.local.entity.Foto
 import br.com.ricardo.diariodeclasse.data.local.entity.Metrica
 import br.com.ricardo.diariodeclasse.data.local.entity.Pendencia
 import br.com.ricardo.diariodeclasse.data.local.entity.Sondagem
@@ -22,6 +23,7 @@ data class ResumoDoBackup(
     val pendenciasEmAberto: Int,
     val anotacoes: Int,
     val sondagens: Int,
+    val fotos: Int,
 )
 
 /**
@@ -40,7 +42,18 @@ fun resumirBackup(dados: DadosDoDiario): ResumoDoBackup {
         pendenciasEmAberto = contarPendenciasEmAberto(dados.pendencias, alunosVisiveis),
         anotacoes = contarAnotacoesVisiveis(dados.anotacoes, alunosVisiveis),
         sondagens = contarSondagensVisiveis(dados.sondagens, idsDasMetricasVisiveis(dados.metricas, turmasVisiveis)),
+        fotos = contarFotosVisiveis(dados.fotos, turmasVisiveis),
     )
+}
+
+private fun contarFotosVisiveis(fotos: List<Foto>, turmasVisiveis: Set<String>): Int {
+    var quantidade = 0
+    for (foto in fotos) {
+        if (foto.deletedAt == null && foto.turmaId in turmasVisiveis) {
+            quantidade = quantidade + 1
+        }
+    }
+    return quantidade
 }
 
 private fun idsDasMetricasVisiveis(metricas: List<Metrica>, turmasVisiveis: Set<String>): Set<String> {

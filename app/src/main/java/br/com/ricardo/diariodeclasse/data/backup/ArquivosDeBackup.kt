@@ -5,6 +5,8 @@ import android.net.Uri
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.BufferedInputStream
+import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
@@ -25,7 +27,8 @@ class ArquivosDeBackup @Inject constructor(
     @ApplicationContext private val context: Context,
 ) {
 
-    suspend fun gravar(destino: Uri, conteudo: String) {
+    /** Grava o .zip com o JSON e as imagens das [fotos]. */
+    suspend fun gravar(destino: Uri, json: String, fotos: List<File>) {
         withContext(Dispatchers.IO) {
             // "wt" = escrita, apagando o conteúdo anterior se o arquivo já existir.
             val saida: OutputStream? = context.contentResolver.openOutputStream(destino, "wt")
@@ -35,20 +38,39 @@ class ArquivosDeBackup @Inject constructor(
             // `use` fecha o arquivo ao terminar, mesmo se der erro
             // (como o try-with-resources do Java).
             saida.use { arquivo ->
-                arquivo.write(conteudo.toByteArray(Charsets.UTF_8))
+                PacoteDeBackup.escrever(arquivo, json, fotos)
             }
         }
     }
 
-    suspend fun ler(origem: Uri): String {
+    /**
+     * Devolve o texto do JSON. Se o arquivo for um .zip, as fotos dele são
+     * copiadas para [pastaDasFotos]. Também aceita um .json avulso, exportado
+     * pelas versões do app anteriores às fotos.
+     *
+     * Um .zip sem o JSON devolve texto vazio, que a leitura do backup recusa
+     * como "não é uma exportação do diário".
+     */
+    suspend fun ler(origem: Uri, pastaDasFotos: File): String {
         return withContext(Dispatchers.IO) {
             val entrada: InputStream? = context.contentResolver.openInputStream(origem)
             if (entrada == null) {
                 throw IOException("Não foi possível abrir o arquivo para leitura")
             }
-            entrada.use { arquivo ->
-                String(arquivo.readBytes(), Charsets.UTF_8)
+            BufferedInputStream(entrada).use { arquivo ->
+                lerConteudo(arquivo, pastaDasFotos)
             }
         }
+    }
+
+    private fun lerConteudo(arquivo: BufferedInputStream, pastaDasFotos: File): String {
+        if (!PacoteDeBackup.eZip(arquivo)) {
+            return String(arquivo.readBytes(), Charsets.UTF_8)
+        }
+        val json: String? = PacoteDeBackup.ler(arquivo, pastaDasFotos)
+        if (json == null) {
+            return ""
+        }
+        return json
     }
 }

@@ -1,5 +1,7 @@
 package br.com.ricardo.diariodeclasse.di
 
+import br.com.ricardo.diariodeclasse.data.fotos.ArquivosDeFotos
+import br.com.ricardo.diariodeclasse.data.fotos.ArquivosDeFotosImpl
 import br.com.ricardo.diariodeclasse.data.repository.AlunoRepository
 import br.com.ricardo.diariodeclasse.data.repository.AlunoRepositoryImpl
 import br.com.ricardo.diariodeclasse.data.repository.AnotacaoRepository
@@ -8,6 +10,8 @@ import br.com.ricardo.diariodeclasse.data.repository.BackupRepository
 import br.com.ricardo.diariodeclasse.data.repository.BackupRepositoryImpl
 import br.com.ricardo.diariodeclasse.data.repository.ChamadaRepository
 import br.com.ricardo.diariodeclasse.data.repository.ChamadaRepositoryImpl
+import br.com.ricardo.diariodeclasse.data.repository.FotoRepository
+import br.com.ricardo.diariodeclasse.data.repository.FotoRepositoryImpl
 import br.com.ricardo.diariodeclasse.data.repository.LembreteDiarioRepository
 import br.com.ricardo.diariodeclasse.data.repository.LembreteDiarioRepositoryImpl
 import br.com.ricardo.diariodeclasse.data.repository.LembreteRepository
@@ -76,4 +80,12 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindLembreteRepository(impl: LembreteRepositoryImpl): LembreteRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindFotoRepository(impl: FotoRepositoryImpl): FotoRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindArquivosDeFotos(impl: ArquivosDeFotosImpl): ArquivosDeFotos
 }

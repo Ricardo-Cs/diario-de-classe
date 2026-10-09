@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Pastas que o FileProvider pode expor a outros apps, sempre um arquivo por vez
+    e só com permissão concedida pelo app. Apenas a pasta temporária da câmera:
+    as fotos guardadas (files/fotos) nunca são expostas.
+-->
+<paths>
+    <cache-path name="camera" path="camera/" />
+</paths>

@@ -5,6 +5,7 @@ import br.com.ricardo.diariodeclasse.data.local.entity.AlunoNaMeta
 import br.com.ricardo.diariodeclasse.data.local.entity.Anotacao
 import br.com.ricardo.diariodeclasse.data.local.entity.Chamada
 import br.com.ricardo.diariodeclasse.data.local.entity.DadosDoDiario
+import br.com.ricardo.diariodeclasse.data.local.entity.Foto
 import br.com.ricardo.diariodeclasse.data.local.entity.Lembrete
 import br.com.ricardo.diariodeclasse.data.local.entity.Meta
 import br.com.ricardo.diariodeclasse.data.local.entity.Metrica
@@ -76,6 +77,7 @@ object ConversorDeBackup {
             metas = dados.metas.map { meta -> metaParaArquivo(meta) },
             alunosNaMeta = dados.alunosNaMeta.map { linha -> alunoNaMetaParaArquivo(linha) },
             lembretes = dados.lembretes.map { lembrete -> lembreteParaArquivo(lembrete) },
+            fotos = dados.fotos.map { foto -> fotoParaArquivo(foto) },
         )
         return jsonDoArquivo.encodeToString(ArquivoDeBackup.serializer(), arquivo)
     }
@@ -135,6 +137,7 @@ object ConversorDeBackup {
             metas = arquivo.metas.map { meta -> metaDoArquivo(meta) },
             alunosNaMeta = arquivo.alunosNaMeta.map { linha -> alunoNaMetaDoArquivo(linha) },
             lembretes = arquivo.lembretes.map { lembrete -> lembreteDoArquivo(lembrete) },
+            fotos = arquivo.fotos.map { foto -> fotoDoArquivo(foto) },
         )
     }
 
@@ -301,6 +304,19 @@ object ConversorDeBackup {
         )
     }
 
+    private fun fotoParaArquivo(foto: Foto): FotoNoArquivo {
+        return FotoNoArquivo(
+            id = foto.id,
+            turmaId = foto.turmaId,
+            data = foto.data.toString(),
+            nomeDoArquivo = foto.nomeDoArquivo,
+            legenda = foto.legenda,
+            createdAt = foto.createdAt.toString(),
+            updatedAt = foto.updatedAt.toString(),
+            deletedAt = textoOuNulo(foto.deletedAt),
+        )
+    }
+
     // --- Arquivo → entidade ---
 
     private fun turmaDoArquivo(turma: TurmaNoArquivo): Turma {
@@ -461,6 +477,19 @@ object ConversorDeBackup {
             createdAt = Instant.parse(lembrete.createdAt),
             updatedAt = Instant.parse(lembrete.updatedAt),
             deletedAt = instanteOuNulo(lembrete.deletedAt),
+        )
+    }
+
+    private fun fotoDoArquivo(foto: FotoNoArquivo): Foto {
+        return Foto(
+            id = foto.id,
+            turmaId = foto.turmaId,
+            data = LocalDate.parse(foto.data),
+            nomeDoArquivo = foto.nomeDoArquivo,
+            legenda = foto.legenda,
+            createdAt = Instant.parse(foto.createdAt),
+            updatedAt = Instant.parse(foto.updatedAt),
+            deletedAt = instanteOuNulo(foto.deletedAt),
         )
     }
 

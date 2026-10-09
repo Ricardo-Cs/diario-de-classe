@@ -46,6 +46,7 @@ O desenvolvedor **nunca trabalhou com Kotlin** e precisa **entender e apresentar
 | Notificação | Se o aluno X não fez a atividade Y, notificar no dia seguinte | Média |
 | Metas da turma | Meta **e forma de medição** definidas pela própria professora | Média |
 | Métricas personalizáveis | Métricas definidas pela professora, com histórico | Média/alta |
+| Fotos do dia | Registro do dia da turma em fotos, para histórico (pedido da professora após o uso) | Média |
 
 ### Diretrizes de design
 
@@ -80,6 +81,13 @@ Os níveis são os da psicogênese da língua escrita (pré-silábico, silábico
   - **marcando à mão** (padrão): ela marca quem atingiu (sim/não). Ex.: "conhecer a família numérica do 10 ao 80";
   - **pela métrica**: "estes alunos chegam ao nível Alfabético até 06/11", com progresso **calculado** a partir das sondagens.
 - O que é sobre a própria professora (entregar portfólio, plano de ação) **não é meta**: é **lembrete**.
+
+**Fotos do dia** (pedido da professora em out/2026, após usar a versão de teste)
+- Fotos da **turma no dia** (não de um aluno), com legenda opcional. Sem vídeo: arquivos grandes demais para guardar e exportar sem backend.
+- Câmera (app de câmera do celular, `TakePicture`) ou galeria (Photo Picker); nenhuma das duas pede permissão.
+- Reduzidas ao entrar (lado maior 1600 px, JPEG 85, rotação do EXIF aplicada) e guardadas em `files/fotos/`; o banco guarda só o nome do arquivo.
+- Ficam **fora do Auto Backup** (limite de 25 MB) e vão na exportação, que virou um `.zip` (JSON + fotos). Na transferência direta entre celulares elas vão junto.
+- Na aba Diário, o card "Fotos do dia" vem antes das metas; a tela de fotos da turma mostra a linha do tempo por dia.
 
 **Lembretes da professora**
 - Descrição + data; gerais (não pertencem a uma turma).
@@ -130,7 +138,7 @@ Backend futuro (provavelmente **NestJS + PostgreSQL**) quando houver: uso em mai
 ### Mitigação de perda de dados no MVP
 Como o app substitui o caderno, perder o aparelho não pode significar perder o diário.
 - Configurar **Auto Backup** do Android (banco na conta Google).
-- Funcionalidade de **exportar/importar** dados (JSON) e, possivelmente, relatório em PDF.
+- Funcionalidade de **exportar/importar** dados (`.zip` com o JSON e as fotos; o `.json` antigo continua sendo importado) e, possivelmente, relatório em PDF.
 
 ---
 
@@ -149,6 +157,7 @@ Como o app substitui o caderno, perder o aparelho não pode significar perder o 
 - `AlunoNaMeta` — alunos que a meta acompanha (N:N), com nível inicial e "atingiu em" (metas à mão)
 - `Anotacao` — aluno + texto + data
 - `Lembrete` — descrição + data + concluído em (da professora, sem turma)
+- `Foto` — turma + data + nome do arquivo + legenda opcional
 
 Todas as entidades seguem as regras da seção 4 (UUID, timestamps, soft delete).
 
@@ -190,3 +199,4 @@ Já existem vários "diários de classe digitais" (apps de secretarias estaduais
 4. ~~Registro de faltas → Pendências → Notificações.~~
 5. ~~Anotações~~ → ~~Métricas (escala de níveis) e Metas ligadas a métricas~~ (aba Diário). Grupos e tags nas anotações foram retirados do plano em out/2026 (ver seção 2); próximos passos saem do uso real da professora. Métricas vieram antes porque a meta real da professora tem prazo no início de novembro de 2026.
 6. ~~Backup/exportação JSON~~ (estender a cada entidade nova); relatório em PDF em aberto.
+7. Pedidos da professora após o uso: ~~fotos do dia~~ → aba de perfil (conteúdo ainda a definir com ela).

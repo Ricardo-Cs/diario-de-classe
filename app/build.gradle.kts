@@ -104,6 +104,9 @@ dependencies {
     // WorkManager
     implementation(libs.androidx.work.runtime.ktx)
 
+    // Coil: carrega as fotos do diário na tela, já reduzidas ao tamanho exibido
+    implementation(libs.coil.compose)
+
     // Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)

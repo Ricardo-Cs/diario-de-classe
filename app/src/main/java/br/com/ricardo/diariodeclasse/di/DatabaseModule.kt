@@ -8,6 +8,7 @@ import br.com.ricardo.diariodeclasse.data.local.dao.AlunoDao
 import br.com.ricardo.diariodeclasse.data.local.dao.AnotacaoDao
 import br.com.ricardo.diariodeclasse.data.local.dao.BackupDao
 import br.com.ricardo.diariodeclasse.data.local.dao.ChamadaDao
+import br.com.ricardo.diariodeclasse.data.local.dao.FotoDao
 import br.com.ricardo.diariodeclasse.data.local.dao.LembreteDao
 import br.com.ricardo.diariodeclasse.data.local.dao.MetaDao
 import br.com.ricardo.diariodeclasse.data.local.dao.MetricaDao
@@ -68,6 +69,9 @@ object DatabaseModule {
 
     @Provides
     fun provideLembreteDao(database: AppDatabase): LembreteDao = database.lembreteDao()
+
+    @Provides
+    fun provideFotoDao(database: AppDatabase): FotoDao = database.fotoDao()
 
     @Provides
     fun provideBackupDao(database: AppDatabase): BackupDao = database.backupDao()

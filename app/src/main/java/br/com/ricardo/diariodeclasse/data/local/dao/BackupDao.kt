@@ -9,6 +9,7 @@ import br.com.ricardo.diariodeclasse.data.local.entity.AlunoNaMeta
 import br.com.ricardo.diariodeclasse.data.local.entity.Anotacao
 import br.com.ricardo.diariodeclasse.data.local.entity.Chamada
 import br.com.ricardo.diariodeclasse.data.local.entity.DadosDoDiario
+import br.com.ricardo.diariodeclasse.data.local.entity.Foto
 import br.com.ricardo.diariodeclasse.data.local.entity.Lembrete
 import br.com.ricardo.diariodeclasse.data.local.entity.Meta
 import br.com.ricardo.diariodeclasse.data.local.entity.Metrica
@@ -67,6 +68,12 @@ interface BackupDao {
 
     @Query("SELECT * FROM lembretes")
     suspend fun buscarLembretes(): List<Lembrete>
+
+    @Query("SELECT * FROM fotos")
+    suspend fun buscarFotos(): List<Foto>
+
+    @Query("DELETE FROM fotos")
+    suspend fun apagarFotos()
 
     @Query("DELETE FROM lembretes")
     suspend fun apagarLembretes()
@@ -146,6 +153,9 @@ interface BackupDao {
     @Insert
     suspend fun inserirLembretes(lembretes: List<Lembrete>)
 
+    @Insert
+    suspend fun inserirFotos(fotos: List<Foto>)
+
     /**
      * Lê todas as tabelas dentro de uma transação, para o retrato ser consistente
      * mesmo que algo seja gravado no meio da leitura.
@@ -166,6 +176,7 @@ interface BackupDao {
             metas = buscarMetas(),
             alunosNaMeta = buscarAlunosNaMeta(),
             lembretes = buscarLembretes(),
+            fotos = buscarFotos(),
         )
     }
 
@@ -179,6 +190,7 @@ interface BackupDao {
      */
     @Transaction
     suspend fun substituirTudo(dados: DadosDoDiario) {
+        apagarFotos()
         apagarLembretes()
         apagarAlunosNaMeta()
         apagarMetas()
@@ -206,5 +218,6 @@ interface BackupDao {
         inserirMetas(dados.metas)
         inserirAlunosNaMeta(dados.alunosNaMeta)
         inserirLembretes(dados.lembretes)
+        inserirFotos(dados.fotos)
     }
 }

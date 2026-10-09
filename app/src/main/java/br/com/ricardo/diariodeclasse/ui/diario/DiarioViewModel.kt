@@ -4,16 +4,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.ricardo.diariodeclasse.data.local.entity.Aluno
 import br.com.ricardo.diariodeclasse.data.local.entity.AlunoNaMeta
+import br.com.ricardo.diariodeclasse.data.local.entity.Foto
 import br.com.ricardo.diariodeclasse.data.local.entity.Meta
 import br.com.ricardo.diariodeclasse.data.local.entity.Metrica
 import br.com.ricardo.diariodeclasse.data.local.entity.NivelDaMetrica
 import br.com.ricardo.diariodeclasse.data.local.entity.ResultadoDatado
 import br.com.ricardo.diariodeclasse.data.local.entity.Turma
 import br.com.ricardo.diariodeclasse.data.repository.AlunoRepository
+import br.com.ricardo.diariodeclasse.data.repository.FotoRepository
 import br.com.ricardo.diariodeclasse.data.repository.MetaRepository
 import br.com.ricardo.diariodeclasse.data.repository.MetricaRepository
 import br.com.ricardo.diariodeclasse.data.repository.TurmaAtivaRepository
 import br.com.ricardo.diariodeclasse.data.repository.TurmaRepository
+import br.com.ricardo.diariodeclasse.ui.fotos.FotoNaTela
 import br.com.ricardo.diariodeclasse.ui.metas.ProgressoDaMeta
 import br.com.ricardo.diariodeclasse.ui.metas.calcularProgressoDaMeta
 import br.com.ricardo.diariodeclasse.ui.metricas.DistribuicaoDaMetrica
@@ -56,6 +59,10 @@ sealed interface DiarioUiState {
         val turmaAtiva: Turma,
         val todasAsTurmas: List<Turma>,
         val hoje: LocalDate,
+        /** Na ordem em que foram adicionadas. */
+        val fotosDeHoje: List<FotoNaTela>,
+        /** Se a turma tem alguma foto, de qualquer dia (mostra "Ver todas as fotos"). */
+        val temFotos: Boolean,
         val metasEmAndamento: List<ResumoDaMeta>,
         val metasEncerradas: List<ResumoDaMeta>,
         val metricas: List<ResumoDaMetrica>,
@@ -76,11 +83,12 @@ private data class DadosDaTurma(
     val metricas: DadosDasMetricas,
     val metas: List<Meta>,
     val alunosDasMetas: List<AlunoNaMeta>,
+    val fotos: List<Foto>,
 )
 
 /**
- * Aba Diário: o acompanhamento da turma ativa (metas e métricas). Mesma turma
- * ativa do Início; trocar aqui troca lá também.
+ * Aba Diário: o registro e o acompanhamento da turma ativa (fotos do dia, metas
+ * e métricas). Mesma turma ativa do Início; trocar aqui troca lá também.
  */
 @HiltViewModel
 class DiarioViewModel @Inject constructor(
@@ -89,6 +97,7 @@ class DiarioViewModel @Inject constructor(
     private val alunoRepository: AlunoRepository,
     private val metricaRepository: MetricaRepository,
     private val metaRepository: MetaRepository,
+    private val fotoRepository: FotoRepository,
     private val clock: Clock,
 ) : ViewModel() {
 
@@ -133,8 +142,9 @@ class DiarioViewModel @Inject constructor(
             metricas,
             metaRepository.observarMetasDaTurma(turma.id),
             metaRepository.observarAlunosDasMetasDaTurma(turma.id),
-        ) { alunos, dadosDasMetricas, metas, alunosDasMetas ->
-            DadosDaTurma(turma, alunos, dadosDasMetricas, metas, alunosDasMetas)
+            fotoRepository.observarDaTurma(turma.id),
+        ) { alunos, dadosDasMetricas, metas, alunosDasMetas, fotos ->
+            DadosDaTurma(turma, alunos, dadosDasMetricas, metas, alunosDasMetas, fotos)
         }
     }
 
@@ -164,10 +174,22 @@ class DiarioViewModel @Inject constructor(
             turmaAtiva = dados.turma,
             todasAsTurmas = todasAsTurmas,
             hoje = hoje,
+            fotosDeHoje = fotosDoDia(dados.fotos, hoje),
+            temFotos = dados.fotos.isNotEmpty(),
             metasEmAndamento = emAndamento,
             metasEncerradas = encerradas,
             metricas = metricas,
         )
+    }
+
+    private fun fotosDoDia(fotos: List<Foto>, dia: LocalDate): List<FotoNaTela> {
+        val doDia = mutableListOf<FotoNaTela>()
+        for (foto in fotos) {
+            if (foto.data == dia) {
+                doDia.add(FotoNaTela(foto, fotoRepository.arquivoDa(foto)))
+            }
+        }
+        return doDia
     }
 
     private fun resumirMeta(meta: Meta, dados: DadosDaTurma, hoje: LocalDate): ResumoDaMeta {
