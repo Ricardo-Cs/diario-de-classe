@@ -40,7 +40,7 @@ import java.time.LocalDate
 fun InicioScreen(
     aoCadastrarTurma: () -> Unit,
     aoAbrirChamada: (turmaId: String, data: LocalDate) -> Unit,
-    aoAbrirTurma: (turmaId: String) -> Unit,
+    aoAbrirTurma: () -> Unit,
     aoAbrirPendencias: () -> Unit,
     aoAbrirLembretes: () -> Unit,
     aoAbrirConfiguracoes: () -> Unit,
@@ -109,7 +109,7 @@ fun InicioScreen(
                         hoje = estado.hoje,
                         aoAbrirChamada = { aoAbrirChamada(turmas.turmaAtiva.id, estado.hoje) },
                         aoAbrirChamadaDeOutroDia = { data -> aoAbrirChamada(turmas.turmaAtiva.id, data) },
-                        aoAdicionarAlunos = { aoAbrirTurma(turmas.turmaAtiva.id) },
+                        aoAdicionarAlunos = aoAbrirTurma,
                     )
                     CardPendencias(
                         resumo = turmas.pendencias,

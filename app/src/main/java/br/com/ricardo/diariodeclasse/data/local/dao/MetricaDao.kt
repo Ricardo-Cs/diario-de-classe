@@ -37,7 +37,7 @@ interface MetricaDao {
     @Query("SELECT * FROM niveis_da_metrica WHERE metricaId = :metricaId")
     suspend fun buscarTodosOsNiveis(metricaId: String): List<NivelDaMetrica>
 
-    /** Níveis de todas as métricas da turma, para a aba Diário montar os resumos de uma vez. */
+    /** Níveis de todas as métricas da turma, para a aba Acompanhamento montar os resumos de uma vez. */
     @Query(
         "SELECT niveis_da_metrica.* FROM niveis_da_metrica " +
             "INNER JOIN metricas ON metricas.id = niveis_da_metrica.metricaId " +

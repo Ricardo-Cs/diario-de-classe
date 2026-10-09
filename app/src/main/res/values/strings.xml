@@ -16,8 +16,8 @@
     <!-- Navegação principal -->
     <string name="aba_inicio">Início</string>
     <string name="aba_a_fazer">A fazer</string>
-    <string name="aba_turma">Turmas</string>
-    <string name="aba_diario">Diário</string>
+    <string name="aba_turma">Turma</string>
+    <string name="aba_acompanhar">Acompanhar</string>
 
     <!-- A fazer -->
     <string name="a_fazer_secao_alunos">Alunos</string>
@@ -193,8 +193,6 @@
     <string name="anotacao_excluida_aviso">Anotação excluída</string>
 
     <!-- Lista de turmas -->
-    <string name="turmas_titulo">Turmas</string>
-    <string name="turmas_vazio">Nenhuma turma cadastrada ainda.</string>
     <string name="turmas_nova">Nova turma</string>
 
     <!-- Formulário de turma -->
@@ -214,6 +212,7 @@
     <string name="periodo_integral">Integral</string>
 
     <!-- Detalhe da turma -->
+    <string name="turma_editar_descricao">Editar a turma %1$s</string>
     <string name="turma_alunos_vazio">Nenhum aluno nesta turma ainda.</string>
     <string name="turma_adicionar_alunos">Adicionar alunos</string>
     <string name="turma_excluir">Excluir turma</string>
@@ -234,7 +233,9 @@
     <string name="aluno_nivel_desde">desde %1$s</string>
     <string name="aluno_nivel_anterior">%1$s · desde %2$s</string>
 
-    <!-- Diário: métricas e metas da turma -->
+    <!-- Acompanhamento: fotos, métricas e metas da turma -->
+    <!-- Título da tela; na barra inferior o nome é "Acompanhar", que cabe melhor. -->
+    <string name="acompanhamento_titulo">Acompanhamento</string>
     <string name="diario_sem_turma">Cadastre uma turma para registrar fotos e acompanhar métricas e metas.</string>
     <string name="diario_fotos">Fotos do dia</string>
     <string name="diario_ver_fotos">Ver todas as fotos</string>
@@ -386,7 +387,7 @@
     <string name="meta_campo_forma">Como acompanhar</string>
     <string name="meta_forma_a_mao">Marcando à mão quem atingiu</string>
     <string name="meta_forma_metrica">Pelo nível de uma métrica</string>
-    <string name="meta_forma_metrica_sem_metricas">Crie uma métrica no Diário para usar esta opção.</string>
+    <string name="meta_forma_metrica_sem_metricas">Crie uma métrica em Acompanhar para usar esta opção.</string>
     <string name="meta_forma_fixa_a_mao">Acompanhada marcando à mão quem atingiu.</string>
     <string name="meta_forma_fixa_metrica">Acompanhada pela métrica %1$s.</string>
     <string name="meta_campo_metrica">Métrica</string>

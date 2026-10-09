@@ -50,6 +50,13 @@ O desenvolvedor **nunca trabalhou com Kotlin** e precisa **entender e apresentar
 
 ### Diretrizes de design
 
+**Navegação** (reorganizada em out/2026: pendências e lembretes não tinham acesso direto)
+- Barra inferior: **Início · A fazer · Turma · Acompanhar**. Todas partem da mesma **turma ativa**, trocada pelo seletor no topo de cada aba.
+- **A fazer**: pendências dos alunos e lembretes da professora, em duas seções. As notificações e os links do Início abrem direto aqui.
+- **Turma**: alunos da turma ativa; "Nova turma" e editar ficam na própria tela (não há lista de turmas).
+- **Acompanhar** (título "Acompanhamento"): fotos do dia, metas e métricas. O nome longo não cabe na barra.
+- Backup fica em Configurações (engrenagem no Início): é raro e não merece aba.
+
 **Registro de faltas (chamada)**
 - A chamada oficial continua no sistema da rede; no app, o que importa é **quem faltou**, porque é isso que ela anota no caderno e é daí que saem as pendências.
 - Todos os alunos **presentes por padrão**; a professora toca só nos ausentes. Deve levar segundos.
@@ -87,7 +94,7 @@ Os níveis são os da psicogênese da língua escrita (pré-silábico, silábico
 - Câmera (app de câmera do celular, `TakePicture`) ou galeria (Photo Picker); nenhuma das duas pede permissão.
 - Reduzidas ao entrar (lado maior 1600 px, JPEG 85, rotação do EXIF aplicada) e guardadas em `files/fotos/`; o banco guarda só o nome do arquivo.
 - Ficam **fora do Auto Backup** (limite de 25 MB) e vão na exportação, que virou um `.zip` (JSON + fotos). Na transferência direta entre celulares elas vão junto.
-- Na aba Diário, o card "Fotos do dia" vem antes das metas; a tela de fotos da turma mostra a linha do tempo por dia.
+- Na aba Acompanhamento, o card "Fotos do dia" vem antes das metas; a tela de fotos da turma mostra a linha do tempo por dia.
 
 **Lembretes da professora**
 - Descrição + data; gerais (não pertencem a uma turma).
@@ -197,6 +204,6 @@ Já existem vários "diários de classe digitais" (apps de secretarias estaduais
 2. ~~Estrutura de pacotes MVVM.~~
 3. ~~Turmas e Alunos.~~
 4. ~~Registro de faltas → Pendências → Notificações.~~
-5. ~~Anotações~~ → ~~Métricas (escala de níveis) e Metas ligadas a métricas~~ (aba Diário). Grupos e tags nas anotações foram retirados do plano em out/2026 (ver seção 2); próximos passos saem do uso real da professora. Métricas vieram antes porque a meta real da professora tem prazo no início de novembro de 2026.
+5. ~~Anotações~~ → ~~Métricas (escala de níveis) e Metas ligadas a métricas~~ (aba Acompanhamento, que se chamava Diário até out/2026). Grupos e tags nas anotações foram retirados do plano em out/2026 (ver seção 2); próximos passos saem do uso real da professora. Métricas vieram antes porque a meta real da professora tem prazo no início de novembro de 2026.
 6. ~~Backup/exportação JSON~~ (estender a cada entidade nova); relatório em PDF em aberto.
 7. Pedidos da professora após o uso: ~~fotos do dia~~ → aba de perfil (conteúdo ainda a definir com ela).

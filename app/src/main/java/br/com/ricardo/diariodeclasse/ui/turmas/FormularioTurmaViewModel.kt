@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import br.com.ricardo.diariodeclasse.data.local.entity.Periodo
 import br.com.ricardo.diariodeclasse.data.local.entity.Turma
+import br.com.ricardo.diariodeclasse.data.repository.TurmaAtivaRepository
 import br.com.ricardo.diariodeclasse.data.repository.TurmaRepository
 import br.com.ricardo.diariodeclasse.ui.navigation.FormularioTurmaRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -45,6 +46,7 @@ data class FormularioTurmaUiState(
 class FormularioTurmaViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val turmaRepository: TurmaRepository,
+    private val turmaAtivaRepository: TurmaAtivaRepository,
     clock: Clock,
 ) : ViewModel() {
 
@@ -114,7 +116,9 @@ class FormularioTurmaViewModel @Inject constructor(
             val turmaExistente: Turma? = turmaEmEdicao
 
             if (turmaExistente == null) {
-                turmaRepository.criar(nome, anoSerie, estado.periodo, anoLetivo)
+                val turmaNova: Turma = turmaRepository.criar(nome, anoSerie, estado.periodo, anoLetivo)
+                // A turma recém-criada vira a ativa: o próximo passo é cadastrar os alunos dela.
+                turmaAtivaRepository.selecionar(turmaNova.id)
             } else {
                 val turmaAlterada = turmaExistente.copy(
                     nome = nome,

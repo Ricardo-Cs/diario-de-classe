@@ -11,7 +11,7 @@ import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
 /*
- * Textos da meta usados no Diário e na tela da meta, para os dois lugares
+ * Textos da meta usados no Acompanhamento e na tela da meta, para os dois lugares
  * falarem do mesmo jeito.
  */
 

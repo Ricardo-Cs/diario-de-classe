@@ -28,7 +28,7 @@ data class AdicionarFotosUiState(
 )
 
 /**
- * Adiciona fotos pela câmera ou pela galeria. Usado pela aba Diário e pela tela
+ * Adiciona fotos pela câmera ou pela galeria. Usado pela aba Acompanhamento e pela tela
  * de fotos da turma (ver `lembrarAdicionarFotos`).
  *
  * A câmera e a galeria são outros apps: enquanto estão abertos, o Android pode

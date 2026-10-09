@@ -59,7 +59,7 @@ class AlunoViewModel @Inject constructor(
 
     /**
      * A tela tem três rotas ([AlunoRoute] na aba Turmas, [AlunoNoAFazerRoute] em
-     * "A fazer" e `AlunoNoDiarioRoute` no Diário), e todas guardam o id com o mesmo
+     * "A fazer" e `AlunoNoAcompanhamentoRoute` no Acompanhamento), e todas guardam o id com o mesmo
      * nome, "alunoId". Lemos direto pela chave para servir a qualquer uma delas.
      */
     private val alunoId: String = lerAlunoIdDaRota(savedStateHandle)

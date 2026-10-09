@@ -13,5 +13,5 @@ enum class AbaPrincipal(
     INICIO(InicioGrafo, R.string.aba_inicio, R.drawable.ic_inicio),
     A_FAZER(AFazerGrafo, R.string.aba_a_fazer, R.drawable.ic_a_fazer),
     TURMA(TurmaGrafo, R.string.aba_turma, R.drawable.ic_turma),
-    DIARIO(DiarioGrafo, R.string.aba_diario, R.drawable.ic_diario),
+    ACOMPANHAMENTO(AcompanhamentoGrafo, R.string.aba_acompanhar, R.drawable.ic_diario),
 }

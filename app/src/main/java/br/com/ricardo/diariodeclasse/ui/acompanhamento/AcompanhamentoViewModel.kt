@@ -1,4 +1,4 @@
-package br.com.ricardo.diariodeclasse.ui.diario
+package br.com.ricardo.diariodeclasse.ui.acompanhamento
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -38,7 +38,7 @@ import java.time.Clock
 import java.time.LocalDate
 import javax.inject.Inject
 
-/** Uma métrica na lista do Diário, com o retrato atual da turma. */
+/** Uma métrica na lista do Acompanhamento, com o retrato atual da turma. */
 data class ResumoDaMetrica(
     val metrica: Metrica,
     val distribuicao: DistribuicaoDaMetrica,
@@ -51,9 +51,9 @@ data class ResumoDaMeta(
     val progresso: ProgressoDaMeta,
 )
 
-sealed interface DiarioUiState {
-    data object Carregando : DiarioUiState
-    data object NenhumaTurma : DiarioUiState
+sealed interface AcompanhamentoUiState {
+    data object Carregando : AcompanhamentoUiState
+    data object NenhumaTurma : AcompanhamentoUiState
 
     data class Carregado(
         val turmaAtiva: Turma,
@@ -66,7 +66,7 @@ sealed interface DiarioUiState {
         val metasEmAndamento: List<ResumoDaMeta>,
         val metasEncerradas: List<ResumoDaMeta>,
         val metricas: List<ResumoDaMetrica>,
-    ) : DiarioUiState
+    ) : AcompanhamentoUiState
 }
 
 /** Métricas, níveis e resultados da turma, que andam sempre juntos nos cálculos. */
@@ -87,11 +87,11 @@ private data class DadosDaTurma(
 )
 
 /**
- * Aba Diário: o registro e o acompanhamento da turma ativa (fotos do dia, metas
+ * Aba Acompanhamento: o registro e o acompanhamento da turma ativa (fotos do dia, metas
  * e métricas). Mesma turma ativa do Início; trocar aqui troca lá também.
  */
 @HiltViewModel
-class DiarioViewModel @Inject constructor(
+class AcompanhamentoViewModel @Inject constructor(
     turmaRepository: TurmaRepository,
     private val turmaAtivaRepository: TurmaAtivaRepository,
     private val alunoRepository: AlunoRepository,
@@ -101,7 +101,7 @@ class DiarioViewModel @Inject constructor(
     private val clock: Clock,
 ) : ViewModel() {
 
-    val uiState: StateFlow<DiarioUiState> = combine(
+    val uiState: StateFlow<AcompanhamentoUiState> = combine(
         observarDadosDaTurmaAtiva(),
         turmaRepository.observarTurmas(),
     ) { dados, todasAsTurmas ->
@@ -109,7 +109,7 @@ class DiarioViewModel @Inject constructor(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = DiarioUiState.Carregando,
+        initialValue = AcompanhamentoUiState.Carregando,
     )
 
     /** Troca todas as consultas quando a turma ativa muda (ver `InicioViewModel`). */
@@ -148,9 +148,9 @@ class DiarioViewModel @Inject constructor(
         }
     }
 
-    private fun criarEstado(dados: DadosDaTurma?, todasAsTurmas: List<Turma>): DiarioUiState {
+    private fun criarEstado(dados: DadosDaTurma?, todasAsTurmas: List<Turma>): AcompanhamentoUiState {
         if (dados == null) {
-            return DiarioUiState.NenhumaTurma
+            return AcompanhamentoUiState.NenhumaTurma
         }
         val hoje: LocalDate = LocalDate.now(clock)
 
@@ -170,7 +170,7 @@ class DiarioViewModel @Inject constructor(
             metricas.add(resumirMetrica(metrica, dados, hoje))
         }
 
-        return DiarioUiState.Carregado(
+        return AcompanhamentoUiState.Carregado(
             turmaAtiva = dados.turma,
             todasAsTurmas = todasAsTurmas,
             hoje = hoje,

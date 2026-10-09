@@ -1,5 +1,6 @@
 package br.com.ricardo.diariodeclasse.ui.navigation
 
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -11,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -36,11 +38,24 @@ fun BarraInferior(
                 selected = estaNaAba(destinoAtual, aba),
                 onClick = { aoSelecionarAba(aba) },
                 icon = { Icon(painterResource(aba.icone), contentDescription = null) },
-                label = { Text(stringResource(aba.titulo)) },
+                label = { RotuloDaAba(stringResource(aba.titulo)) },
                 colors = coresDosItens(corDaBarra, corDoConteudo),
             )
         }
     }
+}
+
+/**
+ * Sempre numa linha só. Em celular pequeno com fonte grande, "Acompanhar" não
+ * caberia: em vez de quebrar a palavra, a letra diminui até caber (no mínimo 9sp).
+ */
+@Composable
+private fun RotuloDaAba(texto: String) {
+    Text(
+        text = texto,
+        maxLines = 1,
+        autoSize = TextAutoSize.StepBased(minFontSize = 9.sp, maxFontSize = MaterialTheme.typography.labelMedium.fontSize),
+    )
 }
 
 /**

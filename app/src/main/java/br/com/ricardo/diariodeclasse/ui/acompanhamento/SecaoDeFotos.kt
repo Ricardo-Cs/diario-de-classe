@@ -1,4 +1,4 @@
-package br.com.ricardo.diariodeclasse.ui.diario
+package br.com.ricardo.diariodeclasse.ui.acompanhamento
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -30,7 +30,7 @@ import br.com.ricardo.diariodeclasse.ui.fotos.descricaoDaFoto
  */
 @Composable
 fun SecaoDeFotos(
-    estado: DiarioUiState.Carregado,
+    estado: AcompanhamentoUiState.Carregado,
     salvando: Boolean,
     aoTirarFoto: () -> Unit,
     aoEscolherDaGaleria: () -> Unit,
@@ -82,7 +82,7 @@ fun SecaoDeFotos(
 
 /** "3 fotos hoje" e as miniaturas numa fileira que rola para o lado. */
 @Composable
-private fun FotosDeHoje(estado: DiarioUiState.Carregado, aoAbrirFoto: (fotoId: String) -> Unit) {
+private fun FotosDeHoje(estado: AcompanhamentoUiState.Carregado, aoAbrirFoto: (fotoId: String) -> Unit) {
     val quantidade: Int = estado.fotosDeHoje.size
 
     Text(

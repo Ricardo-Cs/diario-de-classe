@@ -25,7 +25,7 @@ import br.com.ricardo.diariodeclasse.data.local.entity.Turma
 /**
  * Botão com a turma ativa; ao tocar, abre um menu com as demais turmas.
  * Com uma turma só não há o que trocar: mostra apenas o nome, sem seta nem menu.
- * Usado no Início e no Diário, que partem da mesma turma ativa.
+ * Usado em todas as abas (Início, A fazer, Turma e Acompanhamento), que partem da mesma turma ativa.
  *
  * `remember { mutableStateOf(...) }` é o "useState" do Compose: guarda se o menu
  * está aberto e redesenha o componente quando o valor muda.

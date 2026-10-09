@@ -27,7 +27,7 @@ import br.com.ricardo.diariodeclasse.ui.afazer.SecaoDoAFazer
 import br.com.ricardo.diariodeclasse.ui.alunos.AlunoScreen
 import br.com.ricardo.diariodeclasse.ui.chamada.ChamadaScreen
 import br.com.ricardo.diariodeclasse.ui.configuracoes.ConfiguracoesScreen
-import br.com.ricardo.diariodeclasse.ui.diario.DiarioScreen
+import br.com.ricardo.diariodeclasse.ui.acompanhamento.AcompanhamentoScreen
 import br.com.ricardo.diariodeclasse.ui.fotos.FotoScreen
 import br.com.ricardo.diariodeclasse.ui.fotos.FotosScreen
 import br.com.ricardo.diariodeclasse.ui.inicio.InicioScreen
@@ -36,9 +36,8 @@ import br.com.ricardo.diariodeclasse.ui.metas.MetaScreen
 import br.com.ricardo.diariodeclasse.ui.metricas.FormularioMetricaScreen
 import br.com.ricardo.diariodeclasse.ui.metricas.MetricaScreen
 import br.com.ricardo.diariodeclasse.ui.metricas.SondagemScreen
-import br.com.ricardo.diariodeclasse.ui.turmas.DetalheTurmaScreen
 import br.com.ricardo.diariodeclasse.ui.turmas.FormularioTurmaScreen
-import br.com.ricardo.diariodeclasse.ui.turmas.ListaTurmasScreen
+import br.com.ricardo.diariodeclasse.ui.turmas.TurmaScreen
 
 /**
  * Mapa de navegação do app. As telas não conhecem o `navController`:
@@ -105,12 +104,8 @@ fun AppNavHost(
                         aoAbrirPendencias = { abrirAFazer(SecaoDoAFazer.PENDENCIAS_DOS_ALUNOS) },
                         aoAbrirLembretes = { abrirAFazer(SecaoDoAFazer.MEUS_LEMBRETES) },
                         aoAbrirConfiguracoes = { navController.navigate(ConfiguracoesRoute) },
-                        aoAbrirTurma = { turmaId ->
-                            // Vai para a aba Turma e abre a turma lá, para a barra
-                            // inferior destacar a aba certa.
-                            navegarParaAba(navController, AbaPrincipal.TURMA)
-                            navController.navigate(DetalheTurmaRoute(turmaId))
-                        },
+                        // A aba Turma mostra a turma ativa, a mesma do Início.
+                        aoAbrirTurma = { abrirRaizDaAba(navController, AbaPrincipal.TURMA, TurmaRoute) },
                     )
                 }
 
@@ -143,30 +138,19 @@ fun AppNavHost(
                 }
             }
 
-            navigation<TurmaGrafo>(startDestination = ListaTurmasRoute) {
-                composable<ListaTurmasRoute> {
-                    ListaTurmasScreen(
-                        aoAbrirTurma = { turmaId -> navController.navigate(DetalheTurmaRoute(turmaId)) },
+            navigation<TurmaGrafo>(startDestination = TurmaRoute) {
+                composable<TurmaRoute> {
+                    TurmaScreen(
                         aoCriarTurma = { navController.navigate(FormularioTurmaRoute()) },
+                        aoEditarTurma = { turmaId -> navController.navigate(FormularioTurmaRoute(turmaId)) },
+                        aoAbrirAluno = { alunoId -> navController.navigate(AlunoRoute(alunoId)) },
                     )
                 }
 
                 composable<FormularioTurmaRoute> {
                     FormularioTurmaScreen(
                         aoVoltar = { navController.popBackStack() },
-                        // Fecha o formulário e o detalhe da turma excluída de uma vez,
-                        // voltando direto para a lista.
-                        aoExcluirTurma = {
-                            navController.popBackStack(route = ListaTurmasRoute, inclusive = false)
-                        },
-                    )
-                }
-
-                composable<DetalheTurmaRoute> {
-                    DetalheTurmaScreen(
-                        aoEditarTurma = { turmaId -> navController.navigate(FormularioTurmaRoute(turmaId)) },
-                        aoAbrirAluno = { alunoId -> navController.navigate(AlunoRoute(alunoId)) },
-                        aoVoltar = { navController.popBackStack() },
+                        aoExcluirTurma = { navController.popBackStack() },
                     )
                 }
 
@@ -177,9 +161,9 @@ fun AppNavHost(
                 }
             }
 
-            navigation<DiarioGrafo>(startDestination = DiarioRoute) {
-                composable<DiarioRoute> {
-                    DiarioScreen(
+            navigation<AcompanhamentoGrafo>(startDestination = AcompanhamentoRoute) {
+                composable<AcompanhamentoRoute> {
+                    AcompanhamentoScreen(
                         aoCriarMetrica = { turmaId -> navController.navigate(FormularioMetricaRoute(turmaId)) },
                         aoAbrirMetrica = { metricaId -> navController.navigate(MetricaRoute(metricaId)) },
                         aoCriarMeta = { turmaId -> navController.navigate(FormularioMetaRoute(turmaId)) },
@@ -207,7 +191,7 @@ fun AppNavHost(
                         aoVoltar = { navController.popBackStack() },
                         // Fecha o formulário e a tela da métrica excluída de uma vez.
                         aoExcluirMetrica = {
-                            navController.popBackStack(route = DiarioRoute, inclusive = false)
+                            navController.popBackStack(route = AcompanhamentoRoute, inclusive = false)
                         },
                     )
                 }
@@ -234,7 +218,7 @@ fun AppNavHost(
                     FormularioMetaScreen(
                         aoVoltar = { navController.popBackStack() },
                         aoExcluirMeta = {
-                            navController.popBackStack(route = DiarioRoute, inclusive = false)
+                            navController.popBackStack(route = AcompanhamentoRoute, inclusive = false)
                         },
                     )
                 }
@@ -247,12 +231,12 @@ fun AppNavHost(
                         aoAbrirSondagem = { metricaId, data ->
                             navController.navigate(SondagemRoute(metricaId, data.toString()))
                         },
-                        aoAbrirAluno = { alunoId -> navController.navigate(AlunoNoDiarioRoute(alunoId)) },
+                        aoAbrirAluno = { alunoId -> navController.navigate(AlunoNoAcompanhamentoRoute(alunoId)) },
                         aoVoltar = { navController.popBackStack() },
                     )
                 }
 
-                composable<AlunoNoDiarioRoute> {
+                composable<AlunoNoAcompanhamentoRoute> {
                     AlunoScreen(
                         aoVoltar = { navController.popBackStack() },
                     )

@@ -19,25 +19,23 @@ object AFazerGrafo
 object TurmaGrafo
 
 @Serializable
-object DiarioGrafo
+object AcompanhamentoGrafo
 
 // Telas
 
 @Serializable
 object InicioRoute
 
+/** Alunos da turma ativa. */
 @Serializable
-object ListaTurmasRoute
+object TurmaRoute
 
 /** `turmaId == null` significa "criar nova turma". */
 @Serializable
 data class FormularioTurmaRoute(val turmaId: String? = null)
 
 @Serializable
-data class DetalheTurmaRoute(val turmaId: String)
-
-@Serializable
-object DiarioRoute
+object AcompanhamentoRoute
 
 /** Configurações (backup dos dados); fica na pilha do Início, de onde é aberta. */
 @Serializable
@@ -66,9 +64,9 @@ data class AlunoRoute(val alunoId: String)
 @Serializable
 data class AlunoNoAFazerRoute(val alunoId: String)
 
-/** A mesma tela do aluno, aberta a partir da aba Diário (pela tela da meta). */
+/** A mesma tela do aluno, aberta a partir da aba Acompanhamento (pela tela da meta). */
 @Serializable
-data class AlunoNoDiarioRoute(val alunoId: String)
+data class AlunoNoAcompanhamentoRoute(val alunoId: String)
 
 /** `metricaId == null` significa "criar nova métrica". */
 @Serializable
@@ -88,7 +86,7 @@ data class FormularioMetaRoute(val turmaId: String, val metaId: String? = null)
 @Serializable
 data class MetaRoute(val metaId: String)
 
-/** Linha do tempo das fotos da turma; fica na pilha do Diário, onde fica o card de fotos. */
+/** Linha do tempo das fotos da turma; fica na pilha do Acompanhamento, onde fica o card de fotos. */
 @Serializable
 data class FotosRoute(val turmaId: String)
 

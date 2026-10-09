@@ -1,4 +1,4 @@
-package br.com.ricardo.diariodeclasse.ui.diario
+package br.com.ricardo.diariodeclasse.ui.acompanhamento
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -49,17 +49,17 @@ import br.com.ricardo.diariodeclasse.ui.metricas.FaixaDaDistribuicao
 import java.time.LocalDate
 
 @Composable
-fun DiarioScreen(
+fun AcompanhamentoScreen(
     aoCriarMetrica: (turmaId: String) -> Unit,
     aoAbrirMetrica: (metricaId: String) -> Unit,
     aoCriarMeta: (turmaId: String) -> Unit,
     aoAbrirMeta: (metaId: String) -> Unit,
     aoAbrirFotos: (turmaId: String) -> Unit,
     aoAbrirFoto: (turmaId: String, fotoId: String) -> Unit,
-    viewModel: DiarioViewModel = hiltViewModel(),
+    viewModel: AcompanhamentoViewModel = hiltViewModel(),
     adicionarFotosViewModel: AdicionarFotosViewModel = hiltViewModel(),
 ) {
-    val estado: DiarioUiState = viewModel.uiState.collectAsStateWithLifecycle().value
+    val estado: AcompanhamentoUiState = viewModel.uiState.collectAsStateWithLifecycle().value
     val estadoDaAdicao: AdicionarFotosUiState = adicionarFotosViewModel.uiState.collectAsStateWithLifecycle().value
     val adicionarFotos: AdicionarFotos = lembrarAdicionarFotos(adicionarFotosViewModel)
     val avisos: SnackbarHostState = remember { SnackbarHostState() }
@@ -71,19 +71,19 @@ fun DiarioScreen(
     )
 
     Scaffold(
-        topBar = { BarraSuperior(titulo = stringResource(R.string.aba_diario)) },
+        topBar = { BarraSuperior(titulo = stringResource(R.string.acompanhamento_titulo)) },
         snackbarHost = { SnackbarHost(avisos) },
     ) { espacamentoDasBarras ->
         val modifier = Modifier.padding(espacamentoDasBarras)
 
         when (estado) {
-            is DiarioUiState.Carregando -> TelaCarregando()
+            is AcompanhamentoUiState.Carregando -> TelaCarregando()
 
-            is DiarioUiState.NenhumaTurma -> {
+            is AcompanhamentoUiState.NenhumaTurma -> {
                 MensagemCentralizada(stringResource(R.string.diario_sem_turma), modifier)
             }
 
-            is DiarioUiState.Carregado -> ConteudoDiario(
+            is AcompanhamentoUiState.Carregado -> ConteudoAcompanhamento(
                 estado = estado,
                 fotos = AcoesDeFotos(
                     salvando = estadoDaAdicao.salvando,
@@ -117,8 +117,8 @@ private class AcoesDeFotos(
  * Depois as metas, que têm prazo e pedem ação, e as métricas que as alimentam.
  */
 @Composable
-private fun ConteudoDiario(
-    estado: DiarioUiState.Carregado,
+private fun ConteudoAcompanhamento(
+    estado: AcompanhamentoUiState.Carregado,
     fotos: AcoesDeFotos,
     aoSelecionarTurma: (turmaId: String) -> Unit,
     aoCriarMetrica: () -> Unit,
@@ -165,7 +165,7 @@ private fun ConteudoDiario(
 
 @Composable
 private fun SecaoDeMetas(
-    estado: DiarioUiState.Carregado,
+    estado: AcompanhamentoUiState.Carregado,
     aoCriarMeta: () -> Unit,
     aoAbrirMeta: (metaId: String) -> Unit,
 ) {
@@ -232,7 +232,7 @@ private fun CardDaMeta(resumo: ResumoDaMeta, hoje: LocalDate, aoTocar: () -> Uni
 
 @Composable
 private fun SecaoDeMetricas(
-    estado: DiarioUiState.Carregado,
+    estado: AcompanhamentoUiState.Carregado,
     aoCriarMetrica: () -> Unit,
     aoAbrirMetrica: (metricaId: String) -> Unit,
 ) {

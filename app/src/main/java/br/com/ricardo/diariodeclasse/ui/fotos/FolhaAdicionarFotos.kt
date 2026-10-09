@@ -85,7 +85,7 @@ fun FolhaAdicionarFotos(
     }
 }
 
-/** "Tirar foto" e "Da galeria", lado a lado. Também usados no card do Diário. */
+/** "Tirar foto" e "Da galeria", lado a lado. Também usados no card do Acompanhamento. */
 @Composable
 fun BotoesDeOrigem(
     aoTirarFoto: () -> Unit,

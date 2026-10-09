@@ -74,7 +74,7 @@ private data class DadosDaTurma(
 
 /**
  * Pendências da turma ativa, na aba "A fazer". Mesma turma ativa do Início e
- * do Diário; trocar aqui troca lá também.
+ * do Acompanhamento; trocar aqui troca lá também.
  */
 @HiltViewModel
 class PendenciasViewModel @Inject constructor(
