@@ -47,16 +47,17 @@ O desenvolvedor **nunca trabalhou com Kotlin** e precisa **entender e apresentar
 | Metas da turma | Meta **e forma de medição** definidas pela própria professora | Média |
 | Métricas personalizáveis | Métricas definidas pela professora, com histórico | Média/alta |
 | Fotos do dia | Registro do dia da turma em fotos, para histórico (pedido da professora após o uso) | Média |
+| Perfil da professora | Foto, nome e escola, em aba própria (pedido da professora após o uso) | Baixa |
 
 ### Diretrizes de design
 
 **Navegação** (reorganizada em out/2026: pendências e lembretes não tinham acesso direto)
-- Barra inferior: **Início · A fazer · Turma · Acompanhar**. Todas partem da mesma **turma ativa**, trocada pelo seletor no topo de cada aba.
+- Barra inferior: **Início · A fazer · Turma · Acompanhar · Perfil**. As quatro primeiras partem da mesma **turma ativa**, trocada pelo seletor no topo de cada aba.
 - **A fazer**: pendências dos alunos e lembretes da professora, em duas seções. As notificações e os links do Início abrem direto aqui.
 - **Turma**: alunos da turma ativa; "Nova turma" e editar ficam na própria tela (não há lista de turmas).
 - **Acompanhar** (título "Acompanhamento"): fotos do dia, metas e métricas. O nome longo não cabe na barra.
 - Botão "Anotar" no Início: escolhe o aluno numa lista e já abre o campo de texto (2 toques até escrever; antes eram 3 telas).
-- Backup fica em Configurações (engrenagem no Início): é raro e não merece aba.
+- Backup fica em Configurações (engrenagem no topo do Perfil, como no Instagram): é raro e não merece aba.
 
 **Registro de faltas (chamada)**
 - A chamada oficial continua no sistema da rede; no app, o que importa é **quem faltou**, porque é isso que ela anota no caderno e é daí que saem as pendências.
@@ -96,6 +97,12 @@ Os níveis são os da psicogênese da língua escrita (pré-silábico, silábico
 - Reduzidas ao entrar (lado maior 1600 px, JPEG 85, rotação do EXIF aplicada) e guardadas em `files/fotos/`; o banco guarda só o nome do arquivo.
 - Ficam **fora do Auto Backup** (limite de 25 MB) e vão na exportação, que virou um `.zip` (JSON + fotos). Na transferência direta entre celulares elas vão junto.
 - Na aba Acompanhamento, o card "Fotos do dia" vem antes das metas; a tela de fotos da turma mostra a linha do tempo por dia.
+
+**Perfil da professora** (pedido em out/2026: "tipo do Instagram", para o app ficar "menos desconexo")
+- Última aba da barra, com a foto dela no lugar do ícone (sem foto, as iniciais; sem nome, um ícone de pessoa).
+- Foto (câmera ou galeria, mesma redução e pasta das fotos do dia), nome e escola opcional; números do diário calculados (turmas, alunos, anotações).
+- O primeiro nome vai na saudação do Início ("Bom dia, Maria!").
+- Um perfil por aparelho, criado quando ela preenche algo pela primeira vez. Vai na exportação, com a foto.
 
 **Lembretes da professora**
 - Descrição + data; gerais (não pertencem a uma turma).
@@ -166,6 +173,7 @@ Como o app substitui o caderno, perder o aparelho não pode significar perder o 
 - `Anotacao` — aluno + texto + data
 - `Lembrete` — descrição + data + concluído em (da professora, sem turma)
 - `Foto` — turma + data + nome do arquivo + legenda opcional
+- `Perfil` — nome + escola opcional + nome do arquivo da foto opcional (da professora, um por aparelho)
 
 Todas as entidades seguem as regras da seção 4 (UUID, timestamps, soft delete).
 
@@ -207,4 +215,4 @@ Já existem vários "diários de classe digitais" (apps de secretarias estaduais
 4. ~~Registro de faltas → Pendências → Notificações.~~
 5. ~~Anotações~~ → ~~Métricas (escala de níveis) e Metas ligadas a métricas~~ (aba Acompanhamento, que se chamava Diário até out/2026). Grupos e tags nas anotações foram retirados do plano em out/2026 (ver seção 2); próximos passos saem do uso real da professora. Métricas vieram antes porque a meta real da professora tem prazo no início de novembro de 2026.
 6. ~~Backup/exportação JSON~~ (estender a cada entidade nova); relatório em PDF em aberto.
-7. Pedidos da professora após o uso: ~~fotos do dia~~ → aba de perfil (conteúdo ainda a definir com ela).
+7. Pedidos da professora após o uso: ~~fotos do dia~~ → ~~aba de perfil~~ (reorganização da navegação feita junto, em out/2026).

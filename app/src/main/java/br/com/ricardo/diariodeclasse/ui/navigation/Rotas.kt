@@ -21,6 +21,9 @@ object TurmaGrafo
 @Serializable
 object AcompanhamentoGrafo
 
+@Serializable
+object PerfilGrafo
+
 // Telas
 
 @Serializable
@@ -37,7 +40,11 @@ data class FormularioTurmaRoute(val turmaId: String? = null)
 @Serializable
 object AcompanhamentoRoute
 
-/** Configurações (backup dos dados); fica na pilha do Início, de onde é aberta. */
+/** Foto, nome e escola da professora, e o resumo do diário. */
+@Serializable
+object PerfilRoute
+
+/** Configurações (backup dos dados); fica na pilha do Perfil, de onde é aberta. */
 @Serializable
 object ConfiguracoesRoute
 

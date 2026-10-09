@@ -11,6 +11,7 @@ import br.com.ricardo.diariodeclasse.data.local.entity.Meta
 import br.com.ricardo.diariodeclasse.data.local.entity.Metrica
 import br.com.ricardo.diariodeclasse.data.local.entity.NivelDaMetrica
 import br.com.ricardo.diariodeclasse.data.local.entity.Pendencia
+import br.com.ricardo.diariodeclasse.data.local.entity.Perfil
 import br.com.ricardo.diariodeclasse.data.local.entity.Periodo
 import br.com.ricardo.diariodeclasse.data.local.entity.RegistroPresenca
 import br.com.ricardo.diariodeclasse.data.local.entity.ResultadoDaSondagem
@@ -78,6 +79,7 @@ object ConversorDeBackup {
             alunosNaMeta = dados.alunosNaMeta.map { linha -> alunoNaMetaParaArquivo(linha) },
             lembretes = dados.lembretes.map { lembrete -> lembreteParaArquivo(lembrete) },
             fotos = dados.fotos.map { foto -> fotoParaArquivo(foto) },
+            perfis = dados.perfis.map { perfil -> perfilParaArquivo(perfil) },
         )
         return jsonDoArquivo.encodeToString(ArquivoDeBackup.serializer(), arquivo)
     }
@@ -138,6 +140,7 @@ object ConversorDeBackup {
             alunosNaMeta = arquivo.alunosNaMeta.map { linha -> alunoNaMetaDoArquivo(linha) },
             lembretes = arquivo.lembretes.map { lembrete -> lembreteDoArquivo(lembrete) },
             fotos = arquivo.fotos.map { foto -> fotoDoArquivo(foto) },
+            perfis = arquivo.perfis.map { perfil -> perfilDoArquivo(perfil) },
         )
     }
 
@@ -317,6 +320,18 @@ object ConversorDeBackup {
         )
     }
 
+    private fun perfilParaArquivo(perfil: Perfil): PerfilNoArquivo {
+        return PerfilNoArquivo(
+            id = perfil.id,
+            nome = perfil.nome,
+            escola = perfil.escola,
+            nomeDoArquivoDaFoto = perfil.nomeDoArquivoDaFoto,
+            createdAt = perfil.createdAt.toString(),
+            updatedAt = perfil.updatedAt.toString(),
+            deletedAt = textoOuNulo(perfil.deletedAt),
+        )
+    }
+
     // --- Arquivo → entidade ---
 
     private fun turmaDoArquivo(turma: TurmaNoArquivo): Turma {
@@ -490,6 +505,18 @@ object ConversorDeBackup {
             createdAt = Instant.parse(foto.createdAt),
             updatedAt = Instant.parse(foto.updatedAt),
             deletedAt = instanteOuNulo(foto.deletedAt),
+        )
+    }
+
+    private fun perfilDoArquivo(perfil: PerfilNoArquivo): Perfil {
+        return Perfil(
+            id = perfil.id,
+            nome = perfil.nome,
+            escola = perfil.escola,
+            nomeDoArquivoDaFoto = perfil.nomeDoArquivoDaFoto,
+            createdAt = Instant.parse(perfil.createdAt),
+            updatedAt = Instant.parse(perfil.updatedAt),
+            deletedAt = instanteOuNulo(perfil.deletedAt),
         )
     }
 

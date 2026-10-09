@@ -22,6 +22,8 @@ import br.com.ricardo.diariodeclasse.data.repository.MetricaRepository
 import br.com.ricardo.diariodeclasse.data.repository.MetricaRepositoryImpl
 import br.com.ricardo.diariodeclasse.data.repository.PendenciaRepository
 import br.com.ricardo.diariodeclasse.data.repository.PendenciaRepositoryImpl
+import br.com.ricardo.diariodeclasse.data.repository.PerfilRepository
+import br.com.ricardo.diariodeclasse.data.repository.PerfilRepositoryImpl
 import br.com.ricardo.diariodeclasse.data.repository.TurmaAtivaRepository
 import br.com.ricardo.diariodeclasse.data.repository.TurmaAtivaRepositoryImpl
 import br.com.ricardo.diariodeclasse.data.repository.TurmaRepository
@@ -84,6 +86,10 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindFotoRepository(impl: FotoRepositoryImpl): FotoRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindPerfilRepository(impl: PerfilRepositoryImpl): PerfilRepository
 
     @Binds
     @Singleton

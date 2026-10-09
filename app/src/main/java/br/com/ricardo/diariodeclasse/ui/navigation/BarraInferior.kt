@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
+import br.com.ricardo.diariodeclasse.ui.perfil.FotoDoPerfilNaBarra
 
 /**
  * Barra na cor da marca (Molten Lava). Usa o `primaryContainer`, e não o `primary`,
@@ -37,11 +38,20 @@ fun BarraInferior(
             NavigationBarItem(
                 selected = estaNaAba(destinoAtual, aba),
                 onClick = { aoSelecionarAba(aba) },
-                icon = { Icon(painterResource(aba.icone), contentDescription = null) },
+                icon = { IconeDaAba(aba) },
                 label = { RotuloDaAba(stringResource(aba.titulo)) },
                 colors = coresDosItens(corDaBarra, corDoConteudo),
             )
         }
+    }
+}
+
+@Composable
+private fun IconeDaAba(aba: AbaPrincipal) {
+    if (aba == AbaPrincipal.PERFIL) {
+        FotoDoPerfilNaBarra()
+    } else {
+        Icon(painterResource(aba.icone), contentDescription = null)
     }
 }
 

@@ -13,3 +13,15 @@ fun saudacaoParaHorario(horario: LocalTime): Saudacao {
     }
     return Saudacao.BOA_NOITE
 }
+
+/**
+ * Na saudação vai só o primeiro nome ("Bom dia, Maria!"), como se fala na escola.
+ * `null` enquanto ela não preencheu o perfil: a saudação fica sem nome.
+ */
+fun primeiroNome(nomeCompleto: String?): String? {
+    if (nomeCompleto == null || nomeCompleto.isBlank()) {
+        return null
+    }
+    val partes: List<String> = nomeCompleto.trim().split(" ")
+    return partes.first()
+}

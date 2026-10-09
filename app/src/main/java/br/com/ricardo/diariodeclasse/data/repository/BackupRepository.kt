@@ -11,6 +11,7 @@ import br.com.ricardo.diariodeclasse.data.fotos.ArquivosDeFotos
 import br.com.ricardo.diariodeclasse.data.local.dao.BackupDao
 import br.com.ricardo.diariodeclasse.data.local.entity.DadosDoDiario
 import br.com.ricardo.diariodeclasse.data.local.entity.Foto
+import br.com.ricardo.diariodeclasse.data.local.entity.Perfil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -74,22 +75,31 @@ class BackupRepositoryImpl @Inject constructor(
             ConversorDeBackup.gerarJson(dados, exportadoEm)
         }
         val fotos: List<File> = withContext(Dispatchers.IO) {
-            imagensParaExportar(dados.fotos)
+            imagensParaExportar(dados.fotos, dados.perfis)
         }
         return Exportacao(json, fotos)
     }
 
     /**
-     * Só as fotos que aparecem no app. Uma foto pode estar no banco sem a imagem
-     * (ex.: banco recuperado do backup automático, que não leva as fotos); nesse
-     * caso o arquivo simplesmente não vai no .zip.
+     * Só as fotos que aparecem no app, mais a foto do perfil. Uma foto pode estar
+     * no banco sem a imagem (ex.: banco recuperado do backup automático, que não
+     * leva as fotos); nesse caso o arquivo simplesmente não vai no .zip.
      */
-    private fun imagensParaExportar(fotos: List<Foto>): List<File> {
+    private fun imagensParaExportar(fotos: List<Foto>, perfis: List<Perfil>): List<File> {
         val imagens = mutableListOf<File>()
         for (foto in fotos) {
             val imagem: File = arquivosDeFotos.arquivoDa(foto.nomeDoArquivo)
             if (foto.deletedAt == null && imagem.exists()) {
                 imagens.add(imagem)
+            }
+        }
+        for (perfil in perfis) {
+            val nomeDaFoto: String? = perfil.nomeDoArquivoDaFoto
+            if (perfil.deletedAt == null && nomeDaFoto != null) {
+                val imagem: File = arquivosDeFotos.arquivoDa(nomeDaFoto)
+                if (imagem.exists()) {
+                    imagens.add(imagem)
+                }
             }
         }
         return imagens

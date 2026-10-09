@@ -4,12 +4,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.ricardo.diariodeclasse.data.local.entity.Aluno
 import br.com.ricardo.diariodeclasse.data.local.entity.Lembrete
+import br.com.ricardo.diariodeclasse.data.local.entity.Perfil
 import br.com.ricardo.diariodeclasse.data.local.entity.Turma
 import br.com.ricardo.diariodeclasse.data.repository.AlunoRepository
 import br.com.ricardo.diariodeclasse.data.repository.AnotacaoRepository
 import br.com.ricardo.diariodeclasse.data.repository.ChamadaRepository
 import br.com.ricardo.diariodeclasse.data.repository.LembreteRepository
 import br.com.ricardo.diariodeclasse.data.repository.PendenciaRepository
+import br.com.ricardo.diariodeclasse.data.repository.PerfilRepository
 import br.com.ricardo.diariodeclasse.data.repository.TurmaAtivaRepository
 import br.com.ricardo.diariodeclasse.data.repository.TurmaRepository
 import br.com.ricardo.diariodeclasse.ui.lembretes.lembretesDoInicio
@@ -38,6 +40,8 @@ import javax.inject.Inject
  */
 data class InicioUiState(
     val saudacao: Saudacao,
+    /** Da professora, para "Bom dia, Maria!"; `null` enquanto o perfil está vazio. */
+    val primeiroNome: String?,
     val hoje: LocalDate,
     val turmas: TurmasDoInicio,
     /** Em aberto, atrasados e dos próximos dias (ver `lembretesDoInicio`). */
@@ -79,6 +83,7 @@ class InicioViewModel @Inject constructor(
     private val pendenciaRepository: PendenciaRepository,
     private val lembreteRepository: LembreteRepository,
     private val anotacaoRepository: AnotacaoRepository,
+    perfilRepository: PerfilRepository,
     private val clock: Clock,
 ) : ViewModel() {
 
@@ -100,8 +105,9 @@ class InicioViewModel @Inject constructor(
         dadosDoDia,
         turmaRepository.observarTurmas(),
         lembreteRepository.observarEmAberto(),
-    ) { dataEHora, dados, todasAsTurmas, lembretesEmAberto ->
-        criarEstado(dataEHora, dados, todasAsTurmas, lembretesEmAberto)
+        perfilRepository.observarPerfil(),
+    ) { dataEHora, dados, todasAsTurmas, lembretesEmAberto, perfil ->
+        criarEstado(dataEHora, dados, todasAsTurmas, lembretesEmAberto, perfil)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
@@ -146,6 +152,7 @@ class InicioViewModel @Inject constructor(
         dados: DadosDoDia?,
         todasAsTurmas: List<Turma>,
         lembretesEmAberto: List<Lembrete>,
+        perfil: Perfil?,
     ): InicioUiState {
         val turmas: TurmasDoInicio
         if (dados == null) {
@@ -163,6 +170,7 @@ class InicioViewModel @Inject constructor(
         val hoje: LocalDate = dataEHora.toLocalDate()
         return InicioUiState(
             saudacao = saudacaoParaHorario(dataEHora.toLocalTime()),
+            primeiroNome = primeiroNome(perfil?.nome),
             hoje = hoje,
             turmas = turmas,
             lembretes = lembretesDoInicio(lembretesEmAberto, hoje),
@@ -173,6 +181,7 @@ class InicioViewModel @Inject constructor(
         val dataEHora: LocalDateTime = agora.value
         return InicioUiState(
             saudacao = saudacaoParaHorario(dataEHora.toLocalTime()),
+            primeiroNome = null,
             hoje = dataEHora.toLocalDate(),
             turmas = TurmasDoInicio.Carregando,
             lembretes = emptyList(),

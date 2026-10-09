@@ -18,6 +18,7 @@
     <string name="aba_a_fazer">A fazer</string>
     <string name="aba_turma">Turma</string>
     <string name="aba_acompanhar">Acompanhar</string>
+    <string name="aba_perfil">Perfil</string>
 
     <!-- A fazer -->
     <string name="a_fazer_secao_alunos">Alunos</string>
@@ -27,6 +28,9 @@
     <string name="saudacao_bom_dia">Bom dia!</string>
     <string name="saudacao_boa_tarde">Boa tarde!</string>
     <string name="saudacao_boa_noite">Boa noite!</string>
+    <string name="saudacao_bom_dia_nome">Bom dia, %1$s!</string>
+    <string name="saudacao_boa_tarde_nome">Boa tarde, %1$s!</string>
+    <string name="saudacao_boa_noite_nome">Boa noite, %1$s!</string>
     <string name="inicio_trocar_turma">Trocar turma</string>
     <string name="inicio_sem_turmas">Cadastre sua primeira turma para começar a usar o diário.</string>
     <string name="inicio_cadastrar_turma">Cadastrar turma</string>
@@ -411,6 +415,32 @@
     <string name="meta_excluir">Excluir meta</string>
     <string name="meta_excluir_titulo">Excluir meta?</string>
     <string name="meta_excluir_mensagem">A meta %1$s deixará de aparecer no app. As sondagens continuam registradas.</string>
+
+    <!-- Perfil da professora -->
+    <string name="perfil_sem_nome">Seu nome</string>
+    <string name="perfil_convite">Coloque seu nome e uma foto para o diário ficar com a sua cara.</string>
+    <string name="perfil_preencher">Preencher perfil</string>
+    <string name="perfil_editar">Editar perfil</string>
+    <string name="perfil_campo_nome">Seu nome</string>
+    <string name="perfil_campo_escola">Escola (opcional)</string>
+    <string name="perfil_foto">Foto do perfil</string>
+    <string name="perfil_trocar_foto">Trocar foto</string>
+    <string name="perfil_escolher_da_galeria">Escolher da galeria</string>
+    <string name="perfil_remover_foto">Remover foto</string>
+    <string name="perfil_mensagem_foto_nao_lida">Não foi possível usar essa foto.</string>
+    <!-- Só o rótulo: o número aparece acima dele, em destaque. -->
+    <plurals name="perfil_turmas">
+        <item quantity="one">turma</item>
+        <item quantity="other">turmas</item>
+    </plurals>
+    <plurals name="perfil_alunos">
+        <item quantity="one">aluno</item>
+        <item quantity="other">alunos</item>
+    </plurals>
+    <plurals name="perfil_anotacoes">
+        <item quantity="one">anotação</item>
+        <item quantity="other">anotações</item>
+    </plurals>
 
     <!-- Configurações: backup e exportação -->
     <string name="configuracoes_titulo">Configurações</string>

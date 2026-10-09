@@ -29,8 +29,10 @@ const val FORMATO_DO_ARQUIVO = "diario-de-classe"
  * 4 → lembretes da professora (lista vazia como padrão para arquivos antigos).
  * 5 → fotos do registro do dia. O JSON passa a ir dentro de um .zip, junto com as
  *     imagens; um .json avulso (versões 1 a 4) continua sendo importado.
+ * 6 → perfil da professora (lista vazia como padrão para arquivos antigos). A foto
+ *     dela vai no .zip junto com as outras, em "fotos/".
  */
-const val VERSAO_DO_FORMATO = 5
+const val VERSAO_DO_FORMATO = 6
 
 /** Só o começo do arquivo: lido antes do resto para checar formato e versão. */
 @Serializable
@@ -58,6 +60,7 @@ data class ArquivoDeBackup(
     val alunosNaMeta: List<AlunoNaMetaNoArquivo> = emptyList(),
     val lembretes: List<LembreteNoArquivo> = emptyList(),
     val fotos: List<FotoNoArquivo> = emptyList(),
+    val perfis: List<PerfilNoArquivo> = emptyList(),
 )
 
 @Serializable
@@ -216,6 +219,18 @@ data class FotoNoArquivo(
     val data: String,
     val nomeDoArquivo: String,
     val legenda: String? = null,
+    val createdAt: String,
+    val updatedAt: String,
+    val deletedAt: String? = null,
+)
+
+/** Os dados do perfil; a foto, se houver, vai no .zip como "fotos/[nomeDoArquivoDaFoto]". */
+@Serializable
+data class PerfilNoArquivo(
+    val id: String,
+    val nome: String,
+    val escola: String? = null,
+    val nomeDoArquivoDaFoto: String? = null,
     val createdAt: String,
     val updatedAt: String,
     val deletedAt: String? = null,

@@ -13,6 +13,7 @@ import br.com.ricardo.diariodeclasse.data.local.dao.LembreteDao
 import br.com.ricardo.diariodeclasse.data.local.dao.MetaDao
 import br.com.ricardo.diariodeclasse.data.local.dao.MetricaDao
 import br.com.ricardo.diariodeclasse.data.local.dao.PendenciaDao
+import br.com.ricardo.diariodeclasse.data.local.dao.PerfilDao
 import br.com.ricardo.diariodeclasse.data.local.dao.TurmaDao
 import br.com.ricardo.diariodeclasse.data.local.entity.Aluno
 import br.com.ricardo.diariodeclasse.data.local.entity.AlunoNaMeta
@@ -24,6 +25,7 @@ import br.com.ricardo.diariodeclasse.data.local.entity.Meta
 import br.com.ricardo.diariodeclasse.data.local.entity.Metrica
 import br.com.ricardo.diariodeclasse.data.local.entity.NivelDaMetrica
 import br.com.ricardo.diariodeclasse.data.local.entity.Pendencia
+import br.com.ricardo.diariodeclasse.data.local.entity.Perfil
 import br.com.ricardo.diariodeclasse.data.local.entity.RegistroPresenca
 import br.com.ricardo.diariodeclasse.data.local.entity.ResultadoDaSondagem
 import br.com.ricardo.diariodeclasse.data.local.entity.Sondagem
@@ -43,6 +45,7 @@ import br.com.ricardo.diariodeclasse.data.local.entity.Turma
  * 7 → metas livres: métrica, nível-alvo e prazo opcionais; aluno na meta ganha "atingiu em"
  * 8 → lembretes da professora
  * 9 → fotos do registro do dia
+ * 10 → perfil da professora
  */
 @Database(
     entities = [
@@ -60,8 +63,9 @@ import br.com.ricardo.diariodeclasse.data.local.entity.Turma
         AlunoNaMeta::class,
         Lembrete::class,
         Foto::class,
+        Perfil::class,
     ],
-    version = 9,
+    version = 10,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
@@ -74,6 +78,7 @@ import br.com.ricardo.diariodeclasse.data.local.entity.Turma
         AutoMigration(from = 6, to = 7),
         AutoMigration(from = 7, to = 8),
         AutoMigration(from = 8, to = 9),
+        AutoMigration(from = 9, to = 10),
     ],
 )
 @TypeConverters(Converters::class)
@@ -87,6 +92,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun metaDao(): MetaDao
     abstract fun lembreteDao(): LembreteDao
     abstract fun fotoDao(): FotoDao
+    abstract fun perfilDao(): PerfilDao
     abstract fun backupDao(): BackupDao
 
     companion object {

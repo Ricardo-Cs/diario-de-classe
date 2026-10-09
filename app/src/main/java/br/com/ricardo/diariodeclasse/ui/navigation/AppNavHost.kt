@@ -36,6 +36,7 @@ import br.com.ricardo.diariodeclasse.ui.metas.MetaScreen
 import br.com.ricardo.diariodeclasse.ui.metricas.FormularioMetricaScreen
 import br.com.ricardo.diariodeclasse.ui.metricas.MetricaScreen
 import br.com.ricardo.diariodeclasse.ui.metricas.SondagemScreen
+import br.com.ricardo.diariodeclasse.ui.perfil.PerfilScreen
 import br.com.ricardo.diariodeclasse.ui.turmas.FormularioTurmaScreen
 import br.com.ricardo.diariodeclasse.ui.turmas.TurmaScreen
 
@@ -103,7 +104,6 @@ fun AppNavHost(
                         },
                         aoAbrirPendencias = { abrirAFazer(SecaoDoAFazer.PENDENCIAS_DOS_ALUNOS) },
                         aoAbrirLembretes = { abrirAFazer(SecaoDoAFazer.MEUS_LEMBRETES) },
-                        aoAbrirConfiguracoes = { navController.navigate(ConfiguracoesRoute) },
                         // A aba Turma mostra a turma ativa, a mesma do Início.
                         aoAbrirTurma = { abrirRaizDaAba(navController, AbaPrincipal.TURMA, TurmaRoute) },
                     )
@@ -115,11 +115,6 @@ fun AppNavHost(
                     )
                 }
 
-                composable<ConfiguracoesRoute> {
-                    ConfiguracoesScreen(
-                        aoVoltar = { navController.popBackStack() },
-                    )
-                }
             }
 
             navigation<AFazerGrafo>(startDestination = AFazerRoute) {
@@ -238,6 +233,20 @@ fun AppNavHost(
 
                 composable<AlunoNoAcompanhamentoRoute> {
                     AlunoScreen(
+                        aoVoltar = { navController.popBackStack() },
+                    )
+                }
+            }
+
+            navigation<PerfilGrafo>(startDestination = PerfilRoute) {
+                composable<PerfilRoute> {
+                    PerfilScreen(
+                        aoAbrirConfiguracoes = { navController.navigate(ConfiguracoesRoute) },
+                    )
+                }
+
+                composable<ConfiguracoesRoute> {
+                    ConfiguracoesScreen(
                         aoVoltar = { navController.popBackStack() },
                     )
                 }

@@ -2,14 +2,11 @@ package br.com.ricardo.diariodeclasse.ui.inicio
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
@@ -22,9 +19,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -55,7 +50,6 @@ fun InicioScreen(
     aoAbrirTurma: () -> Unit,
     aoAbrirPendencias: () -> Unit,
     aoAbrirLembretes: () -> Unit,
-    aoAbrirConfiguracoes: () -> Unit,
     viewModel: InicioViewModel = hiltViewModel(),
 ) {
     val estado: InicioUiState = viewModel.uiState.collectAsStateWithLifecycle().value
@@ -124,8 +118,8 @@ fun InicioScreen(
         ) {
             Cabecalho(
                 saudacao = estado.saudacao,
+                primeiroNome = estado.primeiroNome,
                 hoje = estado.hoje,
-                aoAbrirConfiguracoes = aoAbrirConfiguracoes,
             )
 
             when (val turmas: TurmasDoInicio = estado.turmas) {
@@ -192,39 +186,38 @@ fun InicioScreen(
     }
 }
 
-/** Saudação e data; à direita, a engrenagem das configurações (backup dos dados). */
 @Composable
-private fun Cabecalho(saudacao: Saudacao, hoje: LocalDate, aoAbrirConfiguracoes: () -> Unit) {
-    Row(verticalAlignment = Alignment.Top) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = textoDaSaudacao(saudacao),
-                style = MaterialTheme.typography.headlineMedium,
-            )
-            Text(
-                text = formatarDataPorExtenso(hoje),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        IconButton(onClick = aoAbrirConfiguracoes) {
-            Icon(
-                painter = painterResource(R.drawable.ic_configuracoes),
-                contentDescription = stringResource(R.string.configuracoes_titulo),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
+private fun Cabecalho(saudacao: Saudacao, primeiroNome: String?, hoje: LocalDate) {
+    Column {
+        Text(
+            text = textoDaSaudacao(saudacao, primeiroNome),
+            style = MaterialTheme.typography.headlineMedium,
+        )
+        Text(
+            text = formatarDataPorExtenso(hoje),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 
+/** "Bom dia, Maria!" com o perfil preenchido; "Bom dia!" sem ele. */
 @Composable
-private fun textoDaSaudacao(saudacao: Saudacao): String {
-    val idDoTexto: Int = when (saudacao) {
-        Saudacao.BOM_DIA -> R.string.saudacao_bom_dia
-        Saudacao.BOA_TARDE -> R.string.saudacao_boa_tarde
-        Saudacao.BOA_NOITE -> R.string.saudacao_boa_noite
+private fun textoDaSaudacao(saudacao: Saudacao, primeiroNome: String?): String {
+    if (primeiroNome == null) {
+        val idDoTexto: Int = when (saudacao) {
+            Saudacao.BOM_DIA -> R.string.saudacao_bom_dia
+            Saudacao.BOA_TARDE -> R.string.saudacao_boa_tarde
+            Saudacao.BOA_NOITE -> R.string.saudacao_boa_noite
+        }
+        return stringResource(idDoTexto)
     }
-    return stringResource(idDoTexto)
+    val idDoTextoComNome: Int = when (saudacao) {
+        Saudacao.BOM_DIA -> R.string.saudacao_bom_dia_nome
+        Saudacao.BOA_TARDE -> R.string.saudacao_boa_tarde_nome
+        Saudacao.BOA_NOITE -> R.string.saudacao_boa_noite_nome
+    }
+    return stringResource(idDoTextoComNome, primeiroNome)
 }
 
 @Composable

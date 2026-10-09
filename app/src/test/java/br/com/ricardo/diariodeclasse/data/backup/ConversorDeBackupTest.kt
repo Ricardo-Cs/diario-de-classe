@@ -11,6 +11,7 @@ import br.com.ricardo.diariodeclasse.data.local.entity.Meta
 import br.com.ricardo.diariodeclasse.data.local.entity.Metrica
 import br.com.ricardo.diariodeclasse.data.local.entity.NivelDaMetrica
 import br.com.ricardo.diariodeclasse.data.local.entity.Pendencia
+import br.com.ricardo.diariodeclasse.data.local.entity.Perfil
 import br.com.ricardo.diariodeclasse.data.local.entity.Periodo
 import br.com.ricardo.diariodeclasse.data.local.entity.RegistroPresenca
 import br.com.ricardo.diariodeclasse.data.local.entity.ResultadoDaSondagem
@@ -113,6 +114,12 @@ class ConversorDeBackupTest {
                     createdAt = agora, updatedAt = agora, deletedAt = agora,
                 ),
             ),
+            perfis = listOf(
+                Perfil(
+                    id = "perfil", nome = "Maria Souza", escola = "EMEF Monteiro Lobato",
+                    nomeDoArquivoDaFoto = "perfil.jpg", createdAt = agora, updatedAt = agora,
+                ),
+            ),
         )
     }
 
@@ -155,6 +162,7 @@ class ConversorDeBackupTest {
         assertEquals(emptyList<Metrica>(), dados.metricas)
         assertEquals(emptyList<Meta>(), dados.metas)
         assertEquals(emptyList<Foto>(), dados.fotos)
+        assertEquals(emptyList<Perfil>(), dados.perfis)
     }
 
     @Test

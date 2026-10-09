@@ -13,6 +13,7 @@ import br.com.ricardo.diariodeclasse.data.local.dao.LembreteDao
 import br.com.ricardo.diariodeclasse.data.local.dao.MetaDao
 import br.com.ricardo.diariodeclasse.data.local.dao.MetricaDao
 import br.com.ricardo.diariodeclasse.data.local.dao.PendenciaDao
+import br.com.ricardo.diariodeclasse.data.local.dao.PerfilDao
 import br.com.ricardo.diariodeclasse.data.local.dao.TurmaDao
 import dagger.Module
 import dagger.Provides
@@ -72,6 +73,9 @@ object DatabaseModule {
 
     @Provides
     fun provideFotoDao(database: AppDatabase): FotoDao = database.fotoDao()
+
+    @Provides
+    fun providePerfilDao(database: AppDatabase): PerfilDao = database.perfilDao()
 
     @Provides
     fun provideBackupDao(database: AppDatabase): BackupDao = database.backupDao()
